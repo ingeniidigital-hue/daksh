@@ -37,11 +37,13 @@ describe("AI Project Management Task Dataset & Schema Validation", () => {
       expect(Array.isArray(story.security_compliance)).toBe(true);
       expect(story.security_compliance.length).toBeGreaterThan(0);
       
-      expect(Array.isArray(story.acceptance_criteria)).toBe(true);
-      expect(story.acceptance_criteria.length).toBeGreaterThan(0);
-      
-      expect(typeof story.verification_gate).toBe("string");
-      expect(story.verification_gate.length).toBeGreaterThan(5);
+      expect(Array.isArray(story.technical_tasks)).toBe(true);
+      expect(story.technical_tasks.length).toBeGreaterThanOrEqual(3);
+
+      expect(Array.isArray(story.test_cases)).toBe(true);
+      expect(story.test_cases.length).toBeGreaterThanOrEqual(3);
+
+      expect(["todo", "in_progress", "done"]).toContain(story.status);
     });
   });
 
