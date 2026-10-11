@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addCatalogItem, listCatalogItems } from "@/lib/economy";
+import { evaluateConditionalCache } from "@/lib/sdk-sync";
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +8,27 @@ export async function GET(
 ) {
   const { id: titleId } = await params;
   const items = listCatalogItems(titleId);
-  return NextResponse.json({ titleId, total: items.length, items });
+  const data = { titleId, total: items.length, items };
+
+  const ifNoneMatch = request.headers.get("if-none-match");
+  const cacheResult = evaluateConditionalCache(data, ifNoneMatch);
+
+  if (cacheResult.status === 304) {
+    return new Response(null, {
+      status: 304,
+      headers: {
+        "ETag": cacheResult.etag,
+        "Cache-Control": "public, max-age=60, must-revalidate"
+      }
+    });
+  }
+
+  return NextResponse.json(data, {
+    headers: {
+      "ETag": cacheResult.etag,
+      "Cache-Control": "public, max-age=60, must-revalidate"
+    }
+  });
 }
 
 export async function POST(

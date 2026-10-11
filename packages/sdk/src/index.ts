@@ -7,3 +7,4 @@ export * from "./matchmaking";
 export * from "./leaderboards";
 export * from "./telemetry";
 export * from "./analytics";
+export * from "./cache";
