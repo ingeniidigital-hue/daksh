@@ -9,18 +9,34 @@ namespace Daksh.SDK
     /// Matchmaking subsystem.
     /// Handles ticket creation, matchmaking queue polling, and match-found event dispatch.
     /// </summary>
-    public class DakshMatchmaking
+    public class DakshMatchmaking : IDakshSubsystem
     {
-        private readonly DakshClient _client;
+        private DakshClient _client;
         private Coroutine _activePollCoroutine;
+
+        public string SubsystemName => "Matchmaking";
 
         public event Action<MatchmakingTicket> OnMatchFound;
         public event Action<MatchmakingTicket> OnMatchStatusUpdated;
         public event Action<string> OnMatchmakingFailed;
 
+        public DakshMatchmaking() { }
+
         public DakshMatchmaking(DakshClient client)
         {
+            Initialize(client);
+        }
+
+        public void Initialize(DakshClient client)
+        {
             _client = client;
+            Debug.Log("[Daksh.Matchmaking] Initialized modular Matchmaking subsystem.");
+        }
+
+        public void Shutdown()
+        {
+            StopPolling();
+            Debug.Log("[Daksh.Matchmaking] Shutdown modular Matchmaking subsystem.");
         }
 
         /// <summary>
@@ -28,6 +44,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<CreateTicketResponse> CreateTicketAsync(string rulesetId, int mmr = 1000)
         {
+            if (_client == null) throw new InvalidOperationException("DakshMatchmaking subsystem is not initialized.");
+
             if (!_client.Auth.IsAuthenticated)
             {
                 throw new DakshException("Cannot queue for matchmaking: Player is not authenticated.");
@@ -58,6 +76,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<GetTicketResponse> GetTicketAsync(string ticketId)
         {
+            if (_client == null) throw new InvalidOperationException("DakshMatchmaking subsystem is not initialized.");
             string endpoint = $"/api/titles/{_client.Config.titleId}/multiplayer/matchmaking/tickets?ticketId={ticketId}";
             return await _client.GetAsync<GetTicketResponse>(endpoint, useETag: false, requiresAuth: true);
         }
@@ -67,6 +86,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<CancelTicketResponse> CancelTicketAsync(string ticketId)
         {
+            if (_client == null) throw new InvalidOperationException("DakshMatchmaking subsystem is not initialized.");
             StopPolling();
             string endpoint = $"/api/titles/{_client.Config.titleId}/multiplayer/matchmaking/tickets?ticketId={ticketId}";
             return await _client.DeleteAsync<CancelTicketResponse>(endpoint, requiresAuth: true);
@@ -77,13 +97,14 @@ namespace Daksh.SDK
         /// </summary>
         public void StartPolling(string ticketId, float pollIntervalSeconds = 2.0f)
         {
+            if (_client == null) throw new InvalidOperationException("DakshMatchmaking subsystem is not initialized.");
             StopPolling();
             _activePollCoroutine = _client.StartCoroutine(PollTicketLoop(ticketId, pollIntervalSeconds));
         }
 
         public void StopPolling()
         {
-            if (_activePollCoroutine != null)
+            if (_activePollCoroutine != null && _client != null)
             {
                 _client.StopCoroutine(_activePollCoroutine);
                 _activePollCoroutine = null;

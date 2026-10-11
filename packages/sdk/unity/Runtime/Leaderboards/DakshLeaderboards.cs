@@ -8,15 +8,29 @@ namespace Daksh.SDK
     /// Redis-backed global leaderboards subsystem with microsecond tiebreaking
     /// and client-side offline score submission fallback.
     /// </summary>
-    public class DakshLeaderboards
+    public class DakshLeaderboards : IDakshSubsystem
     {
-        private readonly DakshClient _client;
+        private DakshClient _client;
 
+        public string SubsystemName => "Leaderboards";
         public event Action<ScoreSubmissionResult> OnScoreSubmitted;
+
+        public DakshLeaderboards() { }
 
         public DakshLeaderboards(DakshClient client)
         {
+            Initialize(client);
+        }
+
+        public void Initialize(DakshClient client)
+        {
             _client = client;
+            Debug.Log("[Daksh.Leaderboards] Initialized modular Leaderboards subsystem.");
+        }
+
+        public void Shutdown()
+        {
+            Debug.Log("[Daksh.Leaderboards] Shutdown modular Leaderboards subsystem.");
         }
 
         /// <summary>
@@ -26,6 +40,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<ScoreSubmissionResult> SubmitScoreAsync(string leaderboardId, double score, bool queueIfOffline = true)
         {
+            if (_client == null) throw new InvalidOperationException("DakshLeaderboards subsystem is not initialized.");
+
             if (!_client.Auth.IsAuthenticated)
             {
                 throw new DakshException("Cannot submit leaderboard score: Player is not authenticated.");
@@ -63,6 +79,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<TopScoresResponse> GetTopScoresAsync(string leaderboardId, int limit = 50)
         {
+            if (_client == null) throw new InvalidOperationException("DakshLeaderboards subsystem is not initialized.");
             string endpoint = $"/api/titles/{_client.Config.titleId}/leaderboards/{leaderboardId}/scores?limit={limit}";
             return await _client.GetAsync<TopScoresResponse>(endpoint, useETag: false, requiresAuth: false);
         }
@@ -73,6 +90,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<PlayerRankResponse> GetPlayerRankAsync(string leaderboardId, string playerId = null)
         {
+            if (_client == null) throw new InvalidOperationException("DakshLeaderboards subsystem is not initialized.");
             string targetPlayerId = playerId ?? _client.Auth.CurrentPlayer?.id;
             if (string.IsNullOrEmpty(targetPlayerId))
             {

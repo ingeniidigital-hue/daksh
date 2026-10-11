@@ -8,28 +8,77 @@ Official client SDK for integrating Unity games with **Daksh Game BaaS** — an 
 
 ---
 
+## Modular Architecture & Assembly Definitions
+
+The Daksh Unity SDK is built with a **100% modular architecture**. Core functionality (transport, cryptographic cache, ETag store, offline queue, device auth) has **zero compile-time dependencies** on optional gameplay features. Each subsystem is encapsulated in its own Unity Assembly Definition (`.asmdef`):
+
+```
+packages/sdk/unity/
+├── Runtime/
+│   ├── com.daksh.sdk.asmdef                  # Umbrella assembly (references all modules)
+│   ├── DakshClient.cs                        # Umbrella coordinator extending DakshCoreClient
+│   ├── DakshSDK.cs                           # Global static facade
+│   │
+│   ├── Core/                                 # [com.daksh.sdk.core.asmdef]
+│   │   ├── Auth/ (DakshAuth.cs)              # Hardware Device Auth & Session Manager
+│   │   ├── Cache/ (DakshCache, ETagStore, OfflineActionQueue) # AES-256 + 304 diffing
+│   │   ├── Transport/ (IDakshTransport, UnityWebRequestTransport) # Pluggable HTTP
+│   │   ├── DakshCoreClient.cs                # Core base client & Subsystem Registry
+│   │   ├── DakshConfig.cs                    # Config with modular feature toggles
+│   │   └── IDakshSubsystem.cs                # Modular plugin lifecycle contract
+│   │
+│   ├── Economy/                              # [com.daksh.sdk.economy.asmdef]
+│   │   ├── DakshEconomy.cs                   # PlayFab Economy V2 Catalogs & Purchases
+│   │   └── EconomyModels.cs                  # Catalog, Currency, Purchase models
+│   │
+│   ├── Leaderboards/                         # [com.daksh.sdk.leaderboards.asmdef]
+│   │   ├── DakshLeaderboards.cs              # Redis ZSET Leaderboards & Tiebreakers
+│   │   └── LeaderboardModels.cs              # Score & Rank models
+│   │
+│   ├── Matchmaking/                          # [com.daksh.sdk.matchmaking.asmdef]
+│   │   ├── DakshMatchmaking.cs               # Dynamic Ticket Queue & Polling
+│   │   └── MatchmakingModels.cs              # Ticket & Lobby models
+│   │
+│   ├── OTA/                                  # [com.daksh.sdk.ota.asmdef]
+│   │   ├── DakshAddressablesDownloader.cs    # Resumable HTTP 206 Byte-Range Downloader
+│   │   └── OTAModels.cs                      # Bundle & Progress models
+│   │
+│   └── Relay/                                # [com.daksh.sdk.relay.asmdef]
+│       ├── DakshRelay.cs                     # 21-byte binary packing & dead reckoning
+│       ├── DakshRelayClient.cs               # 30 Hz spatial dispatch loop
+│       └── RelayModels.cs                    # Relay opcodes & datagram models
+│
+└── Editor/                                   # [com.daksh.sdk.editor.asmdef]
+    └── DakshSettingsWindow.cs                # Unity GUI Inspector (Window > Daksh > Settings)
+```
+
+### Module Inclusion Options:
+- **Full Suite**: Reference `com.daksh.sdk` in your game's `.asmdef` to access all features.
+- **Selective / Lightweight**: Reference only `com.daksh.sdk.core` and the specific module assemblies you need (e.g. `com.daksh.sdk.economy`). Unused modules like Relay or Addressables won't be compiled into your game binary!
+
+---
+
 ## Key Features
 
-- **Standard UPM Packaging**: Clean Unity Package Manager layout with assembly definitions (`com.daksh.sdk.asmdef`) for zero-bloat compilation.
+- **Subsystem Registry (`IDakshSubsystem`)**: Every subsystem dynamically registers with `DakshCoreClient`. Subsystems can be enabled, disabled, or swapped at runtime via `DakshConfig` feature flags:
+  ```csharp
+  var config = new DakshConfig {
+      enableEconomy = true,
+      enableLeaderboards = true,
+      enableMatchmaking = false, // Exclude from memory
+      enableOTA = false,          // Exclude from memory
+      enableRelay = false         // Exclude from memory
+  };
+  ```
+- **Pluggable Transport Layer (`IDakshTransport`)**: Network transport is decoupled from `UnityWebRequest`. Game teams can plug in custom WebSockets, gRPC, or mock transports for unit testing.
 - **Cryptographic Local Caching (`DakshCache`)**: Client-side AES-256 encryption protecting player credentials, wallet balances, and offline actions with SHA-256 integrity verification.
-- **ETag 304 Conditional Diffing (`ETagStore`)**: Sends `If-None-Match` on network requests; receives HTTP 304 Not Modified to serve local cached catalogs with **0 duplicate payload bytes**, saving massive bandwidth on mobile networks.
-- **Persistent FIFO Offline Action Queue (`OfflineActionQueue`)**: Queues player mutations (item consumption, achievement unlocks, score checkpoints) to encrypted disk when disconnected, automatically replaying them in strict FIFO order upon reconnection.
-- **PlayFab Economy V2 Client (`DakshEconomy`)**:
-  - Catalog synchronization with ETag diffing.
-  - Multi-currency balances (Gold, Gems, Energy).
-  - Atomic purchases with client-generated idempotency keys (`X-Idempotency-Key`) preventing double-charging.
-- **Redis Global Leaderboards (`DakshLeaderboards`)**:
-  - Score submissions with microsecond tiebreaking metadata.
-  - Top player rankings and localized player tier lookups.
-- **Dynamic Matchmaking (`DakshMatchmaking`)**:
-  - Flexible party and solo ticket creation, status polling (`QUEUED`, `MATCHED`, `CANCELLED`), and automated coroutines.
-- **Resumable OTA Asset Downloader (`DakshAddressablesDownloader`)**:
-  - HTTP 206 Partial Content byte-range resume for interrupted 50MB+ Addressable bundles.
-  - Post-download SHA-256 cryptographic verification.
-- **Nakama-Compatible Real-Time Netcode (`DakshRelay`)**:
-  - 21-byte compact binary position serialization (`PackPosition` / `TryUnpackPosition`).
-  - Dead reckoning extrapolation and exponential smoothing filters.
-  - 30 Hz automated synchronization loop.
+- **ETag 304 Conditional Diffing (`ETagStore`)**: Automatically sends `If-None-Match`. On `HTTP 304 Not Modified`, serves the cached payload directly with **0 duplicate network bytes**, preventing mobile bandwidth waste.
+- **Persistent FIFO Offline Action Queue (`OfflineActionQueue`)**: Queues player mutations (purchases, score checkpoints, analytics events) to encrypted disk when disconnected, automatically replaying them in strict FIFO order upon reconnection.
+- **PlayFab Economy V2 Client (`DakshEconomy`)**: Catalogs with ETag diffing, multi-currency support, and atomic purchases with client-generated idempotency keys (`X-Idempotency-Key`).
+- **Redis Global Leaderboards (`DakshLeaderboards`)**: Score submissions with microsecond tiebreaking metadata and localized rank lookups.
+- **Dynamic Matchmaking (`DakshMatchmaking`)**: Solo and party ticket creation, cancellation, and automated polling coroutine.
+- **Resumable OTA Asset Downloader (`DakshAddressablesDownloader`)**: HTTP 206 Partial Content byte-range resume for Addressables, with SHA-256 file checksum validation.
+- **Nakama-Compatible Real-Time Netcode (`DakshRelay`)**: 21-byte compact binary position serialization, dead reckoning extrapolation, and 30 Hz automated synchronization loop.
 
 ---
 
@@ -49,38 +98,16 @@ Add the package entry directly to your Unity project's `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.daksh.sdk": "https://github.com/your-org/daksh.git?path=/packages/sdk/unity#v1.0.0",
-    ...
+    "com.daksh.sdk": "https://github.com/your-org/daksh.git?path=/packages/sdk/unity#v1.0.0"
   }
 }
 ```
 
-### Method C: Local Disk (Embedded Package)
-Clone or copy the `packages/sdk/unity` folder into your project's `Packages/com.daksh.sdk` directory.
-
 ---
 
-## Architecture & Subsystems
+## Usage Examples
 
-```
-DakshClient (MonoBehaviour Singleton)
-├── DakshConfig                     # TitleId, ServerUrl, LocalEncryptionKey, Timeouts
-├── DakshCache                      # AES-256 Persistent Encrypted Disk & PlayerPrefs Cache
-├── ETagStore                       # HTTP 304 Conditional Validation & Diff Engine
-├── OfflineActionQueue              # Disk-backed FIFO Replay Queue
-├── DakshAuth                       # Hardware Device Fingerprinting & JWT Session Manager
-├── DakshEconomy                    # PlayFab Economy V2 Catalogs, Currencies & Idempotent Purchases
-├── DakshLeaderboards               # Redis ZSET Leaderboard Submissions & Top Rankings
-├── DakshMatchmaking                # Ticket Lifecycle & Automated Polling Coroutine
-├── DakshAddressablesDownloader      # Resumable HTTP 206 Byte-Range AssetBundle Downloader
-└── DakshRelayClient                # Nakama-compatible 30 Hz Real-Time Spatial Relay Netcode
-```
-
----
-
-## Quickstart Guide
-
-### 1. Initialization
+### 1. Initialization & Subsystem Access
 ```csharp
 using Daksh.SDK;
 using UnityEngine;
@@ -96,7 +123,7 @@ public class GameManager : MonoBehaviour
             autoFlushOfflineQueue = true
         };
 
-        // Initialize the Daksh singleton
+        // Initialize master client
         var client = DakshClient.Initialize(config);
 
         // Hardware Device Authentication
@@ -110,10 +137,6 @@ public class GameManager : MonoBehaviour
 ```csharp
 // 1. Fetch catalog (automatically cached with ETag)
 var catalog = await DakshClient.Instance.Economy.GetCatalogAsync();
-foreach (var item in catalog.items)
-{
-    Debug.Log($"Item: {item.name} ({item.category})");
-}
 
 // Subsequent calls send 'If-None-Match' and receive HTTP 304 (0 duplicate bytes)
 var cachedCatalog = await DakshClient.Instance.Economy.GetCatalogAsync();
@@ -152,6 +175,13 @@ Debug.Log($"Bundle ready at: {localPath}");
 ```csharp
 // Start 30 Hz spatial synchronization for the local player transform
 DakshClient.Instance.Relay.StartPositionSync(roomId: "room_alpha_01", transform, tickRateHz: 30f);
+```
+
+### 6. Static Facade Access (`DakshSDK`)
+```csharp
+// Alternative clean static facade syntax
+var catalog = await DakshSDK.Economy.GetCatalogAsync();
+var rank = await DakshSDK.Leaderboards.GetPlayerRankAsync("arena_season_1");
 ```
 
 ---

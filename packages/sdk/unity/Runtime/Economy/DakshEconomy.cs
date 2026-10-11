@@ -9,18 +9,33 @@ namespace Daksh.SDK
     /// Manages virtual currency balances, catalog item listings with ETag conditional 304 diffing,
     /// and atomic server-reconciled inventory purchases with idempotency keys.
     /// </summary>
-    public class DakshEconomy
+    public class DakshEconomy : IDakshSubsystem
     {
-        private readonly DakshClient _client;
+        private DakshClient _client;
         private CatalogResponse _cachedCatalog;
 
+        public string SubsystemName => "Economy";
         public CatalogResponse CachedCatalog => _cachedCatalog;
 
         public event Action<PurchaseResult> OnPurchaseCompleted;
 
+        public DakshEconomy() { }
+
         public DakshEconomy(DakshClient client)
         {
+            Initialize(client);
+        }
+
+        public void Initialize(DakshClient client)
+        {
             _client = client;
+            Debug.Log("[Daksh.Economy] Initialized modular Economy subsystem.");
+        }
+
+        public void Shutdown()
+        {
+            _cachedCatalog = null;
+            Debug.Log("[Daksh.Economy] Shutdown modular Economy subsystem.");
         }
 
         /// <summary>
@@ -29,6 +44,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<CatalogResponse> GetCatalogAsync(bool forceRefresh = false)
         {
+            if (_client == null) throw new InvalidOperationException("DakshEconomy subsystem is not initialized.");
             string endpoint = $"/api/titles/{_client.Config.titleId}/economy/catalog";
             var response = await _client.GetAsync<CatalogResponse>(endpoint, useETag: !forceRefresh, requiresAuth: false);
 
@@ -45,6 +61,7 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<CurrencyListResponse> GetCurrenciesAsync()
         {
+            if (_client == null) throw new InvalidOperationException("DakshEconomy subsystem is not initialized.");
             string endpoint = $"/api/titles/{_client.Config.titleId}/economy/currencies";
             return await _client.GetAsync<CurrencyListResponse>(endpoint, useETag: true, requiresAuth: false);
         }
@@ -56,6 +73,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<PurchaseResult> PurchaseItemAsync(string itemId, string currencyCode, string customIdempotencyKey = null, bool queueIfOffline = true)
         {
+            if (_client == null) throw new InvalidOperationException("DakshEconomy subsystem is not initialized.");
+
             if (!_client.Auth.IsAuthenticated)
             {
                 throw new DakshException("Cannot purchase item: Player is not authenticated. Call DakshClient.Instance.Auth.AuthenticateDeviceAsync() first.");

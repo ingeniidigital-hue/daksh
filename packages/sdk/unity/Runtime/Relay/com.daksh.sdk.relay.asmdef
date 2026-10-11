@@ -1,0 +1,16 @@
+{
+  "name": "com.daksh.sdk.relay",
+  "rootNamespace": "Daksh.SDK",
+  "references": [
+    "com.daksh.sdk.core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

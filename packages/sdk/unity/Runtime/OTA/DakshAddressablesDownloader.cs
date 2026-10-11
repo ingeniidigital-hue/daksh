@@ -12,15 +12,29 @@ namespace Daksh.SDK
     /// Supports HTTP 206 Partial Content byte-range resume for interrupted downloads,
     /// and performs cryptographic SHA-256 integrity validation upon completion.
     /// </summary>
-    public class DakshAddressablesDownloader
+    public class DakshAddressablesDownloader : IDakshSubsystem
     {
-        private readonly DakshClient _client;
+        private DakshClient _client;
 
+        public string SubsystemName => "OTA";
         public event Action<DownloadProgressInfo> OnDownloadProgress;
+
+        public DakshAddressablesDownloader() { }
 
         public DakshAddressablesDownloader(DakshClient client)
         {
+            Initialize(client);
+        }
+
+        public void Initialize(DakshClient client)
+        {
             _client = client;
+            Debug.Log("[Daksh.OTA] Initialized modular OTA Addressables downloader.");
+        }
+
+        public void Shutdown()
+        {
+            Debug.Log("[Daksh.OTA] Shutdown modular OTA Addressables downloader.");
         }
 
         /// <summary>
@@ -28,6 +42,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<string> DownloadBundleWithResumeAsync(string bundleId, string saveDirectory = null)
         {
+            if (_client == null) throw new InvalidOperationException("DakshAddressablesDownloader subsystem is not initialized.");
+
             string dir = string.IsNullOrEmpty(saveDirectory)
                 ? Path.Combine(Application.persistentDataPath, "DakshOTA")
                 : saveDirectory;

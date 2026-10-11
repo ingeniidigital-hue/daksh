@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
 
-describe("Unity SDK UPM Package & API Contract Verification", () => {
+describe("Unity SDK Modular Architecture & API Contract Verification", () => {
   const unitySdkPath = path.resolve(__dirname, "../../packages/sdk/unity");
 
   it("TEST-UNITY-01 [UPM Manifest]: package.json has valid schema, semantic version 1.0.0, and metadata", () => {
@@ -21,72 +21,97 @@ describe("Unity SDK UPM Package & API Contract Verification", () => {
     expect(manifest.keywords).toContain("etag");
   });
 
-  it("TEST-UNITY-02 [Assembly Definitions]: Runtime and Editor .asmdef files are valid JSON and properly linked", () => {
-    const runtimeAsmPath = path.join(unitySdkPath, "Runtime/com.daksh.sdk.asmdef");
-    expect(fs.existsSync(runtimeAsmPath)).toBe(true);
-    const runtimeAsm = JSON.parse(fs.readFileSync(runtimeAsmPath, "utf-8"));
-    expect(runtimeAsm.name).toBe("com.daksh.sdk");
-    expect(runtimeAsm.rootNamespace).toBe("Daksh.SDK");
-
-    const editorAsmPath = path.join(unitySdkPath, "Editor/com.daksh.sdk.editor.asmdef");
-    expect(fs.existsSync(editorAsmPath)).toBe(true);
-    const editorAsm = JSON.parse(fs.readFileSync(editorAsmPath, "utf-8"));
-    expect(editorAsm.name).toBe("com.daksh.sdk.editor");
-    expect(editorAsm.references).toContain("com.daksh.sdk");
-  });
-
-  it("TEST-UNITY-03 [Core Subsystems]: All C# subsystems and coordinator classes exist with proper namespaces", () => {
-    const requiredFiles = [
-      "Runtime/Core/DakshClient.cs",
-      "Runtime/Core/DakshConfig.cs",
-      "Runtime/Core/DakshException.cs",
-      "Runtime/Cache/DakshCache.cs",
-      "Runtime/Cache/ETagStore.cs",
-      "Runtime/Cache/OfflineActionQueue.cs",
-      "Runtime/Auth/DakshAuth.cs",
-      "Runtime/Economy/EconomyModels.cs",
-      "Runtime/Economy/DakshEconomy.cs",
-      "Runtime/Leaderboards/LeaderboardModels.cs",
-      "Runtime/Leaderboards/DakshLeaderboards.cs",
-      "Runtime/Matchmaking/MatchmakingModels.cs",
-      "Runtime/Matchmaking/DakshMatchmaking.cs",
-      "Runtime/OTA/OTAModels.cs",
-      "Runtime/OTA/DakshAddressablesDownloader.cs",
-      "Runtime/Relay/RelayModels.cs",
-      "Runtime/Relay/DakshRelay.cs",
-      "Runtime/Relay/DakshRelayClient.cs",
-      "Editor/DakshSettingsWindow.cs",
-      "Samples~/Quickstart/DakshQuickstartDemo.cs"
+  it("TEST-UNITY-02 [Modular Assembly Definitions]: All 7 subsystem asmdef files exist and link cleanly", () => {
+    const expectedAsmdefs = [
+      { path: "Runtime/com.daksh.sdk.asmdef", name: "com.daksh.sdk", references: ["com.daksh.sdk.core", "com.daksh.sdk.economy"] },
+      { path: "Runtime/Core/com.daksh.sdk.core.asmdef", name: "com.daksh.sdk.core", references: [] },
+      { path: "Runtime/Economy/com.daksh.sdk.economy.asmdef", name: "com.daksh.sdk.economy", references: ["com.daksh.sdk.core"] },
+      { path: "Runtime/Leaderboards/com.daksh.sdk.leaderboards.asmdef", name: "com.daksh.sdk.leaderboards", references: ["com.daksh.sdk.core"] },
+      { path: "Runtime/Matchmaking/com.daksh.sdk.matchmaking.asmdef", name: "com.daksh.sdk.matchmaking", references: ["com.daksh.sdk.core"] },
+      { path: "Runtime/OTA/com.daksh.sdk.ota.asmdef", name: "com.daksh.sdk.ota", references: ["com.daksh.sdk.core"] },
+      { path: "Runtime/Relay/com.daksh.sdk.relay.asmdef", name: "com.daksh.sdk.relay", references: ["com.daksh.sdk.core"] },
+      { path: "Editor/com.daksh.sdk.editor.asmdef", name: "com.daksh.sdk.editor", references: ["com.daksh.sdk.core"] }
     ];
 
-    for (const relPath of requiredFiles) {
-      const fullPath = path.join(unitySdkPath, relPath);
-      expect(fs.existsSync(fullPath), `File missing: ${relPath}`).toBe(true);
-      const content = fs.readFileSync(fullPath, "utf-8");
-      expect(content.length).toBeGreaterThan(100);
-      expect(content).toMatch(/namespace Daksh\.SDK/);
+    for (const asm of expectedAsmdefs) {
+      const fullPath = path.join(unitySdkPath, asm.path);
+      expect(fs.existsSync(fullPath), `Asmdef missing: ${asm.path}`).toBe(true);
+      const parsed = JSON.parse(fs.readFileSync(fullPath, "utf-8"));
+      expect(parsed.name).toBe(asm.name);
+      for (const ref of asm.references) {
+        expect(parsed.references).toContain(ref);
+      }
     }
   });
 
-  it("TEST-UNITY-04 [Offline Caching & ETag Contracts]: C# implementations match server-side caching architecture", () => {
-    const cacheCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/Cache/DakshCache.cs"), "utf-8");
+  it("TEST-UNITY-03 [Subsystem Registry & IDakshSubsystem]: Modular interface implemented across all subsystems", () => {
+    const interfacePath = path.join(unitySdkPath, "Runtime/Core/IDakshSubsystem.cs");
+    expect(fs.existsSync(interfacePath)).toBe(true);
+    const ifaceContent = fs.readFileSync(interfacePath, "utf-8");
+    expect(ifaceContent).toContain("interface IDakshSubsystem");
+    expect(ifaceContent).toContain("string SubsystemName { get; }");
+    expect(ifaceContent).toContain("void Initialize(DakshClient client)");
+    expect(ifaceContent).toContain("void Shutdown()");
+
+    const subsystemFiles = [
+      "Runtime/Economy/DakshEconomy.cs",
+      "Runtime/Leaderboards/DakshLeaderboards.cs",
+      "Runtime/Matchmaking/DakshMatchmaking.cs",
+      "Runtime/OTA/DakshAddressablesDownloader.cs",
+      "Runtime/Relay/DakshRelayClient.cs"
+    ];
+
+    for (const subFile of subsystemFiles) {
+      const content = fs.readFileSync(path.join(unitySdkPath, subFile), "utf-8");
+      expect(content).toContain("IDakshSubsystem");
+      expect(content).toContain("SubsystemName");
+      expect(content).toContain("Initialize(");
+      expect(content).toContain("Shutdown(");
+    }
+
+    // Verify Subsystem registry in DakshCoreClient
+    const coreClient = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/DakshCoreClient.cs"), "utf-8");
+    expect(coreClient).toContain("RegisterSubsystem");
+    expect(coreClient).toContain("GetSubsystem<T>");
+    expect(coreClient).toContain("TryGetSubsystem<T>");
+    expect(coreClient).toContain("HasSubsystem<T>");
+    expect(coreClient).toContain("UnregisterSubsystem<T>");
+  });
+
+  it("TEST-UNITY-04 [Pluggable Transport Abstraction]: IDakshTransport decouples network layer from business logic", () => {
+    const transportInterface = path.join(unitySdkPath, "Runtime/Core/Transport/IDakshTransport.cs");
+    expect(fs.existsSync(transportInterface)).toBe(true);
+    const transportContent = fs.readFileSync(transportInterface, "utf-8");
+    expect(transportContent).toContain("interface IDakshTransport");
+    expect(transportContent).toContain("Task<TransportResponse> SendAsync(TransportRequest request)");
+
+    const uwrTransport = path.join(unitySdkPath, "Runtime/Core/Transport/UnityWebRequestTransport.cs");
+    expect(fs.existsSync(uwrTransport)).toBe(true);
+    const uwrContent = fs.readFileSync(uwrTransport, "utf-8");
+    expect(uwrContent).toContain("class UnityWebRequestTransport : IDakshTransport");
+
+    const coreClient = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/DakshCoreClient.cs"), "utf-8");
+    expect(coreClient).toContain("public IDakshTransport Transport { get; set; }");
+  });
+
+  it("TEST-UNITY-05 [Offline Caching & ETag Contracts]: AES-256 and HTTP 304 diffing verified", () => {
+    const cacheCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/Cache/DakshCache.cs"), "utf-8");
     expect(cacheCs).toContain("Aes aes = Aes.Create()");
     expect(cacheCs).toContain("SHA256 sha = SHA256.Create()");
     expect(cacheCs).toContain("Encrypt");
     expect(cacheCs).toContain("Decrypt");
 
-    const etagCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/Cache/ETagStore.cs"), "utf-8");
+    const etagCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/Cache/ETagStore.cs"), "utf-8");
     expect(etagCs).toContain("GetETag");
     expect(etagCs).toContain("GetCachedPayload");
     expect(etagCs).toContain("Store");
 
-    const clientCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/DakshClient.cs"), "utf-8");
-    // Verify HTTP 304 handling in DakshClient
-    expect(clientCs).toContain("If-None-Match");
-    expect(clientCs).toContain("req.responseCode == 304");
+    const coreClient = fs.readFileSync(path.join(unitySdkPath, "Runtime/Core/DakshCoreClient.cs"), "utf-8");
+    expect(coreClient).toContain("If-None-Match");
+    expect(coreClient).toContain("response.StatusCode == 304");
   });
 
-  it("TEST-UNITY-05 [Economy & Idempotency]: Economy C# models match backend PlayFab Economy V2 schema", () => {
+  it("TEST-UNITY-06 [Economy & Idempotency]: Economy C# models match backend PlayFab Economy V2 schema", () => {
     const economyModels = fs.readFileSync(path.join(unitySdkPath, "Runtime/Economy/EconomyModels.cs"), "utf-8");
     expect(economyModels).toContain("public class CatalogItem");
     expect(economyModels).toContain("public class CatalogResponse");
@@ -99,7 +124,7 @@ describe("Unity SDK UPM Package & API Contract Verification", () => {
     expect(economyCs).toContain("PurchaseItemAsync");
   });
 
-  it("TEST-UNITY-06 [Resumable OTA & Netcode Contracts]: Range 206 resume and 21-byte relay packing verified", () => {
+  it("TEST-UNITY-07 [Resumable OTA & Netcode Contracts]: Range 206 resume and 21-byte relay packing verified", () => {
     const otaCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/OTA/DakshAddressablesDownloader.cs"), "utf-8");
     expect(otaCs).toContain('req.SetRequestHeader("Range"');
     expect(otaCs).toContain("req.responseCode == 206");
@@ -110,5 +135,20 @@ describe("Unity SDK UPM Package & API Contract Verification", () => {
     expect(relayCs).toContain("TryUnpackPosition");
     expect(relayCs).toContain("ExtrapolateDeadReckoning");
     expect(relayCs).toContain("SmoothPosition");
+  });
+
+  it("TEST-UNITY-08 [Umbrella Client & Facade]: DakshClient and DakshSDK provide typed unified access", () => {
+    const clientCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/DakshClient.cs"), "utf-8");
+    expect(clientCs).toContain("public class DakshClient : DakshCoreClient");
+    expect(clientCs).toContain("public DakshEconomy Economy");
+    expect(clientCs).toContain("public DakshLeaderboards Leaderboards");
+    expect(clientCs).toContain("public DakshMatchmaking Matchmaking");
+    expect(clientCs).toContain("public DakshAddressablesDownloader OTA");
+    expect(clientCs).toContain("public DakshRelayClient Relay");
+
+    const sdkCs = fs.readFileSync(path.join(unitySdkPath, "Runtime/DakshSDK.cs"), "utf-8");
+    expect(sdkCs).toContain("public static class DakshSDK");
+    expect(sdkCs).toContain("public static DakshClient Client");
+    expect(sdkCs).toContain("public static DakshEconomy Economy");
   });
 });

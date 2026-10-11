@@ -41,7 +41,7 @@ namespace Daksh.SDK
     /// </summary>
     public class DakshAuth
     {
-        private readonly DakshClient _client;
+        private readonly DakshCoreClient _client;
         private const string CacheKeySession = "auth_player_session";
 
         public string ActiveToken { get; private set; }
@@ -52,7 +52,7 @@ namespace Daksh.SDK
         public event Action<PlayerProfile> OnAuthenticated;
         public event Action OnLoggedOut;
 
-        public DakshAuth(DakshClient client)
+        public DakshAuth(DakshCoreClient client)
         {
             _client = client;
             TryRestoreCachedSession();

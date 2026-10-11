@@ -1,7 +1,14 @@
 {
   "name": "com.daksh.sdk",
   "rootNamespace": "Daksh.SDK",
-  "references": [],
+  "references": [
+    "com.daksh.sdk.core",
+    "com.daksh.sdk.economy",
+    "com.daksh.sdk.leaderboards",
+    "com.daksh.sdk.matchmaking",
+    "com.daksh.sdk.ota",
+    "com.daksh.sdk.relay"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

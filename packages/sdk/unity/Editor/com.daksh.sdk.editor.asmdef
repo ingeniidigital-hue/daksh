@@ -2,6 +2,7 @@
   "name": "com.daksh.sdk.editor",
   "rootNamespace": "Daksh.SDK.Editor",
   "references": [
+    "com.daksh.sdk.core",
     "com.daksh.sdk"
   ],
   "includePlatforms": [

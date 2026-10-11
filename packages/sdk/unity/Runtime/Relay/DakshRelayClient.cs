@@ -10,17 +10,32 @@ namespace Daksh.SDK
     /// Nakama-compatible real-time relay client.
     /// Dispatches high-frequency (30 Hz) binary position packets to relay rooms.
     /// </summary>
-    public class DakshRelayClient
+    public class DakshRelayClient : IDakshSubsystem
     {
-        private readonly DakshClient _client;
+        private DakshClient _client;
         private Coroutine _relayLoopCoroutine;
         private uint _sequenceCounter = 0;
 
+        public string SubsystemName => "Relay";
         public bool IsRunning => _relayLoopCoroutine != null;
+
+        public DakshRelayClient() { }
 
         public DakshRelayClient(DakshClient client)
         {
+            Initialize(client);
+        }
+
+        public void Initialize(DakshClient client)
+        {
             _client = client;
+            Debug.Log("[Daksh.Relay] Initialized modular Relay client subsystem.");
+        }
+
+        public void Shutdown()
+        {
+            StopPositionSync();
+            Debug.Log("[Daksh.Relay] Shutdown modular Relay client subsystem.");
         }
 
         /// <summary>
@@ -28,6 +43,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<bool> JoinRoomAsync(string roomId)
         {
+            if (_client == null) throw new InvalidOperationException("DakshRelayClient subsystem is not initialized.");
+
             if (!_client.Auth.IsAuthenticated)
             {
                 throw new DakshException("Cannot join relay room: Player is not authenticated.");
@@ -45,6 +62,8 @@ namespace Daksh.SDK
         /// </summary>
         public async Task<RelayDispatchResponse> SendPacketAsync(string roomId, byte[] packet)
         {
+            if (_client == null) throw new InvalidOperationException("DakshRelayClient subsystem is not initialized.");
+
             string endpoint = $"/api/titles/{_client.Config.titleId}/multiplayer/relay/rooms/{roomId}/packet";
             string url = _client.Config.serverUrl.TrimEnd('/') + endpoint;
 
@@ -91,13 +110,14 @@ namespace Daksh.SDK
         /// </summary>
         public void StartPositionSync(string roomId, Transform targetTransform, float tickRateHz = 30f)
         {
+            if (_client == null) throw new InvalidOperationException("DakshRelayClient subsystem is not initialized.");
             StopPositionSync();
             _relayLoopCoroutine = _client.StartCoroutine(SyncLoop(roomId, targetTransform, tickRateHz));
         }
 
         public void StopPositionSync()
         {
-            if (_relayLoopCoroutine != null)
+            if (_relayLoopCoroutine != null && _client != null)
             {
                 _client.StopCoroutine(_relayLoopCoroutine);
                 _relayLoopCoroutine = null;
