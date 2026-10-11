@@ -235,7 +235,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Clean AI Workspace / Content Area */}
         {mode === "ai" ? (
-          <div className="flex-1 flex flex-col overflow-y-auto bg-[#0b1329]">
+          <div className="flex-1 flex flex-col overflow-y-auto bg-[#f4f6f9]">
             <AIOrchestratorConsole 
               titleId={id} 
               titleName={titleName} 
@@ -244,7 +244,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
               isInspectorOpen={showManualInspector}
             />
             {showManualInspector && (
-              <div className="border-t-4 border-indigo-900/80 bg-[#f4f6f9] p-6 animate-in fade-in duration-200">
+              <div className="border-t-2 border-gray-300 bg-[#f4f6f9] p-6 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-300">
                   <div className="flex items-center space-x-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>

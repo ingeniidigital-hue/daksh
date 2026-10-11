@@ -67,7 +67,7 @@ function formatChatMessage(text: string) {
           const renderedContent = codeParts.map((cPart, cIdx) => {
             if (cPart.startsWith("`") && cPart.endsWith("`")) {
               return (
-                <code key={cIdx} className="bg-slate-900 text-indigo-300 px-1 py-0.5 rounded font-mono text-[11px] border border-slate-700">
+                <code key={cIdx} className="bg-gray-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px] border border-gray-300 font-semibold">
                   {cPart.slice(1, -1)}
                 </code>
               );
@@ -76,7 +76,7 @@ function formatChatMessage(text: string) {
           });
 
           if (isBold) {
-            return <strong key={bIdx} className="font-bold text-white">{renderedContent}</strong>;
+            return <strong key={bIdx} className="font-bold text-gray-900">{renderedContent}</strong>;
           }
           return <span key={bIdx}>{renderedContent}</span>;
         })}
@@ -357,129 +357,133 @@ export default function AIOrchestratorConsole({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0b1329] text-gray-200 min-h-[calc(100vh-3.5rem)] font-sans">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-5 font-sans">
       
-      {/* Top AI Control Bar */}
-      <div className="bg-[#111c38] border-b border-slate-800 px-4 py-2.5 sm:px-6 shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-xs">
-            <Bot className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-sm text-white tracking-wide">
-                Daksh LiveOps AI Orchestrator
-              </span>
-              <span className="bg-emerald-950 text-emerald-400 text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-800 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                AI Agent Active
-              </span>
+      {/* AdminLTE Card Container */}
+      <div className="bg-white border border-gray-200 rounded shadow-xs overflow-hidden flex flex-col">
+
+        {/* AdminLTE Card Header */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white shadow-xs font-bold shrink-0">
+              <Bot className="w-4 h-4" />
             </div>
-            <p className="text-[11px] text-slate-400 font-mono hidden sm:block">
-              Model Context Protocol · 12 LiveOps Microservice Tools Connected
-            </p>
-          </div>
-        </div>
-
-        {/* Action Controls & Active Project Badge */}
-        <div className="flex items-center space-x-2 shrink-0">
-          
-          {/* Active Project Switcher / Indicator */}
-          {!isProjectSelector ? (
-            <Link
-              href="/dashboard"
-              className="flex items-center space-x-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white px-2.5 py-1 rounded text-xs border border-slate-700 transition-colors"
-              title="Click to switch active game project"
-            >
-              <Gamepad2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="font-semibold text-white">{titleName}</span>
-              <span className="text-[10px] font-mono text-slate-400">({titleId})</span>
-              <span className="text-[10px] text-indigo-400 font-bold ml-1">Switch ▾</span>
-            </Link>
-          ) : (
-            <div className="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2.5 py-1 rounded font-medium flex items-center gap-1.5">
-              <Gamepad2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Project Selection Mode</span>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-sm text-gray-800 tracking-tight">
+                  Daksh LiveOps AI Orchestrator
+                </span>
+                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-medium px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Agent Active
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 hidden sm:block">
+                Model Context Protocol (MCP) · 12 Microservice Tools Connected
+              </p>
             </div>
-          )}
+          </div>
 
-          {/* API Key Modal Button */}
-          <button
-            onClick={() => setIsApiKeyModalOpen(true)}
-            className="flex items-center space-x-1.5 bg-slate-900/90 hover:bg-slate-800 text-indigo-300 hover:text-white text-xs px-2.5 py-1 rounded border border-indigo-900/80 transition-colors"
-            title="Configure AI API Key or Simulation Mode"
-          >
-            <Key className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="font-mono text-[11px] hidden md:inline truncate max-w-[100px]">{apiKey.slice(0, 10)}...</span>
-            <span className="text-[10px] bg-indigo-950 text-indigo-300 px-1 py-0.2 rounded border border-indigo-800">Sim</span>
-          </button>
+          {/* Action Controls & Active Project Badge */}
+          <div className="flex items-center space-x-2 shrink-0">
+            
+            {/* Active Project Switcher / Indicator */}
+            {!isProjectSelector ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 px-2.5 py-1 rounded text-xs border border-gray-300 font-medium transition-colors"
+                title="Click to switch active game project"
+              >
+                <Gamepad2 className="w-3.5 h-3.5 text-blue-600" />
+                <span className="font-semibold text-gray-800">{titleName}</span>
+                <span className="text-[10px] font-mono text-gray-500">({titleId})</span>
+                <span className="text-[10px] text-blue-600 font-bold ml-1">Switch ▾</span>
+              </Link>
+            ) : (
+              <div className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded font-medium flex items-center gap-1.5">
+                <Gamepad2 className="w-3.5 h-3.5 text-blue-600" />
+                <span>Project Selection Mode</span>
+              </div>
+            )}
 
-          {/* Browse MCP Tools */}
-          <button
-            onClick={() => setIsToolsModalOpen(true)}
-            className="flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs px-2.5 py-1 rounded border border-slate-700 transition-colors"
-            title="Inspect Model Context Protocol registered schemas"
-          >
-            <Wrench className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">MCP Tools (12)</span>
-          </button>
-
-          {/* Optional Manual Inspector Toggle */}
-          {showInspectorToggle && onToggleInspector && (
+            {/* API Key Modal Button */}
             <button
-              onClick={onToggleInspector}
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs border transition-colors ${
-                isInspectorOpen 
-                  ? "bg-indigo-600 text-white border-indigo-500 font-medium" 
-                  : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700"
-              }`}
-              title="Toggle manual raw tables inspector"
+              onClick={() => setIsApiKeyModalOpen(true)}
+              className="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded border border-gray-300 transition-colors"
+              title="Configure AI API Key or Simulation Mode"
             >
-              <Sliders className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline">{isInspectorOpen ? "Hide Inspector" : "Manual Inspector"}</span>
+              <Key className="w-3.5 h-3.5 text-blue-600" />
+              <span className="font-mono text-[11px] hidden md:inline truncate max-w-[100px]">{apiKey.slice(0, 10)}...</span>
+              <span className="text-[10px] bg-blue-50 text-blue-700 px-1 py-0.2 rounded border border-blue-200">Sim</span>
             </button>
-          )}
 
-          {/* Clear Chat */}
-          <button
-            onClick={clearChat}
-            className="p-1.5 text-slate-400 hover:text-slate-200 rounded hover:bg-slate-800 transition-colors"
-            title="Clear chat history"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+            {/* Browse MCP Tools */}
+            <button
+              onClick={() => setIsToolsModalOpen(true)}
+              className="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded border border-gray-300 transition-colors"
+              title="Inspect Model Context Protocol registered schemas"
+            >
+              <Wrench className="w-3.5 h-3.5 text-blue-600" />
+              <span className="hidden sm:inline">MCP Tools (12)</span>
+            </button>
+
+            {/* Optional Manual Inspector Toggle */}
+            {showInspectorToggle && onToggleInspector && (
+              <button
+                onClick={onToggleInspector}
+                className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs border transition-colors ${
+                  isInspectorOpen 
+                    ? "bg-blue-600 text-white border-blue-600 font-medium" 
+                    : "bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-300"
+                }`}
+                title="Toggle manual raw tables inspector"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">{isInspectorOpen ? "Hide Inspector" : "Manual Inspector"}</span>
+              </button>
+            )}
+
+            {/* Clear Chat */}
+            <button
+              onClick={clearChat}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+              title="Clear chat history"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Main Clean Chat & Simulation Area */}
-      <div className="flex-1 flex flex-col max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-4 overflow-hidden">
-        
-        {/* Chat Stream Viewport */}
-        <div className="flex-1 bg-[#0f172a]/90 border border-slate-800/80 rounded-xl p-4 sm:p-5 overflow-y-auto space-y-4 text-xs font-sans shadow-inner scrollbar-thin">
+        {/* AdminLTE Direct Chat Messages Viewport */}
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs font-sans bg-[#fbfcfd] min-h-[460px] max-h-[580px] border-b border-gray-200 scrollbar-thin">
           {messages.map((msg) => (
             <div 
               key={msg.id} 
               className={`flex items-start gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
             >
               {/* Avatar */}
-              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
+              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold shadow-xs ${
                 msg.sender === "user" 
-                  ? "bg-slate-700 text-slate-200 border border-slate-600" 
-                  : "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-slate-700 text-white" 
+                  : "bg-blue-600 text-white"
               }`}>
                 {msg.sender === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
               {/* Message Content Bubble */}
-              <div className={`max-w-[88%] rounded-xl p-3.5 sm:p-4 space-y-2.5 ${
+              <div className={`max-w-[88%] rounded-lg p-4 space-y-3 ${
                 msg.sender === "user"
-                  ? "bg-indigo-950/80 border border-indigo-800/80 text-white"
-                  : "bg-[#18233c] border border-slate-800 text-slate-200 shadow-sm"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-white border border-gray-200 text-gray-800 shadow-2xs"
               }`}>
                 
                 {/* Header: Sender & Timestamp */}
-                <div className="flex items-center justify-between text-[11px] text-slate-400 gap-2 border-b border-slate-700/50 pb-1.5">
-                  <span className="font-semibold text-slate-300">
+                <div className={`flex items-center justify-between text-xs pb-1.5 border-b ${
+                  msg.sender === "user"
+                    ? "text-blue-100 border-blue-500/40"
+                    : "text-gray-500 border-gray-100"
+                }`}>
+                  <span className="font-semibold">
                     {msg.sender === "user" ? "Studio Developer" : "Daksh AI Orchestrator"}
                   </span>
                   <span className="font-mono text-[10px]">{msg.timestamp}</span>
@@ -487,10 +491,10 @@ export default function AIOrchestratorConsole({
 
                 {/* Thought Process (Collapsible) */}
                 {msg.thoughtProcess && (
-                  <div className="bg-slate-950/90 border border-slate-800 rounded-lg p-2.5 text-[11px] font-mono text-indigo-300">
+                  <div className="bg-gray-50 border border-gray-200 rounded p-2.5 text-[11px] font-mono text-gray-700">
                     <button 
                       onClick={() => setExpandedThoughtId(expandedThoughtId === msg.id ? null : msg.id)}
-                      className="flex items-center justify-between w-full text-[10px] text-indigo-400 hover:underline"
+                      className="flex items-center justify-between w-full text-[10px] text-blue-600 hover:underline"
                     >
                       <span className="flex items-center gap-1.5 font-semibold uppercase tracking-wider">
                         <Cpu className="w-3.5 h-3.5" />
@@ -499,7 +503,7 @@ export default function AIOrchestratorConsole({
                       <span>{expandedThoughtId === msg.id ? "▲ Hide" : "▼ Show"}</span>
                     </button>
                     {expandedThoughtId === msg.id && (
-                      <div className="mt-2 whitespace-pre-line text-slate-300 text-[11px] leading-relaxed border-t border-slate-800 pt-2">
+                      <div className="mt-2 whitespace-pre-line text-gray-700 text-[11px] leading-relaxed border-t border-gray-200 pt-2">
                         {msg.thoughtProcess}
                       </div>
                     )}
@@ -507,40 +511,42 @@ export default function AIOrchestratorConsole({
                 )}
 
                 {/* Main Message Text */}
-                <div className="text-xs sm:text-[13px] leading-relaxed">
+                <div className={`text-xs sm:text-[13px] leading-relaxed ${
+                  msg.sender === "user" ? "text-white" : "text-gray-800"
+                }`}>
                   {formatChatMessage(msg.text)}
                 </div>
 
                 {/* Interactive Project Selection Cards (Rendered if in project selection mode) */}
                 {msg.isProjectSelectCard && (
                   <div className="pt-2 space-y-2.5">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-gray-600">
                       Available Game Projects ({availableTitles.length}):
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {availableTitles.map((title) => (
                         <div
                           key={title.id}
-                          className="bg-[#0f172a] border border-slate-700 hover:border-indigo-500 rounded-lg p-3 transition-all flex flex-col justify-between"
+                          className="bg-white border border-gray-300 hover:border-blue-500 rounded-lg p-4 transition-all shadow-xs hover:shadow-md flex flex-col justify-between"
                         >
                           <div>
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-white text-sm">{title.name}</span>
-                              <span className="font-mono text-[10px] bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-800">
+                              <span className="font-bold text-gray-900 text-sm">{title.name}</span>
+                              <span className="font-mono text-[11px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded border border-blue-200">
                                 {title.id}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 mt-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                              <span>Nakama :7350 · Postgres :5432</span>
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                              <span>Nakama :7350 · PostgreSQL :5432</span>
                             </div>
                           </div>
 
-                          <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-end">
+                          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-end">
                             <Link
                               href={`/dashboard/${title.id}`}
-                              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors shadow-xs"
+                              className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3.5 py-1.5 rounded flex items-center gap-1.5 transition-colors shadow-xs"
                             >
                               <span>Manage Project</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -552,13 +558,13 @@ export default function AIOrchestratorConsole({
                       {/* Provision New Title Card */}
                       <button
                         onClick={onOpenCreateTitle}
-                        className="bg-[#0f172a]/60 hover:bg-[#0f172a] border border-dashed border-slate-700 hover:border-slate-500 rounded-lg p-3 text-left transition-colors flex flex-col justify-center items-center py-6"
+                        className="bg-gray-50 hover:bg-blue-50/40 border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-lg p-4 text-center transition-colors flex flex-col justify-center items-center py-6 cursor-pointer"
                       >
-                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 mb-2 shadow-2xs">
                           <Plus className="w-4 h-4" />
                         </div>
-                        <span className="font-semibold text-xs text-slate-200">Provision New Title</span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Spin up isolated microservices</span>
+                        <span className="font-semibold text-xs text-gray-800">Provision New Title</span>
+                        <span className="text-[11px] text-gray-500 mt-0.5">Spin up isolated microservices</span>
                       </button>
                     </div>
                   </div>
@@ -567,26 +573,26 @@ export default function AIOrchestratorConsole({
                 {/* Executed MCP Tool Cards */}
                 {msg.toolCalls && msg.toolCalls.length > 0 && (
                   <div className="space-y-1.5 pt-1.5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
                       Executed MCP Tools ({msg.toolCalls.length}):
                     </div>
                     {msg.toolCalls.map((tc, idx) => (
                       <div 
                         key={idx}
-                        className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[11px] font-mono space-y-1"
+                        className="bg-slate-50 border-l-4 border-l-blue-600 border border-slate-200 rounded p-2.5 text-[11px] font-mono space-y-1 text-slate-800 shadow-2xs"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-indigo-400 font-bold flex items-center gap-1.5">
-                            <Terminal className="w-3 h-3 text-indigo-400" />
+                          <span className="text-blue-700 font-bold flex items-center gap-1.5">
+                            <Terminal className="w-3 h-3 text-blue-600" />
                             <span>{tc.toolName}</span>
                           </span>
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded ${
-                            tc.isError ? "bg-red-950 text-red-400" : "bg-emerald-950 text-emerald-400"
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
+                            tc.isError ? "bg-red-100 text-red-700 border border-red-200" : "bg-emerald-100 text-emerald-800 border border-emerald-200"
                           }`}>
                             {tc.isError ? "ERROR" : "200 OK"} · {tc.latencyMs}ms
                           </span>
                         </div>
-                        <div className="text-slate-400 text-[10px] truncate">
+                        <div className="text-gray-600 text-[10px] truncate">
                           args: {JSON.stringify(tc.args)}
                         </div>
                       </div>
@@ -596,13 +602,13 @@ export default function AIOrchestratorConsole({
 
                 {/* Simulation Summary Banner */}
                 {msg.simulationResult && (
-                  <div className="flex items-center justify-between text-[11px] bg-slate-950/70 border border-slate-800/80 px-3 py-1.5 rounded-lg text-emerald-400 font-mono">
+                  <div className="flex items-center justify-between text-xs bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded text-emerald-800 font-mono">
                     <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                       <span>{msg.simulationResult.summary}</span>
                     </span>
                     {msg.simulationResult.latencyMs && (
-                      <span className="text-slate-400 text-[10px]">{msg.simulationResult.latencyMs}ms</span>
+                      <span className="text-gray-500 text-[10px]">{msg.simulationResult.latencyMs}ms</span>
                     )}
                   </div>
                 )}
@@ -613,13 +619,13 @@ export default function AIOrchestratorConsole({
 
           {/* Live Thinking Indicator */}
           {isProcessing && (
-            <div className="flex items-center space-x-2 text-indigo-300 text-xs py-1">
-              <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+            <div className="flex items-center space-x-2 text-gray-700 text-xs py-1">
+              <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white">
                 <Bot className="w-4 h-4 animate-pulse" />
               </div>
-              <div className="bg-[#18233c] border border-slate-800 rounded-xl px-3.5 py-2 flex items-center space-x-2.5">
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                <span className="font-medium text-slate-300">Listening & Simulating LiveOps through MCP...</span>
+              <div className="bg-white border border-gray-200 rounded-lg px-3.5 py-2 flex items-center space-x-2.5 shadow-2xs">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                <span className="font-medium text-gray-700">Listening & Simulating LiveOps through MCP...</span>
               </div>
             </div>
           )}
@@ -629,17 +635,17 @@ export default function AIOrchestratorConsole({
 
         {/* Quick Suggestion Menus (Only when title is selected) */}
         {!isProjectSelector && (
-          <div className="space-y-1.5 shrink-0">
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="font-semibold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-indigo-400" />
+          <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200 space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span>Operations Presets:</span>
               </span>
-              <span className="text-slate-400">Click any preset to execute via MCP</span>
+              <span className="text-gray-500 text-[11px]">Click preset to execute via MCP</span>
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-thin">
+            <div className="flex items-center space-x-1.5 overflow-x-auto pb-0.5">
               {menuCategories.map((cat) => {
                 const Icon = cat.icon;
                 const isActive = activeCategory === cat.id;
@@ -647,10 +653,10 @@ export default function AIOrchestratorConsole({
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors ${
+                    className={`flex items-center space-x-1.5 px-3 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors ${
                       isActive
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <Icon className="w-3 h-3" />
@@ -669,42 +675,42 @@ export default function AIOrchestratorConsole({
                     key={idx}
                     onClick={() => handleSendMessage(p)}
                     disabled={isProcessing}
-                    className="bg-[#111c38] hover:bg-indigo-950 text-slate-300 hover:text-white text-[11px] px-2.5 py-1 rounded-md border border-slate-800 hover:border-indigo-600 transition-all flex items-center space-x-1 disabled:opacity-50"
+                    className="bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 text-[11px] px-2.5 py-1 rounded border border-gray-200 hover:border-blue-400 transition-colors shadow-2xs flex items-center space-x-1 disabled:opacity-50"
                   >
                     <span>"{p}"</span>
-                    <ArrowRight className="w-3 h-3 text-slate-500" />
+                    <ArrowRight className="w-3 h-3 text-gray-400" />
                   </button>
                 ))}
             </div>
           </div>
         )}
 
-        {/* Conversational Input Bar */}
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="relative flex items-center shrink-0"
-        >
-          <input
-            type="text"
-            value={inputPrompt}
-            onChange={(e) => setInputPrompt(e.target.value)}
-            disabled={isProcessing}
-            placeholder={
-              isProjectSelector 
-                ? "Type a command or click a project above (e.g. 'Select project YCSLW')..."
-                : `Ask the Orchestrator to simulate or execute for ${titleName} (e.g. 'Simulate weekend double XP event', 'Grant 500 Gold')...`
-            }
-            className="w-full bg-[#111c38] border border-slate-700/90 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-slate-400 rounded-xl py-3 pl-4 pr-24 text-xs sm:text-sm font-sans shadow-sm transition-all"
-          />
-          <div className="absolute right-2 flex items-center space-x-1">
+        {/* Conversational Input Bar (AdminLTE Card Footer) */}
+        <div className="p-3 sm:p-4 bg-gray-50">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex items-center bg-white border border-gray-300 rounded shadow-xs focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 overflow-hidden"
+          >
+            <input
+              type="text"
+              value={inputPrompt}
+              onChange={(e) => setInputPrompt(e.target.value)}
+              disabled={isProcessing}
+              placeholder={
+                isProjectSelector 
+                  ? "Type a command or click a project above (e.g. 'Select project YCSLW')..."
+                  : `Ask the Orchestrator to simulate or execute for ${titleName} (e.g. 'Simulate weekend double XP event', 'Grant 500 Gold')...`
+              }
+              className="w-full bg-white text-gray-900 placeholder-gray-400 text-xs sm:text-sm px-3.5 py-2.5 outline-none"
+            />
             {inputPrompt && (
               <button
                 type="button"
                 onClick={() => setInputPrompt("")}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-gray-400 hover:text-gray-600 p-2"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -712,7 +718,7 @@ export default function AIOrchestratorConsole({
             <button
               type="submit"
               disabled={isProcessing || !inputPrompt.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1.5 shadow-xs"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 text-white text-xs font-semibold px-4 py-2.5 flex items-center space-x-1.5 transition-colors shrink-0"
             >
               {isProcessing ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -721,8 +727,8 @@ export default function AIOrchestratorConsole({
               )}
               <span className="hidden sm:inline">Send</span>
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
 
       </div>
 

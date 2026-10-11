@@ -39,30 +39,30 @@ export default function MCPToolsModal({ isOpen, onClose }: MCPToolsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-[#1e293b] border border-slate-700 w-full max-w-4xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-gray-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-gray-300 w-full max-w-4xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-gray-800 font-sans">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 bg-slate-900/80">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+            <div className="w-8 h-8 rounded bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-600">
               <Wrench className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-sm font-bold text-white tracking-wide">Model Context Protocol (MCP) Tools Registry</h3>
-                <span className="bg-emerald-900/60 text-emerald-300 text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-emerald-700/50">
+                <h3 className="text-sm font-bold text-gray-900 tracking-tight">Model Context Protocol (MCP) Tools Registry</h3>
+                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-emerald-200">
                   Protocol: 2024-11-05
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5">
                 Official JSON-RPC 2.0 tools exposed by Daksh for autonomous AI orchestrators and agents.
               </p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors"
+            className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -71,12 +71,12 @@ export default function MCPToolsModal({ isOpen, onClose }: MCPToolsModalProps) {
         {/* Content body with sidebar list & schema details */}
         <div className="flex flex-1 overflow-hidden">
           {/* Tool list */}
-          <div className="w-64 border-r border-slate-700 bg-slate-900/40 overflow-y-auto p-2 space-y-1">
-            <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="w-64 border-r border-gray-200 bg-gray-50 overflow-y-auto p-2 space-y-1">
+            <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
               Available Tools ({tools.length})
             </div>
             {loading ? (
-              <div className="p-4 text-xs text-slate-400 animate-pulse">Loading MCP tools...</div>
+              <div className="p-4 text-xs text-gray-500 animate-pulse">Loading MCP tools...</div>
             ) : (
               tools.map((t) => (
                 <button
@@ -84,8 +84,8 @@ export default function MCPToolsModal({ isOpen, onClose }: MCPToolsModalProps) {
                   onClick={() => setSelectedTool(t)}
                   className={`w-full text-left px-2.5 py-2 rounded text-xs transition-colors flex items-center justify-between ${
                     selectedTool?.name === t.name
-                      ? "bg-indigo-600 text-white font-medium"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      ? "bg-blue-600 text-white font-medium shadow-xs"
+                      : "text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   <span className="truncate font-mono text-[11px]">{t.name}</span>
@@ -95,19 +95,19 @@ export default function MCPToolsModal({ isOpen, onClose }: MCPToolsModalProps) {
           </div>
 
           {/* Details pane */}
-          <div className="flex-1 overflow-y-auto p-5 bg-[#0f172a] space-y-4">
+          <div className="flex-1 overflow-y-auto p-5 bg-white space-y-4">
             {selectedTool ? (
               <>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="text-base font-bold font-mono text-indigo-400">{selectedTool.name}</h4>
-                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">{selectedTool.description}</p>
+                    <h4 className="text-base font-bold font-mono text-blue-700">{selectedTool.name}</h4>
+                    <p className="text-xs text-gray-600 mt-1 leading-relaxed">{selectedTool.description}</p>
                   </div>
                   <button
                     onClick={copyToolJson}
-                    className="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded border border-slate-700 transition-colors shrink-0"
+                    className="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs px-2.5 py-1.5 rounded border border-gray-300 transition-colors shrink-0 font-medium"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? "Copied" : "Copy JSON"}</span>
                   </button>
                 </div>

@@ -135,7 +135,7 @@ export default function Dashboard() {
   if (!isClient) return null;
 
   return (
-    <div className={`min-h-screen font-sans ${mode === "ai" ? "bg-[#0b1329] text-slate-200" : "bg-[#f4f6f9] text-gray-800 pb-20"}`}>
+    <div className="min-h-screen bg-[#f4f6f9] text-gray-800 font-sans pb-16">
       {/* AdminLTE Top Navbar */}
       <nav className="bg-[#1f2937] text-white border-b border-gray-700 sticky top-0 z-40 h-12 flex items-center px-4 justify-between">
         <div className="flex items-center space-x-3">
