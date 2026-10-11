@@ -35,7 +35,7 @@
 ```mermaid
 flowchart TD
     %% PLAYER & GAME CLIENT FLOW
-    subgraph CLIENTS["Game Clients & Players Tier (In-Game Gameplay & Economy)"]
+    subgraph CLIENTS["Game Clients & Multi-Platform SDKs"]
         U3D["Unity C# SDK (UPM)<br>Addressables OTA • AES-256 Cache"]
         UE5["Unreal Engine Plugin<br>IoStore Chunks • UDP Netcode"]
         HTML["HTML5 / WebGL SDK<br>Direct Browser WebSocket"]
@@ -47,7 +47,7 @@ flowchart TD
         CDN["Cloud OTA CDN<br>(Unity .bundle / Unreal .pak)"]
     end
 
-    subgraph MANAGED_CLOUD["Daksh Managed Game Backend (Or Self-Hosted Helm)"]
+    subgraph CORE_ENGINE["Daksh Game Backend Engine (Nakama 3.22 & Agones)"]
         subgraph REGIONS["5 Super-Regions: IAD • FRA • BOM • NRT • GRU"]
             CORE["Nakama V8 Game Core<br>Economy V2 • Title Data • Rulesets"]
             AGONES["Agones DGS Fleet<br>Unreal / Unity Headless Servers"]
@@ -57,16 +57,10 @@ flowchart TD
         CH[("ClickHouse OLAP<br>10K Evt/s Telemetry")]
     end
 
-    %% STUDIO DEVELOPER & CLOUD SERVICE BILLING FLOW
-    subgraph STUDIO["Game Studio Developers & LiveOps (Studio Management)"]
+    %% STUDIO & LIVEOPS MANAGEMENT
+    subgraph STUDIO["Game Studio Developers & LiveOps Portal"]
         DASH["Daksh Studio Dashboard<br>(/dashboard • LiveOps • Cmd+K MCP)"]
         PLANKA["Planka Open-Source Project Tracker<br>(localhost:1337)"]
-    end
-
-    subgraph CLOUD_BILLING["Daksh Cloud B2B Platform Billing (Studio Cloud Subscriptions Only)"]
-        GEO["Geo-IP SaaS Billing Router<br>(Routes Studio IP by Region)"]
-        RZP["Razorpay India (UPI / RuPay / NetBanking / GST) - INR"]
-        PDL["Paddle Global (Cards / PayPal / MoR / EU VAT) - USD"]
     end
 
     %% CONNECTIONS: PLAYERS
@@ -77,11 +71,8 @@ flowchart TD
     REGIONS --> RD
     REGIONS --> CH
 
-    %% CONNECTIONS: STUDIO & CLOUD BILLING
-    STUDIO --> MANAGED_CLOUD
-    DASH --> GEO
-    GEO --> RZP
-    GEO --> PDL
+    %% CONNECTIONS: STUDIO MANAGEMENT
+    STUDIO --> CORE_ENGINE
 ```
 
 ---
@@ -102,16 +93,10 @@ flowchart TD
 - **Loot Drop Tables**: Cryptographically randomized weighted mystery boxes with idempotency keys protecting mobile retries.
 - **AI Command Menu (`Cmd+K`)**: Natural language prompt-driven catalog and balance operations via Open Model Context Protocol (MCP).
 
-### 3. Daksh Cloud B2B SaaS Subscription Billing (STORY-12)
-> [!IMPORTANT]
-> **Cloud Service Billing vs. In-Game Economy Distinction:**
-> - **Daksh Cloud B2B Subscription Billing (Razorpay + Paddle)**: Strictly for **game studios/companies** paying for their **Daksh Managed Cloud BaaS platform tiers** (Indie, Studio, Enterprise) and metered cloud compute/MAU resources. **Players never touch Razorpay or Paddle.**
-> - **In-Game Microtransactions (Economy V2)**: Players purchase in-game items (weapons, skins, loot boxes) using in-game virtual currencies (`GOLD`, `GEMS`) or standard native platform IAP (Google Play Billing, Apple StoreKit 2, Steam Microtransactions), processed server-side with atomic row-level locks.
-> 
-- **Intelligent Geo-Routing for Studio Cloud Subscriptions:**
-  - **India Game Studios**: **Razorpay** in INR (UPI, RuPay, Corporate NetBanking, recurring e-Mandates, and automated GST-compliant invoicing).
-  - **International Game Studios**: **Paddle** in USD (Merchant of Record managing worldwide cards, PayPal, EU VAT, and cross-border SaaS tax compliance).
-- **Security & Integrity**: Cryptographic HMAC-SHA256 signature verification blocks unauthorized billing webhooks. Available directly in Daksh Studio at `/dashboard/[id]/billing`.
+### 3. High-Volume Telemetry & Live Analytics (ClickHouse)
+- **10,000 Events/sec Ingestion**: Non-blocking asynchronous telemetry pipeline with ring-buffer backpressure protection for mobile and PC titles.
+- **Live Executive KPIs Dashboard**: Sub-500ms real-time queries for DAU, MAU, ARPU, and D1/D7/D30 retention cohorts using dedicated ClickHouse OLAP replicas without placing load on live match databases.
+- **Automated Anti-Cheat Heuristics**: Flags abnormal player progression, velocity anomalies, and packet rate spikes in real-time.
 
 ### 4. Multi-Client SDK Suite
 | Client / Engine | Package | Offline Queue | Asset Caching |
