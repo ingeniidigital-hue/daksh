@@ -7,7 +7,8 @@
     "com.daksh.sdk.leaderboards",
     "com.daksh.sdk.matchmaking",
     "com.daksh.sdk.ota",
-    "com.daksh.sdk.relay"
+    "com.daksh.sdk.relay",
+    "com.daksh.sdk.actions"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -170,4 +170,34 @@ describe("Unity SDK Modular Architecture & API Contract Verification", () => {
     expect(readmeContent).toContain("Data Versioning, Caching & Sync Architecture");
     expect(readmeContent).toContain("Documentation~/DataVersioningAndSync.md");
   });
+
+  it("TEST-UNITY-10 [Zero-Trust Action Reporting Subsystem]: Verifies DakshActionReporter, zero-trust action reporting, and absence of client SetGold/SetBalance APIs", () => {
+    // 1. Verify Actions asmdef exists and references core
+    const actionsAsmPath = path.join(unitySdkPath, "Runtime/Actions/com.daksh.sdk.actions.asmdef");
+    expect(fs.existsSync(actionsAsmPath)).toBe(true);
+    const actionsAsm = JSON.parse(fs.readFileSync(actionsAsmPath, "utf-8"));
+    expect(actionsAsm.name).toBe("com.daksh.sdk.actions");
+    expect(actionsAsm.references).toContain("com.daksh.sdk.core");
+
+    // 2. Verify DakshActionReporter class
+    const reporterPath = path.join(unitySdkPath, "Runtime/Actions/DakshActionReporter.cs");
+    expect(fs.existsSync(reporterPath)).toBe(true);
+    const reporterContent = fs.readFileSync(reporterPath, "utf-8");
+    expect(reporterContent).toContain("class DakshActionReporter : IDakshSubsystem");
+    expect(reporterContent).toContain("ReportActionAsync");
+    expect(reporterContent).toContain("OnActionResolved");
+    expect(reporterContent).toContain("OnExploitDetected");
+
+    // 3. Verify security: NO client SetGold / SetInventory APIs exist
+    expect(reporterContent).not.toContain("SetGold");
+    expect(reporterContent).not.toContain("SetBalance");
+    expect(reporterContent).not.toContain("SetInventory");
+
+    // 4. Verify Zero-Trust documentation in DataVersioningAndSync.md
+    const docPath = path.join(unitySdkPath, "Documentation~/DataVersioningAndSync.md");
+    const docContent = fs.readFileSync(docPath, "utf-8");
+    expect(docContent).toContain("Zero-Trust Architecture: Why Clients NEVER Set State");
+    expect(docContent).toContain("The Principle of Server-Authoritative Action Reporting");
+    expect(docContent).toContain("EXPLOIT_DETECTED");
+  });
 });

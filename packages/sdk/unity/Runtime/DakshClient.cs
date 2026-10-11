@@ -31,6 +31,7 @@ namespace Daksh.SDK
         public DakshMatchmaking Matchmaking => GetSubsystem<DakshMatchmaking>();
         public DakshAddressablesDownloader OTA => GetSubsystem<DakshAddressablesDownloader>();
         public DakshRelayClient Relay => GetSubsystem<DakshRelayClient>();
+        public DakshActionReporter Actions => GetSubsystem<DakshActionReporter>();
 
         public static DakshClient Initialize(DakshConfig config)
         {
@@ -88,6 +89,9 @@ namespace Daksh.SDK
             {
                 RegisterSubsystem(new DakshRelayClient(this));
             }
+
+            // Always register Zero-Trust Server-Authoritative Action Reporter
+            RegisterSubsystem(new DakshActionReporter(this));
 
             Debug.Log($"[Daksh.Client] Daksh Game BaaS SDK v1.0.0 Ready. Active Subsystems: {_subsystems.Count}");
         }

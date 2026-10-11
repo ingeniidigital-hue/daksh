@@ -174,3 +174,96 @@ Debug.Log($"Pending offline actions: {pendingCount}");
 int replayedCount = await DakshClient.Instance.FlushOfflineQueueAsync();
 Debug.Log($"Flushed {replayedCount} offline mutations.");
 ```
+
+---
+
+## 6. Zero-Trust Architecture: Why Clients NEVER Set State
+
+> [!CAUTION]
+> **The #1 Fatal Exploit Vector in Mobile & Multiplayer Games:**
+> Naive backends that expose client-writable state APIs (e.g. `SetGold(amount)`, `SetInventory(items)`, `SetScore(score)`) can be trivially compromised. Attackers use memory scanners (GameGuardian, CheatEngine), dynamic instrumentation (Frida), or MITM proxies (Burp Suite, Charles) to forge payloads like `{ gold: 999999 }` or `{ score: 99999999 }`.
+
+### 6.1. The Principle of Server-Authoritative Action Reporting
+
+In **Daksh Game BaaS**, **clients NEVER set values directly**. There is no endpoint that accepts arbitrary balance modifications or inventory assignments from a game client.
+
+Instead, the client operates exclusively through **Action Intent Reporting**:
+1. **The Client Reports What Happened**: "Player completed Dungeon X in Y seconds with Z monsters defeated."
+2. **The Server Validates the Action**: The server executes anti-cheat rules (e.g. verifies completion duration exceeds theoretical minimum, checks match token, checks energy limits).
+3. **The Server Autonomously Calculates Rewards**: The server determines the XP formula, rolls server-side drop tables, and credits the wallet directly in the database.
+4. **The Server Signs & Dispatches the Delta**: The server returns an authoritative receipt with cryptographic HMAC proof and state deltas (`{ grantedRewards: { gold: 150, xp: 300 }, newBalances: { GOLD: 1250 } }`).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Player as Untrusted Game Client
+    participant Server as Daksh Server
+    participant Rules as Anti-Cheat & Rule Engine
+    participant DB as Authoritative Ledger (Postgres/Redis)
+
+    Note over Player,DB: The Client ONLY reports the event; never the reward!
+    Player->>Server: POST /api/titles/{id}/actions/report<br/>{ actionType: "DUNGEON_CLEARED", context: { duration: 142s, monsters: 28 } }
+    
+    Server->>Rules: Validate Preconditions & Anti-Cheat Rules
+    alt Exploit Detected (e.g. Cleared 10-minute dungeon in 2 seconds)
+        Rules-->>Server: Flag Exploit: Impossible completion duration
+        Server-->>Player: HTTP 403 Forbidden { antiCheatFlagged: true, error: "EXPLOIT_DETECTED" }
+        Note over Server: Security Alert logged, player flagged for ban
+    else Action Verified
+        Rules-->>Server: Valid
+        Server->>Server: Calculate authoritative rewards (Gold formula, XP, Loot tables)
+        Server->>DB: Atomically credit player wallet and add inventory item
+        DB-->>Server: Updated state committed
+        Server->>Server: Sign outcome with server HMAC secret
+        Server-->>Player: HTTP 200 OK<br/>{ success: true, grantedRewards: { gold: 150, xp: 300 }, newBalances: { GOLD: 1250 } }
+        Player->>Player: Update local UI to mirror authoritative server delta
+    end
+```
+
+### 6.2. Comparison: Naive vs. Daksh Zero-Trust Model
+
+| Operation | Naive Vulnerable SDK (Insecure) | Daksh Zero-Trust SDK (Secure) |
+| :--- | :--- | :--- |
+| **Defeating a Boss** | Client calls: `SetGold(currentGold + 500)` *(Attacker changes 500 to 5,000,000)* | Client calls: `Actions.ReportActionAsync("BOSS_DEFEATED", context)` *(Server verifies boss encounter and calculates rewards)* |
+| **Purchasing an Item** | Client passes price: `BuyItem(id: "sword", price: 100)` *(Attacker passes price: 0)* | Client passes item ID: `PurchaseItemAsync("sword")` *(Server looks up authoritative catalog price and debits wallet)* |
+| **Loot Boxes** | Client rolls RNG locally and requests: `GrantItem("legendary_dragon_armor")` | Client requests: `TitleData.RollLootDrop("chest_01")` *(Server rolls cryptographically on backend using secret weights)* |
+| **High Scores** | Client submits raw score: `SubmitScore(999999)` without proof | Server validates `maxScoreDelta` rate limiter and verifies match token before accepting score |
+
+### 6.3. Unity C# Action Reporting Example
+
+```csharp
+using Daksh.SDK;
+using UnityEngine;
+
+public class DungeonManager : MonoBehaviour
+{
+    public async void OnDungeonFinished(string dungeonId, float elapsedSeconds, int killCount)
+    {
+        Debug.Log("Reporting dungeon completion event to Daksh server...");
+
+        // 1. Client reports ONLY the action event — NEVER sets the reward!
+        var result = await DakshClient.Instance.Actions.ReportActionAsync("DUNGEON_CLEARED");
+
+        if (result != null)
+        {
+            if (result.antiCheatFlagged)
+            {
+                Debug.LogError($"Anti-cheat flagged action: {result.error}");
+                return;
+            }
+
+            if (result.success)
+            {
+                // 2. Server authoritatively decided rewards
+                int goldAwarded = result.grantedRewards.gold;
+                int xpAwarded = result.grantedRewards.xp;
+                Debug.Log($"Server granted: +{goldAwarded} Gold, +{xpAwarded} XP! New Balance: {result.newBalances}");
+
+                // 3. Update local render state to reflect authoritative server delta
+                UpdatePlayerHUD(goldAwarded, xpAwarded);
+            }
+        }
+    }
+}
+```
+

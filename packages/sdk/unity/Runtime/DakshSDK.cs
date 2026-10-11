@@ -16,6 +16,7 @@ namespace Daksh.SDK
         public static DakshMatchmaking Matchmaking => Client.Matchmaking;
         public static DakshAddressablesDownloader OTA => Client.OTA;
         public static DakshRelayClient Relay => Client.Relay;
+        public static DakshActionReporter Actions => Client.Actions;
 
         public static void Initialize(DakshConfig config)
         {
