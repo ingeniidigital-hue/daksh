@@ -9,7 +9,7 @@ import {
   ShoppingBag, DollarSign, Gift, 
   Swords, Server, Target, 
   UsersRound, Trophy, 
-  Save, BarChart3, LineChart, Network, TrendingUp,
+  Save, BarChart3, LineChart, Network, TrendingUp, Package,
   LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
@@ -181,6 +181,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarSection>
 
             <SidebarSection title="Live Ops">
+              <SidebarLink href={`/dashboard/${id}/ota`} icon={Package} label="OTA Assets" />
               <SidebarLink href={`/dashboard/${id}/rules`} icon={CloudLightning} label="Automation Rules" />
               <SidebarLink href={`/dashboard/${id}/cloudscript`} icon={Database} label="Cloud Script" />
               <SidebarLink href={`/dashboard/${id}/experiments`} icon={Database} label="Experiments (A/B)" />

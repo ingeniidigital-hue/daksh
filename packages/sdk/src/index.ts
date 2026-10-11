@@ -8,3 +8,4 @@ export * from "./leaderboards";
 export * from "./telemetry";
 export * from "./analytics";
 export * from "./cache";
+export * from "./ota";
