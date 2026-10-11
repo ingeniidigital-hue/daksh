@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, ChevronRight, Cloud, Server } from "lucide-react";
+import { Plus, ChevronRight, Cloud, Server, Activity, CheckCircle2, AlertCircle, Database, Zap } from "lucide-react";
 
 interface Title {
   id: string;
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTitleName, setNewTitleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [systemHealth, setSystemHealth] = useState<any>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -27,10 +28,18 @@ export default function Dashboard() {
     const user = localStorage.getItem("daksh_user");
     if (user) {
       setUserName(JSON.parse(user).name);
-    } else {
-      // Optional: Redirect to login if not authenticated
-      // window.location.href = "/auth";
     }
+
+    const checkHealth = () => {
+      fetch("/api/system/health")
+        .then(res => res.json())
+        .then(data => setSystemHealth(data))
+        .catch(() => {});
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleCreateTitle = () => {
@@ -127,6 +136,98 @@ export default function Dashboard() {
           >
             <Plus className="w-4 h-4 mr-1" /> New Title
           </button>
+        </div>
+
+        {/* Local Engine Real-Time Health Status */}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <Activity className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-lg">Local Core Engine Status</h3>
+                <p className="text-xs text-gray-500 font-medium">Real-time probe across ports 7350, 5432 & 6379</p>
+              </div>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5 ${
+              systemHealth?.status === "healthy" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${systemHealth?.status === "healthy" ? "bg-emerald-500" : "bg-amber-500 animate-ping"}`}></span>
+              <span>{systemHealth?.status === "healthy" ? "All Services Online" : "Connecting / Initializing..."}</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            {/* Nakama */}
+            <div className="bg-[#F5F5F7] rounded-2xl p-4 border border-gray-200/60 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center text-gray-700">
+                  <Zap className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">Nakama Core</div>
+                  <div className="text-xs text-gray-500">Port :7350 (v3.22)</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`text-xs font-bold uppercase tracking-wider ${
+                  systemHealth?.services?.nakama?.status === "online" ? "text-emerald-600" : "text-gray-400"
+                }`}>
+                  {systemHealth?.services?.nakama?.status || "Checking"}
+                </div>
+                {systemHealth?.services?.nakama?.latencyMs !== undefined && (
+                  <div className="text-[10px] text-gray-400 font-mono">{systemHealth.services.nakama.latencyMs}ms</div>
+                )}
+              </div>
+            </div>
+
+            {/* Postgres */}
+            <div className="bg-[#F5F5F7] rounded-2xl p-4 border border-gray-200/60 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center text-gray-700">
+                  <Database className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">PostgreSQL</div>
+                  <div className="text-xs text-gray-500">Port :5432 (v16)</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`text-xs font-bold uppercase tracking-wider ${
+                  systemHealth?.services?.postgres?.status === "online" ? "text-emerald-600" : "text-gray-400"
+                }`}>
+                  {systemHealth?.services?.postgres?.status || "Checking"}
+                </div>
+                {systemHealth?.services?.postgres?.latencyMs !== undefined && (
+                  <div className="text-[10px] text-gray-400 font-mono">{systemHealth.services.postgres.latencyMs}ms</div>
+                )}
+              </div>
+            </div>
+
+            {/* Redis */}
+            <div className="bg-[#F5F5F7] rounded-2xl p-4 border border-gray-200/60 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center text-gray-700">
+                  <Server className="w-4 h-4 text-red-500" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">Redis Cache</div>
+                  <div className="text-xs text-gray-500">Port :6379 (v7)</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`text-xs font-bold uppercase tracking-wider ${
+                  systemHealth?.services?.redis?.status === "online" ? "text-emerald-600" : "text-gray-400"
+                }`}>
+                  {systemHealth?.services?.redis?.status || "Checking"}
+                </div>
+                {systemHealth?.services?.redis?.latencyMs !== undefined && (
+                  <div className="text-[10px] text-gray-400 font-mono">{systemHealth.services.redis.latencyMs}ms</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {titles.length === 0 ? (
