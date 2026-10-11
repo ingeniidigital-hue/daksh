@@ -39,7 +39,7 @@
     "id": "STORY-02",
     "title": "Player Identity Federation & Device Authentication",
     "category": "sdk",
-    "status": "todo",
+    "status": "done",
     "priority": "critical",
     "user_story": "As a mobile game studio, I want players to authenticate instantly via Device ID and link Steam, Google Play, or Apple accounts later, so that onboarding has zero friction while retaining cross-platform account recovery.",
     "deliverables": [

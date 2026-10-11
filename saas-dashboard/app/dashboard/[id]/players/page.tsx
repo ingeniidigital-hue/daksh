@@ -3,122 +3,180 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ChevronRight, Search, User, Coins, Package, Ban, ShieldAlert, Plus, Trash2 } from "lucide-react";
+import { 
+  ChevronRight, Search, User, Coins, Package, Ban, ShieldAlert, 
+  Plus, Trash2, Smartphone, Key, RefreshCw, CheckCircle2, ShieldCheck 
+} from "lucide-react";
 
-// Mock player data for the UI
-const INITIAL_MOCK_PLAYERS = [
-  { id: "ply_1A2B3C", username: "DragonSlayer99", email: "dragon@example.com", status: "Active", lastLogin: "2 hours ago", wallet: { "GO": 4500, "GM": 150 } as Record<string, number>, inventory: [] as any[] },
-  { id: "ply_9X8Y7Z", username: "NoobMaster", email: "noob@example.com", status: "Banned", lastLogin: "3 days ago", wallet: {} as Record<string, number>, inventory: [] as any[] },
-];
+interface Player {
+  id: string;
+  titleId: string;
+  deviceId: string;
+  username: string;
+  status: "Active" | "Banned" | "Suspended";
+  clientPlatform: string;
+  createdAt: string;
+  lastLoginAt: string;
+  wallet: Record<string, number>;
+  inventory: any[];
+}
 
 function PlayersPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
   
-  const [players, setPlayers] = useState(INITIAL_MOCK_PLAYERS);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  // Catalog State
-  const [items, setItems] = useState<any[]>([]);
-  const [currencies, setCurrencies] = useState<any[]>([]);
-  const [bundles, setBundles] = useState<any[]>([]);
-  const [lootboxes, setLootboxes] = useState<any[]>([]);
+  // Device Auth Simulation Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [simDeviceId, setSimDeviceId] = useState("");
+  const [simPlatform, setSimPlatform] = useState<"Android" | "iOS" | "Windows" | "Web">("Android");
+  const [simDisplayName, setSimDisplayName] = useState("");
+  const [lastAuthToken, setLastAuthToken] = useState<string | null>(null);
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
 
-  // Modal State
-  const [isGrantCurrencyModalOpen, setIsGrantCurrencyModalOpen] = useState(false);
-  const [isGrantItemModalOpen, setIsGrantItemModalOpen] = useState(false);
-  
-  const [grantCurrencyCode, setGrantCurrencyCode] = useState("");
-  const [grantCurrencyAmount, setGrantCurrencyAmount] = useState(100);
-  const [grantItemId, setGrantItemId] = useState("");
+  // Fetch real players from backend API
+  const loadPlayers = async () => {
+    if (!titleId) return;
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/titles/${titleId}/players`);
+      if (res.ok) {
+        const data = await res.json();
+        setPlayers(data.players || []);
+        if (data.players && data.players.length > 0 && !selectedPlayer) {
+          setSelectedPlayer(data.players[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load players:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!titleId) return;
-    const loadCat = (key: string, setter: any) => {
-      const data = localStorage.getItem(`catalog_${key}_${titleId}`);
-      if (data) setter(JSON.parse(data));
-    };
-    loadCat("items", setItems);
-    loadCat("curr", setCurrencies);
-    loadCat("bundles", setBundles);
-    loadCat("lootboxes", setLootboxes);
+    loadPlayers();
   }, [titleId]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      if (players.length > 0) setSelectedPlayer(players[0]);
+      return;
+    }
     const found = players.find(
-      (p) => p.username.toLowerCase() === searchQuery.toLowerCase() || p.id === searchQuery
+      (p) => p.username.toLowerCase().includes(query) || p.id.toLowerCase() === query || p.deviceId.toLowerCase().includes(query)
     );
-    setSelectedPlayer(found || null);
-    if (!found) alert("Player not found!");
+    if (found) {
+      setSelectedPlayer(found);
+    } else {
+      alert(`No player found matching "${searchQuery}"`);
+    }
   };
 
-  const handleGrantCurrency = (e: React.FormEvent) => {
+  const handleSimulateDeviceAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlayer || !grantCurrencyCode || grantCurrencyAmount <= 0) return;
-    
-    const updatedPlayers = players.map(p => {
-      if (p.id === selectedPlayer.id) {
-        const current = p.wallet[grantCurrencyCode] || 0;
-        return {
-          ...p,
-          wallet: { ...p.wallet, [grantCurrencyCode]: current + grantCurrencyAmount }
-        };
+    if (!simDeviceId.trim()) return;
+
+    setIsSubmittingAuth(true);
+    try {
+      const res = await fetch(`/api/titles/${titleId}/players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deviceId: simDeviceId.trim(),
+          clientPlatform: simPlatform,
+          displayName: simDisplayName.trim() || undefined
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Device authentication failed");
       }
-      return p;
-    });
-    setPlayers(updatedPlayers);
-    setSelectedPlayer(updatedPlayers.find(p => p.id === selectedPlayer.id));
-    setIsGrantCurrencyModalOpen(false);
-    setGrantCurrencyCode("");
-    setGrantCurrencyAmount(100);
+
+      const data = await res.json();
+      setLastAuthToken(data.token);
+      await loadPlayers();
+      setSelectedPlayer(data.player);
+      setSimDeviceId("");
+      setSimDisplayName("");
+    } catch (err: any) {
+      alert(`Authentication Error: ${err.message}`);
+    } finally {
+      setIsSubmittingAuth(false);
+    }
   };
 
-  const handleGrantItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPlayer || !grantItemId) return;
+  const handleToggleBan = async () => {
+    if (!selectedPlayer) return;
+    const newStatus = selectedPlayer.status === "Banned" ? "Active" : "Banned";
+    const confirmMsg = newStatus === "Banned" 
+      ? `Are you sure you want to ban ${selectedPlayer.username}? Their session token will be revoked immediately.`
+      : `Unban player ${selectedPlayer.username}?`;
 
-    // Find the item name for display
-    const catItem = [...items, ...bundles, ...lootboxes].find(i => i.id === grantItemId);
-    const itemName = catItem ? catItem.name : grantItemId;
+    if (!confirm(confirmMsg)) return;
 
-    const updatedPlayers = players.map(p => {
-      if (p.id === selectedPlayer.id) {
-        return {
-          ...p,
-          inventory: [...p.inventory, { instanceId: `inv_${Date.now()}`, itemId: grantItemId, name: itemName, grantedAt: new Date().toISOString() }]
-        };
+    try {
+      const res = await fetch(`/api/titles/${titleId}/players/${selectedPlayer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedPlayer(data.player);
+        setPlayers(prev => prev.map(p => p.id === data.player.id ? data.player : p));
       }
-      return p;
-    });
-    setPlayers(updatedPlayers);
-    setSelectedPlayer(updatedPlayers.find(p => p.id === selectedPlayer.id));
-    setIsGrantItemModalOpen(false);
-    setGrantItemId("");
+    } catch (err) {
+      alert("Failed to update player status");
+    }
   };
 
-  const handleRevokeItem = (instanceId: string) => {
-    if (!confirm("Revoke this item from the player's inventory?")) return;
-    const updatedPlayers = players.map(p => {
-      if (p.id === selectedPlayer.id) {
-        return {
-          ...p,
-          inventory: p.inventory.filter((i: any) => i.instanceId !== instanceId)
-        };
+  const handleDeletePlayer = async () => {
+    if (!selectedPlayer) return;
+    const confirmMsg = `⚠️ GDPR / DPDP Right to be Forgotten\n\nPermanently delete all data for player ${selectedPlayer.username} (${selectedPlayer.id})?\nThis action cannot be undone.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch(`/api/titles/${titleId}/players/${selectedPlayer.id}`, {
+        method: "DELETE"
+      });
+
+      if (res.ok) {
+        alert("Player account permanently deleted.");
+        setSelectedPlayer(null);
+        await loadPlayers();
       }
-      return p;
-    });
-    setPlayers(updatedPlayers);
-    setSelectedPlayer(updatedPlayers.find(p => p.id === selectedPlayer.id));
+    } catch (err) {
+      alert("Failed to delete player profile");
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f] font-sans pb-20">
       <main className="max-w-5xl mx-auto px-6 pt-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Player Management (CRM)</h1>
-          <p className="text-gray-500 text-sm">Search and manage player accounts, inventory, and virtual wallets.</p>
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <div className="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">
+              <ShieldCheck className="w-4 h-4" />
+              <span>STORY-02: Player Identity Federation & Device Auth</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Player Management (CRM)</h1>
+            <p className="text-gray-500 text-sm">Real-time player accounts authenticated via Ed25519 asymmetric device JWTs.</p>
+          </div>
+          <button 
+            onClick={() => setIsAuthModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium text-sm flex items-center transition-colors shadow-sm"
+          >
+            <Smartphone className="w-4 h-4 mr-2" /> Simulate Device Login
+          </button>
         </div>
 
         {/* Search Bar */}
@@ -128,7 +186,7 @@ function PlayersPageContent() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by Username or Player ID (Try: DragonSlayer99)"
+                placeholder="Search by Username, Device ID, or Player ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl pl-12 pr-4 py-3 outline-none focus:border-blue-500 transition-colors text-sm"
@@ -140,11 +198,38 @@ function PlayersPageContent() {
             >
               Search
             </button>
+            <button
+              type="button"
+              onClick={loadPlayers}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-3 rounded-xl transition-colors"
+              title="Refresh player list"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
           </form>
         </div>
 
-        {/* Player Profile */}
-        {selectedPlayer && (
+        {/* Players Quick Switcher */}
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+          {players.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setSelectedPlayer(p)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-2 ${
+                selectedPlayer?.id === p.id 
+                  ? "bg-blue-600 text-white shadow-sm" 
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${p.status === "Active" ? "bg-emerald-400" : "bg-red-400"}`}></span>
+              <span>{p.username}</span>
+              <span className="opacity-60 text-[10px]">({p.clientPlatform})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Player Profile Details */}
+        {selectedPlayer ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column: Identity */}
             <div className="lg:col-span-1 space-y-6">
@@ -154,153 +239,170 @@ function PlayersPageContent() {
                   <User className="w-8 h-8 text-gray-400" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">{selectedPlayer.username}</h2>
-                <p className="text-gray-500 text-xs font-mono mb-4">{selectedPlayer.id}</p>
-                <div className={`inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${selectedPlayer.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <p className="text-gray-500 text-xs font-mono mb-3">{selectedPlayer.id}</p>
+                <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  selectedPlayer.status === "Active" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"
+                }`}>
                   {selectedPlayer.status}
                 </div>
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-1">Email Address</p>
-                  <p className="text-sm font-medium text-gray-900">{selectedPlayer.email}</p>
-                  <p className="text-xs text-gray-500 mt-4 mb-1">Last Login</p>
-                  <p className="text-sm font-medium text-gray-900">{selectedPlayer.lastLogin}</p>
+                <div className="mt-6 pt-6 border-t border-gray-100 text-left space-y-3">
+                  <div>
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase">Device Identifier</p>
+                    <p className="text-xs font-mono text-gray-900 bg-[#F5F5F7] p-2 rounded-lg break-all mt-1">{selectedPlayer.deviceId}</p>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Platform:</span>
+                    <span className="font-semibold text-gray-900">{selectedPlayer.clientPlatform}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Registered:</span>
+                    <span className="font-semibold text-gray-900">{new Date(selectedPlayer.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Last Seen:</span>
+                    <span className="font-semibold text-gray-900">{new Date(selectedPlayer.lastLoginAt).toLocaleTimeString()}</span>
+                  </div>
                 </div>
               </div>
 
+              {/* Actions & DPDP */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <h3 className="font-bold mb-4 text-xs uppercase tracking-wider text-gray-500">Support Actions</h3>
-                <button className="w-full text-left px-4 py-2.5 rounded-lg hover:bg-red-50 text-red-600 font-medium text-sm flex items-center transition-colors">
-                  <Ban className="w-4 h-4 mr-3" /> Ban Player
+                <h3 className="font-bold mb-4 text-xs uppercase tracking-wider text-gray-500">Moderation & Compliance</h3>
+                <button 
+                  onClick={handleToggleBan}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm flex items-center transition-colors ${
+                    selectedPlayer.status === "Banned" 
+                      ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100" 
+                      : "bg-red-50 text-red-600 hover:bg-red-100"
+                  }`}
+                >
+                  <Ban className="w-4 h-4 mr-3" />
+                  {selectedPlayer.status === "Banned" ? "Unban Player" : "Ban Player"}
                 </button>
-                <button className="w-full text-left px-4 py-2.5 rounded-lg hover:bg-yellow-50 text-yellow-600 font-medium text-sm flex items-center transition-colors mt-2">
-                  <ShieldAlert className="w-4 h-4 mr-3" /> Reset Account
+
+                <button 
+                  onClick={handleDeletePlayer}
+                  className="w-full text-left px-4 py-2.5 rounded-xl text-red-600 hover:bg-red-50 font-medium text-sm flex items-center transition-colors mt-2"
+                >
+                  <Trash2 className="w-4 h-4 mr-3" />
+                  Right to be Forgotten (DPDP / GDPR)
                 </button>
               </div>
             </div>
 
-            {/* Right Column: Economy */}
+            {/* Right Column: Wallet & Auth Token */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Virtual Wallet */}
+              {/* Virtual Currency Wallets */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold flex items-center text-gray-900">
                     <Coins className="w-5 h-5 mr-2 text-yellow-500" />
-                    Virtual Wallet
+                    Virtual Currencies
                   </h3>
-                  <button onClick={() => setIsGrantCurrencyModalOpen(true)} className="text-xs font-bold bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded hover:bg-yellow-100 transition-colors uppercase tracking-wider">
-                    + Grant Currency
-                  </button>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-mono">STORY-03 Ready</span>
                 </div>
-                {Object.keys(selectedPlayer.wallet).length === 0 ? (
-                  <p className="text-sm text-gray-500 italic">Wallet is empty.</p>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {Object.entries(selectedPlayer.wallet).map(([code, balance]) => (
-                      <div key={code} className="bg-[#F5F5F7] p-4 rounded-xl border border-gray-200">
-                        <div className="text-xs font-bold text-gray-500 uppercase">{currencies.find(c => c.code === code)?.name || code}</div>
-                        <div className="text-2xl font-bold mt-1 text-gray-900">{balance as number}</div>
-                        <div className="text-[10px] text-gray-400 mt-1 font-mono">{code}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {Object.entries(selectedPlayer.wallet || {}).map(([curr, balance]) => (
+                    <div key={curr} className="bg-[#F5F5F7] p-4 rounded-xl border border-gray-200">
+                      <div className="text-xs font-bold text-gray-500 uppercase">{curr}</div>
+                      <div className="text-2xl font-bold mt-1 text-gray-900">{balance}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Inventory */}
+              {/* Ed25519 JWT Cryptographic Token Viewer */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold flex items-center text-gray-900">
-                    <Package className="w-5 h-5 mr-2 text-indigo-500" />
-                    Inventory Items
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold flex items-center text-gray-900">
+                    <Key className="w-4 h-4 mr-2 text-blue-600" />
+                    Ed25519 Asymmetric Session Token
                   </h3>
-                  <button onClick={() => setIsGrantItemModalOpen(true)} className="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded hover:bg-indigo-100 transition-colors uppercase tracking-wider">
-                    + Grant Item
-                  </button>
+                  <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full uppercase">
+                    256-bit Asymmetric
+                  </span>
                 </div>
-                
-                {selectedPlayer.inventory.length === 0 ? (
-                  <div className="bg-[#F5F5F7] p-8 rounded-xl border border-gray-200 text-center">
-                    <p className="text-gray-500 text-sm">No items found in inventory.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {selectedPlayer.inventory.map((inv: any) => (
-                      <div key={inv.instanceId} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 group">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-900 text-sm">{inv.name}</span>
-                          <div className="flex gap-2 mt-1">
-                            <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-mono">Item ID: {inv.itemId}</span>
-                            <span className="text-[10px] text-gray-400">Granted: {new Date(inv.grantedAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => handleRevokeItem(inv.instanceId)}
-                          className="text-gray-400 hover:text-red-600 p-2 opacity-0 group-hover:opacity-100 transition-opacity" 
-                          title="Revoke Item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="text-xs text-gray-500 mb-3">
+                  Tokens are signed using non-repudiable Ed25519 keys with 2-hour sliding expiry and verified on every RPC request.
+                </p>
+                <div className="bg-[#1e1e24] text-emerald-400 p-4 rounded-xl font-mono text-[11px] break-all leading-relaxed">
+                  {lastAuthToken || `eyJhbGciOiJFZERTQSI... (Simulate authentication to inspect live signature)`}
+                </div>
               </div>
+
             </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
+            <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">No players found. Use "Simulate Device Login" to create one.</p>
           </div>
         )}
       </main>
 
-      {/* Grant Currency Modal */}
-      {isGrantCurrencyModalOpen && (
+      {/* Simulate Device Login Modal */}
+      {isAuthModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-xl font-bold mb-6 text-gray-900">Grant Currency</h2>
-            <form onSubmit={handleGrantCurrency} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Currency</label>
-                <select required value={grantCurrencyCode} onChange={e => setGrantCurrencyCode(e.target.value)} className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-yellow-500 text-sm">
-                  <option value="">Select Currency...</option>
-                  {currencies.map(c => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
-                </select>
-                {currencies.length === 0 && <p className="text-xs text-red-500 mt-1">No currencies found in Catalog!</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
-                <input type="number" required min="1" value={grantCurrencyAmount} onChange={e => setGrantCurrencyAmount(parseInt(e.target.value) || 0)} className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-yellow-500 text-sm" />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsGrantCurrencyModalOpen(false)} className="px-5 py-2.5 rounded-xl font-medium text-gray-600 hover:bg-gray-100 text-sm">Cancel</button>
-                <button type="submit" disabled={!grantCurrencyCode} className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-xl font-medium text-sm shadow-sm">Grant to Player</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <h2 className="text-2xl font-bold mb-2">Simulate Device Authentication</h2>
+            <p className="text-gray-500 text-xs mb-6">
+              Executes the real client SDK hook <code className="bg-gray-100 px-1 py-0.5 rounded">Daksh.Auth.AuthenticateDeviceAsync()</code>, generating a live player record and Ed25519 JWT.
+            </p>
 
-      {/* Grant Item Modal */}
-      {isGrantItemModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-xl font-bold mb-6 text-gray-900">Grant Inventory Item</h2>
-            <form onSubmit={handleGrantItem} className="space-y-4">
+            <form onSubmit={handleSimulateDeviceAuth} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Item</label>
-                <select required value={grantItemId} onChange={e => setGrantItemId(e.target.value)} className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 text-sm font-mono">
-                  <option value="">Select Item...</option>
-                  <optgroup label="Items">
-                    {items.map(i => <option key={i.id} value={i.id}>{i.name} ({i.id})</option>)}
-                  </optgroup>
-                  <optgroup label="Bundles">
-                    {bundles.map(b => <option key={b.id} value={b.id}>{b.name} ({b.id})</option>)}
-                  </optgroup>
-                  <optgroup label="Lootboxes">
-                    {lootboxes.map(l => <option key={l.id} value={l.id}>{l.name} ({l.id})</option>)}
-                  </optgroup>
+                <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">Hardware Device ID</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. hw_device_pixel9_xyz123"
+                  value={simDeviceId}
+                  onChange={(e) => setSimDeviceId(e.target.value)}
+                  className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">Display Name (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. PhoenixKnight"
+                  value={simDisplayName}
+                  onChange={(e) => setSimDisplayName(e.target.value)}
+                  className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">Platform</label>
+                <select
+                  value={simPlatform}
+                  onChange={(e: any) => setSimPlatform(e.target.value)}
+                  className="w-full bg-[#F5F5F7] border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                >
+                  <option value="Android">Android</option>
+                  <option value="iOS">iOS</option>
+                  <option value="Windows">Windows PC</option>
+                  <option value="Web">HTML5 / WebGL</option>
                 </select>
               </div>
+
               <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsGrantItemModalOpen(false)} className="px-5 py-2.5 rounded-xl font-medium text-gray-600 hover:bg-gray-100 text-sm">Cancel</button>
-                <button type="submit" disabled={!grantItemId} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm shadow-sm">Grant Item</button>
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(false)}
+                  className="px-5 py-2.5 rounded-full text-xs font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAuth || !simDeviceId.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-medium transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingAuth ? "Authenticating..." : "Authenticate Device"}
+                </button>
               </div>
             </form>
           </div>
@@ -312,7 +414,7 @@ function PlayersPageContent() {
 
 export default function PlayersPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-gray-400">Loading Player Management...</div>}>
       <PlayersPageContent />
     </Suspense>
   );

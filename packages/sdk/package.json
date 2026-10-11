@@ -1,0 +1,17 @@
+{
+  "name": "@daksh/sdk",
+  "version": "0.1.0",
+  "description": "Daksh Game BaaS Cross-Platform Client SDK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": ["game", "sdk", "baas", "daksh"],
+  "author": "Daksh BaaS Authors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
