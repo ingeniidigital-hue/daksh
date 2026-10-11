@@ -45,6 +45,24 @@ export class EconomyService {
   }
 
   /**
+   * Deducts funds from a player's virtual wallet atomically.
+   */
+  public static deductWallet(titleId: string, playerId: string, currencyCode: string, amount: number): number {
+    const res = tryDeductFunds(titleId, playerId, currencyCode, amount);
+    if (!res.success) {
+      throw new Error(`INSUFFICIENT_FUNDS: Player has insufficient ${currencyCode}`);
+    }
+    return res.newBalance;
+  }
+
+  /**
+   * Returns a player's wallet balance for a specific currency.
+   */
+  public static getPlayerBalance(titleId: string, playerId: string, currencyCode: string): number {
+    return getWalletBalance(titleId, playerId, currencyCode);
+  }
+
+  /**
    * Retrieves all wallet balances for a player.
    */
   public static getPlayerWallets(titleId: string, playerId: string): Record<string, number> {

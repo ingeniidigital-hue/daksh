@@ -194,6 +194,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarSection>
 
             <SidebarSection title="Multiplayer">
+              <SidebarLink href={`/dashboard/${id}/multiplayer`} icon={Swords} label="Turn-Based Engine" />
               <SidebarLink href={`/dashboard/${id}/servers`} icon={Server} label="Servers" />
               <SidebarLink href={`/dashboard/${id}/matchmaking`} icon={Swords} label="Matchmaking" />
               <SidebarLink href={`/dashboard/${id}/party`} icon={Target} label="Party" />
