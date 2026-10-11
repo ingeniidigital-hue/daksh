@@ -20,7 +20,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const id = params?.id as string;
   
-  const [titleName, setTitleName] = useState("Loading...");
+  const [titleName, setTitleName] = useState(id || "Game Title");
   const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
   const [isEjectModalOpen, setIsEjectModalOpen] = useState(false);
   const [operatingMode, setOperatingMode] = useState<"ai" | "manual">("ai");
@@ -48,7 +48,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
       }
     }
     const formatted = id.replace(/TITLE_/g, "").replace(/_/g, " ");
-    setTitleName(formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase() : "Cyberpunk: Neon Legends");
+    setTitleName(formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase() : `Title ${id}`);
   }, [id]);
 
   const SidebarLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
@@ -78,172 +78,133 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f4f6f9] flex flex-col font-sans text-gray-800">
       
-      {/* Top Navigation Bar */}
-      <nav className="bg-[#1C2026] text-white flex items-center justify-between px-4 h-14 shrink-0 sticky top-0 z-50">
-        <div className="flex items-center space-x-4">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold text-lg">
-            D
-          </div>
-          <span className="font-semibold text-lg tracking-tight">Daksh</span>
+      {/* AdminLTE-Style Top Navigation Bar */}
+      <nav className="bg-[#1f2937] text-white flex items-center justify-between px-4 h-12 shrink-0 sticky top-0 z-50 border-b border-gray-700">
+        <div className="flex items-center space-x-3">
+          <Link href="/dashboard" className="flex items-center space-x-2.5 hover:opacity-90 transition-opacity">
+            <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-sm tracking-wider text-white shadow-xs">
+              D
+            </div>
+            <span className="font-bold text-sm tracking-tight text-white uppercase">Daksh Console</span>
+          </Link>
           <div className="h-4 w-px bg-gray-600"></div>
-          <Link href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+          <Link href="/dashboard" className="text-xs font-medium text-gray-300 hover:text-white transition-colors">
             All Titles
           </Link>
+          <span className="text-gray-500 text-xs">/</span>
+          <span className="text-xs font-semibold text-blue-400 font-mono">{id}</span>
         </div>
 
-        {/* Operating Mode Indicator & Switcher */}
-        <div className="hidden lg:flex items-center bg-[#252A33] p-1 rounded-xl border border-gray-700/80 text-xs">
-          <button
-            onClick={() => {
-              setOperatingMode("ai");
-              setIsAIMenuOpen(true);
-            }}
-            className={`px-3 py-1 rounded-lg font-semibold flex items-center gap-1.5 transition-all ${
-              operatingMode === "ai"
-                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
-                : "text-gray-400 hover:text-white"
-            }`}
+        <div className="flex items-center space-x-3">
+          {/* Quick Search / Command Palette */}
+          <button 
+            onClick={() => setIsAIMenuOpen(true)}
+            className="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded text-xs border border-gray-600 transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-            AI-Driven Mode (Primary)
+            <Search className="w-3.5 h-3.5 text-gray-400" />
+            <span className="hidden sm:inline text-gray-300">Quick Command</span>
+            <kbd className="bg-gray-900 border border-gray-700 px-1.5 py-0.2 rounded text-[10px] font-mono text-gray-400">⌘K</kbd>
           </button>
-          <button
-            onClick={() => setOperatingMode("manual")}
-            className={`px-3 py-1 rounded-lg font-medium flex items-center gap-1.5 transition-all ${
-              operatingMode === "manual"
-                ? "bg-gray-700 text-white shadow-sm"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <Cpu className="w-3.5 h-3.5" />
-            PlayFab Manual View
-          </button>
-        </div>
 
-        <div className="flex items-center space-x-3 sm:space-x-4">
           {/* 1-Click Eject Button */}
           <button
             onClick={() => setIsEjectModalOpen(true)}
-            className="flex items-center space-x-1.5 bg-[#252A33] hover:bg-amber-600/20 text-amber-400 hover:text-amber-300 px-3 py-1.5 rounded-xl text-xs font-semibold border border-amber-500/30 hover:border-amber-500/60 transition-all shadow-sm"
-            title="1-Click Eject: Download complete Helm v3 chart and PostgreSQL dump"
+            className="flex items-center space-x-1.5 bg-gray-800 hover:bg-gray-700 text-amber-300 px-2.5 py-1 rounded text-xs font-medium border border-gray-700 transition-colors"
+            title="Export complete Helm v3 chart and PostgreSQL dump"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Eject Title</span>
+            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden md:inline">Eject</span>
           </button>
 
-          {/* AI Command Menu Trigger */}
-          <button
-            onClick={() => setIsAIMenuOpen(true)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 transition-all border border-blue-400/30"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-            <span className="hidden sm:inline">AI Menu</span>
-            <kbd className="bg-black/30 px-1.5 py-0.5 rounded text-[10px] font-mono text-blue-200 ml-1">⌘K</kbd>
-          </button>
-
-          <div 
-            onClick={() => setIsAIMenuOpen(true)}
-            className="hidden md:flex items-center bg-[#2D333B] px-3 py-1.5 rounded-xl text-sm text-gray-300 border border-gray-600 cursor-pointer hover:border-gray-500 transition-colors"
-          >
-            <Search className="w-4 h-4 mr-2 text-gray-400" />
-            <span className="opacity-60 text-xs">Prompt AI to create or search...</span>
+          {/* System Health Status Indicator */}
+          <div className="hidden lg:flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2.5 py-0.5 rounded">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="font-mono text-[11px]">System: Healthy</span>
           </div>
 
-          <Bell className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer" />
-          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm font-bold border border-gray-500">
-            A
+          <div className="h-4 w-px bg-gray-700"></div>
+
+          <div className="flex items-center space-x-2">
+            <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-200 border border-slate-600">
+              AD
+            </div>
+            <span className="text-xs font-medium text-gray-300 hidden sm:inline">Admin</span>
           </div>
         </div>
       </nav>
 
-      {/* Main Content Area */}
+      {/* Main Container */}
       <div className="flex flex-1 overflow-hidden">
         
-        {/* PlayFab-style Left Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 overflow-y-auto hidden md:block shrink-0">
+        {/* AdminLTE Dark Sidebar */}
+        <aside className="w-60 bg-[#1e293b] text-gray-300 border-r border-slate-800 overflow-y-auto hidden md:block shrink-0 shadow-sm">
           
-          <div className="p-4 border-b border-gray-100 mb-4">
-            <h2 className="text-lg font-bold text-gray-900 truncate">{titleName}</h2>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-0.5 rounded">
-                ID: {id}
+          {/* Active Title Header */}
+          <div className="p-3.5 border-b border-slate-700/80 bg-slate-900/60">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Active Title</span>
+              <span className="text-[10px] font-mono bg-blue-900/80 text-blue-200 border border-blue-700/50 px-1.5 py-0.2 rounded">
+                {id}
               </span>
-              <button 
-                onClick={() => setIsAIMenuOpen(true)}
-                className="text-[11px] text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1"
-              >
-                <Sparkles className="w-3 h-3" /> Prompt AI
-              </button>
             </div>
-            
-            <div className="mt-2.5 px-2.5 py-1.5 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center justify-between text-[11px] text-blue-800">
-              <span className="font-semibold">AI First Mode:</span>
-              <span className="text-blue-600 font-medium">Zero-Click Active</span>
+            <h2 className="text-sm font-semibold text-white truncate mt-1">{titleName}</h2>
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Production Mode</span>
             </div>
           </div>
 
-          <div className="px-3 pb-20">
+          {/* Sidebar Menu Navigation */}
+          <div className="px-2 py-3 pb-24 space-y-5 text-xs">
             
-            <SidebarSection title="Title Overview">
-              <SidebarLink href={`/dashboard/${id}`} icon={LayoutDashboard} label="Dashboard" />
-              <SidebarLink href={`/dashboard/${id}/title-data`} icon={Database} label="Title Data" />
+            <SidebarSection title="General">
+              <SidebarLink href={`/dashboard/${id}`} icon={LayoutDashboard} label="Overview" />
+              <SidebarLink href={`/dashboard/${id}/analytics`} icon={TrendingUp} label="Executive Analytics" />
+              <SidebarLink href={`/dashboard/${id}/stress`} icon={Activity} label="CCU Load & Health" />
             </SidebarSection>
 
-            <SidebarSection title="Identity">
-              <SidebarLink href={`/dashboard/${id}/players`} icon={Users} label="Players" />
-              <SidebarLink href={`/dashboard/${id}/bans`} icon={UserX} label="IP Bans" />
-              <SidebarLink href={`/dashboard/${id}/auth`} icon={Shield} label="Authentication" />
+            <SidebarSection title="Players & Identity">
+              <SidebarLink href={`/dashboard/${id}/players`} icon={Users} label="Players Directory" />
+              <SidebarLink href={`/dashboard/${id}/auth`} icon={Shield} label="Authentication & Keys" />
+              <SidebarLink href={`/dashboard/${id}/bans`} icon={UserX} label="IP Bans & Anti-Cheat" />
+              <SidebarLink href={`/dashboard/${id}/saves`} icon={Save} label="Cloud Saves" />
             </SidebarSection>
 
-            <SidebarSection title="Live Ops">
-              <SidebarLink href={`/dashboard/${id}/ota`} icon={Package} label="OTA Assets" />
-              <SidebarLink href={`/dashboard/${id}/rules`} icon={CloudLightning} label="Automation Rules" />
-              <SidebarLink href={`/dashboard/${id}/cloudscript`} icon={Database} label="Cloud Script" />
-              <SidebarLink href={`/dashboard/${id}/experiments`} icon={Database} label="Experiments (A/B)" />
-              <SidebarLink href={`/dashboard/${id}/scheduled`} icon={Settings} label="Scheduled Tasks" />
-            </SidebarSection>
-
-            <SidebarSection title="Economy & UGC">
-              <SidebarLink href={`/dashboard/${id}/catalog`} icon={ShoppingBag} label="Catalog" />
-              <SidebarLink href={`/dashboard/${id}/currency`} icon={DollarSign} label="Economy Settings" />
+            <SidebarSection title="Economy & LiveOps">
+              <SidebarLink href={`/dashboard/${id}/catalog`} icon={ShoppingBag} label="Catalog & Stores" />
+              <SidebarLink href={`/dashboard/${id}/currency`} icon={DollarSign} label="Virtual Currencies" />
+              <SidebarLink href={`/dashboard/${id}/title-data`} icon={Database} label="Remote Config" />
               <SidebarLink href={`/dashboard/${id}/ads`} icon={Gift} label="Rewarded Ads" />
+              <SidebarLink href={`/dashboard/${id}/experiments`} icon={Database} label="A/B Experiments" />
+              <SidebarLink href={`/dashboard/${id}/scheduled`} icon={Settings} label="Scheduled Cron Tasks" />
             </SidebarSection>
 
             <SidebarSection title="Multiplayer">
+              <SidebarLink href={`/dashboard/${id}/matchmaking`} icon={Swords} label="Matchmaking & X-Ray" />
+              <SidebarLink href={`/dashboard/${id}/servers`} icon={Server} label="Agones Server Fleet" />
               <SidebarLink href={`/dashboard/${id}/multiplayer`} icon={Swords} label="Turn-Based Engine" />
-              <SidebarLink href={`/dashboard/${id}/servers`} icon={Server} label="Servers" />
-              <SidebarLink href={`/dashboard/${id}/matchmaking`} icon={Swords} label="Matchmaking" />
-              <SidebarLink href={`/dashboard/${id}/party`} icon={Target} label="Party" />
-            </SidebarSection>
-
-            <SidebarSection title="Community">
-              <SidebarLink href={`/dashboard/${id}/groups`} icon={UsersRound} label="Groups" />
+              <SidebarLink href={`/dashboard/${id}/party`} icon={Target} label="Parties & Lobbies" />
+              <SidebarLink href={`/dashboard/${id}/groups`} icon={UsersRound} label="Guilds & Clans" />
               <SidebarLink href={`/dashboard/${id}/leaderboards`} icon={Trophy} label="Leaderboards" />
             </SidebarSection>
 
-            <SidebarSection title="Progression">
-              <SidebarLink href={`/dashboard/${id}/saves`} icon={Save} label="Game Saves" />
-              <SidebarLink href={`/dashboard/${id}/statistics`} icon={BarChart3} label="Statistics" />
-            </SidebarSection>
-
-            <SidebarSection title="Data & Analytics">
-              <SidebarLink href={`/dashboard/${id}/analytics`} icon={TrendingUp} label="Executive Analytics" />
-              <SidebarLink href={`/dashboard/${id}/events`} icon={LineChart} label="Events" />
-              <SidebarLink href={`/dashboard/${id}/webhooks`} icon={Network} label="Webhooks" />
-            </SidebarSection>
-
-            <SidebarSection title="Cloud & Monetization">
-              <SidebarLink href={`/dashboard/${id}/billing`} icon={CreditCard} label="Cloud Tiers & Billing" />
-              <SidebarLink href={`/dashboard/${id}/stress`} icon={Activity} label="5k CCU Stress & Gate" />
+            <SidebarSection title="Infrastructure & Setup">
+              <SidebarLink href={`/dashboard/${id}/ota`} icon={Package} label="Cloud OTA Assets" />
+              <SidebarLink href={`/dashboard/${id}/statistics`} icon={BarChart3} label="Progression Statistics" />
+              <SidebarLink href={`/dashboard/${id}/rules`} icon={CloudLightning} label="Automation Rules" />
+              <SidebarLink href={`/dashboard/${id}/cloudscript`} icon={Database} label="CloudScript Handlers" />
+              <SidebarLink href={`/dashboard/${id}/events`} icon={LineChart} label="Telemetry Logs" />
+              <SidebarLink href={`/dashboard/${id}/webhooks`} icon={Network} label="Outbound Webhooks" />
+              <SidebarLink href={`/dashboard/${id}/billing`} icon={CreditCard} label="Billing & Quotas" />
             </SidebarSection>
 
           </div>
         </aside>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Content Area */}
+        <main className="flex-1 overflow-y-auto bg-[#f4f6f9]">
           {children}
         </main>
       </div>

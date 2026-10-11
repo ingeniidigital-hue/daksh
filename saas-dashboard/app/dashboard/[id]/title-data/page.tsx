@@ -623,7 +623,7 @@ export default function TitleDataPage() {
           <div className="lg:col-span-5 space-y-4">
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 sticky top-6">
               <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-                <Sparkles className="w-5 h-5 text-emerald-400" />
+                <Dices className="w-5 h-5 text-emerald-400" />
                 <h3 className="text-base font-bold text-white">Live Drop Simulator</h3>
               </div>
 
@@ -674,7 +674,7 @@ export default function TitleDataPage() {
                     onClick={() => handleRollDrop(10)}
                     className="py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <Dices className="w-4 h-4" />
                     <span>Roll 10x</span>
                   </button>
 
@@ -683,7 +683,7 @@ export default function TitleDataPage() {
                     onClick={() => handleRollDrop(50)}
                     className="py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-lg shadow-purple-600/20"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <Dices className="w-4 h-4" />
                     <span>Roll 50x</span>
                   </button>
                 </div>

@@ -153,10 +153,7 @@ export default function CatalogPage() {
   const [newSub, setNewSub] = useState<Subscription>({ id: "", name: "", price: 999, currencyCode: "RM", durationDays: 30, imageUrls: ["", "", ""], rewards: [] });
   const [newSubReward, setNewSubReward] = useState<SubscriptionReward>({ itemId: "", amount: 1, type: "Initial" });
 
-  const [ugcItems, setUgcItems] = useState<UGCItem[]>([
-    { id: "ugc_map_01", name: "Cyberpunk City Arena", creatorId: "usr_9921", description: "A high-octane neon city map for 4v4.", status: "Pending", tags: ["Map", "Sci-Fi"], imageUrls: ["https://picsum.photos/seed/cyber/200"] },
-    { id: "ugc_skin_02", name: "Dragon Knight Armor", creatorId: "usr_1024", description: "Awesome dragon themed armor skin.", status: "Approved", tags: ["Skin", "Fantasy"], imageUrls: ["https://picsum.photos/seed/dragon/200"] },
-  ]);
+  const [ugcItems, setUgcItems] = useState<UGCItem[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isSheetModalOpen, setIsSheetModalOpen] = useState(false);
@@ -531,35 +528,6 @@ Subscription,sub_vip,VIP Monthly,Subscription,0,9.99,USD,,,,,,,,FALSE,"{}","[{""
             {isSaving ? "Deploying..." : "Deploy to Nakama"}
           </button>
         </div>
-      </div>
-
-      {/* AI-First Mode Banner */}
-      <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border border-blue-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h3 className="text-sm font-bold text-gray-900">AI Menu Active: Zero Manual Clicking Required</h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-bold uppercase tracking-wider">
-                Primary Driver
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-0.5">
-              Instead of manually creating items, bundles, or drop tables one by one, press <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-700 font-mono text-[10px]">⌘K</kbd> to let AI generate complete balanced catalogs in seconds.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
-          }}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center shadow-sm transition-all shrink-0 self-start sm:self-auto"
-        >
-          <Sparkles className="w-3.5 h-3.5 mr-1.5 text-blue-200" />
-          Prompt AI Menu
-        </button>
       </div>
 
       {/* Tabs */}

@@ -9,55 +9,140 @@ function ExperimentsPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
 
-  const [experiments] = useState([
-    { id: "exp_drop_rate_boost", name: "Weekend Drop Rate 2x", status: "Active", split: "50% A / 50% B", metric: "+18.4% Retention" },
-    { id: "exp_starter_pack_price", name: "Starter Bundle Pricing ($4.99 vs $2.99)", status: "Completed", split: "Control / Variant", metric: "+32.1% Conversion" }
-  ]);
+  const [experiments, setExperiments] = useState<any[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(`daksh_experiments_${titleId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch(e) {
+      return [];
+    }
+  });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expName, setExpName] = useState("");
+  const [expId, setExpId] = useState("");
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expName || !expId) return;
+    const updated = [...experiments, { id: expId, name: expName, status: "Active", split: "50% A / 50% B", metric: "Measuring Uplift" }];
+    setExperiments(updated);
+    localStorage.setItem(`daksh_experiments_${titleId}`, JSON.stringify(updated));
+    setExpName("");
+    setExpId("");
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-        <Link href="/dashboard" className="hover:text-gray-900 transition-colors">Titles</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link href={`/dashboard/${titleId}`} className="hover:text-gray-900 font-mono transition-colors">{titleId}</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-gray-900 font-semibold">Experiments (A/B Testing)</span>
-      </div>
-
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 text-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-            <FlaskConical className="w-6 h-6 text-purple-600" />
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+            <FlaskConical className="w-5 h-5 text-purple-600" />
             LiveOps Experiments & A/B Testing
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-0.5">
             Split player cohorts, test game economy balancing variables, and monitor retention uplift in real time.
           </p>
         </div>
+        <div className="flex items-center space-x-3 text-xs">
+          <div className="text-gray-500">
+            <Link href="/dashboard" className="text-blue-600 hover:underline">Titles</Link> / <span className="font-semibold text-gray-700">{titleId}</span> / Experiments
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center transition-colors shadow-xs"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> New Experiment
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-900">Active Experiments ({experiments.length})</h2>
-          <span className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded">Bayesian Significance Engine</span>
+      <div className="bg-white rounded border border-gray-200 shadow-xs overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/75 flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-700">Active Experiments ({experiments.length})</h2>
+          <span className="text-[11px] text-gray-500 font-mono">Bayesian Statistical Engine</span>
         </div>
-        <div className="divide-y divide-gray-100">
-          {experiments.map((exp, idx) => (
-            <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50/50">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-gray-900">{exp.name}</h3>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">{exp.status}</span>
+        {experiments.length === 0 ? (
+          <div className="p-10 text-center text-gray-500 text-xs">
+            <FlaskConical className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <div className="font-semibold text-gray-700">No Experiments Configured</div>
+            <p className="text-gray-400 mt-0.5 mb-3">Split cohorts to test store pricing or loot drop curves against baseline metrics.</p>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium"
+            >
+              Configure First Experiment
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {experiments.map((exp, idx) => (
+              <div key={idx} className="p-3.5 flex items-center justify-between hover:bg-gray-50/60 text-xs">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-900">{exp.name}</span>
+                    <span className="text-[10px] px-2 py-0.2 rounded font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">{exp.status}</span>
+                  </div>
+                  <p className="text-gray-400 font-mono text-[11px]">ID: {exp.id} • Split: {exp.split}</p>
                 </div>
-                <p className="text-xs font-mono text-gray-400">ID: {exp.id} • Split: {exp.split}</p>
+                <div className="text-[11px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">
+                  {exp.metric}
+                </div>
               </div>
-              <div className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl">
-                {exp.metric}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded border border-gray-200 p-6 max-w-md w-full shadow-lg">
+            <h2 className="text-base font-bold text-gray-900 mb-1">Create A/B Experiment</h2>
+            <p className="text-xs text-gray-500 mb-4">Split player traffic between control and test variants.</p>
+            <form onSubmit={handleCreate} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Experiment ID</label>
+                <input 
+                  type="text" 
+                  value={expId} 
+                  onChange={e => setExpId(e.target.value)} 
+                  placeholder="e.g. exp_drop_rate_boost"
+                  className="w-full text-xs font-mono px-3 py-1.5 border border-gray-300 rounded focus:border-blue-500 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Experiment Name</label>
+                <input 
+                  type="text" 
+                  value={expName} 
+                  onChange={e => setExpName(e.target.value)} 
+                  placeholder="e.g. Weekend 2x Gem Drop"
+                  className="w-full text-xs px-3 py-1.5 border border-gray-300 rounded focus:border-blue-500 outline-none"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-3 py-1.5 rounded text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-xs font-medium"
+                >
+                  Create Experiment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -9,55 +9,66 @@ function StatisticsPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
 
-  const [stats] = useState([
-    { statName: "total_monsters_slain", aggregation: "SUM", description: "Global monsters killed across all matches", total: "1,492,840" },
-    { statName: "dungeon_clears_count", aggregation: "SUM", description: "Successful raid dungeon completions", total: "84,120" },
-    { statName: "player_level_max", aggregation: "MAX", description: "Highest player level achieved in season", total: "Lvl 98" }
-  ]);
+  const [stats] = useState<any[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(`daksh_stats_${titleId}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch(e) {
+      return [];
+    }
+  });
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center space-x-2 text-sm text-gray-500 mb-2">
-        <Link href="/dashboard" className="hover:text-gray-900 transition-colors">Titles</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link href={`/dashboard/${titleId}`} className="hover:text-gray-900 font-mono transition-colors">{titleId}</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-gray-900 font-semibold">Player Statistics</span>
-      </div>
-
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 text-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-emerald-600" />
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-emerald-600" />
             Global & Player Statistics Counters
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-0.5">
             Track gameplay statistics, milestone counters, and server-side progression metrics.
           </p>
         </div>
+        <div className="flex items-center space-x-2 text-xs">
+          <Link href="/dashboard" className="text-blue-600 hover:underline">Titles</Link>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-700 font-semibold">{titleId}</span>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-500">Statistics</span>
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-900">Tracked Statistics ({stats.length})</h2>
-          <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded">Delta Accumulator Engine</span>
+      <div className="bg-white rounded border border-gray-200 shadow-xs overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/75 flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-700">Tracked Statistics ({stats.length})</h2>
+          <span className="text-[11px] text-gray-500 font-mono">Delta Accumulator Engine</span>
         </div>
-        <div className="divide-y divide-gray-100">
-          {stats.map((st, idx) => (
-            <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50/50">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-mono font-bold text-gray-900">{st.statName}</h3>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-semibold">{st.aggregation}</span>
+        {stats.length === 0 ? (
+          <div className="p-10 text-center text-gray-500 text-xs">
+            <BarChart3 className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <div className="font-semibold text-gray-700">No Statistics Counters Active</div>
+            <p className="text-gray-400 mt-0.5">Custom telemetry and achievement counters will be aggregated here as players report authoritative actions.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {stats.map((st, idx) => (
+              <div key={idx} className="p-3.5 flex items-center justify-between hover:bg-gray-50/60 text-xs">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-gray-900">{st.statName}</span>
+                    <span className="text-[10px] px-2 py-0.2 rounded font-semibold bg-gray-100 text-gray-700 border border-gray-200">{st.aggregation}</span>
+                  </div>
+                  <p className="text-gray-500 text-[11px]">{st.description}</p>
                 </div>
-                <p className="text-xs text-gray-500">{st.description}</p>
+                <div className="font-mono font-bold text-gray-900 bg-gray-50 px-2.5 py-1 rounded border border-gray-200">
+                  {st.total}
+                </div>
               </div>
-              <div className="text-xs font-bold font-mono text-gray-900 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-200">
-                {st.total}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

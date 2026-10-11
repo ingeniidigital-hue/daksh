@@ -89,7 +89,7 @@ export default function BillingPage() {
             ? "bg-rose-950/40 border-rose-800 text-rose-300"
             : "bg-indigo-950/40 border-indigo-700 text-indigo-200"
         }`}>
-          <Sparkles className="w-5 h-5 flex-shrink-0 text-indigo-400 mt-0.5" />
+          <Check className="w-5 h-5 flex-shrink-0 text-emerald-400 mt-0.5" />
           <div className="flex-1">
             <p className="font-semibold">
               {checkoutStatus.gateway === "razorpay" 

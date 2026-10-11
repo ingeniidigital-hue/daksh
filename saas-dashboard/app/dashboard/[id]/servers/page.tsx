@@ -32,11 +32,11 @@ interface SuperRegionCard {
 }
 
 const DEFAULT_REGIONS: SuperRegionCard[] = [
-  { id: "bom", name: "Asia South", location: "Mumbai, India", flag: "🇮🇳", status: "ONLINE", ping: 18, activeCcu: 480, tickrate: 60.0 },
-  { id: "fra", name: "Europe Central", location: "Frankfurt, Germany", flag: "🇩🇪", status: "ONLINE", ping: 14, activeCcu: 350, tickrate: 60.0 },
-  { id: "iad", name: "US East", location: "Virginia, USA", flag: "🇺🇸", status: "ONLINE", ping: 22, activeCcu: 290, tickrate: 60.0 },
-  { id: "nrt", name: "Asia East", location: "Tokyo, Japan", flag: "🇯🇵", status: "ONLINE", ping: 25, activeCcu: 120, tickrate: 60.0 },
-  { id: "gru", name: "South America", location: "São Paulo, Brazil", flag: "🇧🇷", status: "ONLINE", ping: 35, activeCcu: 85, tickrate: 60.0 }
+  { id: "bom", name: "Asia South", location: "Mumbai, India", flag: "🇮🇳", status: "ONLINE", ping: 18, activeCcu: 0, tickrate: 60.0 },
+  { id: "fra", name: "Europe Central", location: "Frankfurt, Germany", flag: "🇩🇪", status: "ONLINE", ping: 14, activeCcu: 0, tickrate: 60.0 },
+  { id: "iad", name: "US East", location: "Virginia, USA", flag: "🇺🇸", status: "ONLINE", ping: 22, activeCcu: 0, tickrate: 60.0 },
+  { id: "nrt", name: "Asia East", location: "Tokyo, Japan", flag: "🇯🇵", status: "ONLINE", ping: 25, activeCcu: 0, tickrate: 60.0 },
+  { id: "gru", name: "South America", location: "São Paulo, Brazil", flag: "🇧🇷", status: "ONLINE", ping: 35, activeCcu: 0, tickrate: 60.0 }
 ];
 
 interface AgonesServer {

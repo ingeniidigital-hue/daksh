@@ -13,9 +13,9 @@ function AuthenticationPageContent() {
   const titleId = params?.id as string;
 
   // Simulator state
-  const [deviceId, setDeviceId] = useState("device_hw_unity_demo_9921");
+  const [deviceId, setDeviceId] = useState("hw_client_device_01");
   const [platform, setPlatform] = useState<"Android" | "iOS" | "Windows" | "WebGL">("Android");
-  const [displayName, setDisplayName] = useState("CyberHero_01");
+  const [displayName, setDisplayName] = useState("Player_01");
   const [isSimulating, setIsSimulating] = useState(false);
   const [authResponse, setAuthResponse] = useState<any>(null);
   const [copiedToken, setCopiedToken] = useState(false);
@@ -292,7 +292,7 @@ function AuthenticationPageContent() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-blue-400" /> Execute Hardware Device Auth
+                    <Smartphone className="w-3.5 h-3.5 text-blue-400" /> Execute Hardware Device Auth
                   </>
                 )}
               </button>

@@ -10,7 +10,6 @@ import {
   ArrowDownUp,
   RefreshCw,
   Users,
-  Sparkles,
   ShieldAlert,
   Zap,
   CheckCircle2,
