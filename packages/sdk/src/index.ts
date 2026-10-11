@@ -4,3 +4,4 @@ export * from "./titleData";
 export * from "./turnBased";
 export * from "./relay";
 export * from "./matchmaking";
+export * from "./leaderboards";
