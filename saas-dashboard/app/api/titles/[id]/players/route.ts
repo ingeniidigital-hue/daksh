@@ -55,6 +55,8 @@ export async function POST(
     return NextResponse.json({
       success: true,
       token: authResult.token,
+      refreshToken: authResult.refreshToken,
+      expiresIn: authResult.expiresIn,
       isNewPlayer: authResult.isNewPlayer,
       player: authResult.player
     }, { status: 201 });

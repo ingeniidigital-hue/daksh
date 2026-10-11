@@ -1,5 +1,11 @@
 import crypto from "crypto";
 
+export interface LinkedAccount {
+  provider: "Steam" | "Google" | "Apple" | "Email";
+  providerId: string;
+  linkedAt: string;
+}
+
 export interface Player {
   id: string;
   titleId: string;
@@ -11,10 +17,22 @@ export interface Player {
   lastLoginAt: string;
   wallet: Record<string, number>;
   inventory: any[];
+  linkedAccounts: LinkedAccount[];
+}
+
+export interface RefreshTokenRecord {
+  token: string;
+  titleId: string;
+  playerId: string;
+  deviceId: string;
+  expiresAt: number; // UNIX timestamp
+  isRevoked: boolean;
 }
 
 export interface AuthResult {
   token: string;
+  refreshToken: string;
+  expiresIn: number; // in seconds (7200)
   isNewPlayer: boolean;
   player: Player;
 }
@@ -25,8 +43,33 @@ export interface TokenVerificationResult {
   error?: "INVALID_SIGNATURE" | "TOKEN_EXPIRED" | "PLAYER_BANNED" | "MALFORMED_TOKEN";
 }
 
+export interface LinkAccountParams {
+  titleId: string;
+  playerId: string;
+  provider: "Steam" | "Google" | "Apple" | "Email";
+  providerId: string;
+  conflictResolution?: "ABORT" | "SWITCH_ACCOUNT" | "MERGE_PROFILES";
+}
+
+export interface LinkAccountResult {
+  success: boolean;
+  conflict?: boolean;
+  resolutionApplied?: "LINKED" | "SWITCHED" | "MERGED";
+  player: Player;
+  token?: string;
+  refreshToken?: string;
+  conflictDetails?: {
+    conflictingPlayerId: string;
+    conflictingUsername: string;
+    conflictingWallet: Record<string, number>;
+  };
+}
+
 // In-memory player database partitioned by titleId
 const titlePlayersDb = new Map<string, Map<string, Player>>();
+
+// Refresh tokens registry: key = `${titleId}:${refreshToken}`
+const refreshTokensDb = new Map<string, RefreshTokenRecord>();
 
 // Deterministic Ed25519 Keypair for test & local environment
 let cachedKeyPair: { publicKey: crypto.KeyObject; privateKey: crypto.KeyObject } | null = null;
@@ -40,6 +83,7 @@ export function generateEd25519KeyPair() {
 
 export function clearPlayerStorage() {
   titlePlayersDb.clear();
+  refreshTokensDb.clear();
 }
 
 function getTitleStore(titleId: string): Map<string, Player> {
@@ -76,6 +120,79 @@ export async function signPlayerJwt(payload: Record<string, any>): Promise<strin
   const encodedSignature = signature.toString("base64url");
 
   return `${dataToSign}.${encodedSignature}`;
+}
+
+/**
+ * Generates and stores a cryptographically random refresh token (30-day sliding expiry).
+ */
+export function issueRefreshToken(titleId: string, playerId: string, deviceId: string): string {
+  const randomBytes = crypto.randomBytes(32).toString("hex");
+  const token = `rt_${randomBytes}`;
+  const now = Math.floor(Date.now() / 1000);
+
+  const record: RefreshTokenRecord = {
+    token,
+    titleId,
+    playerId,
+    deviceId,
+    expiresAt: now + 30 * 86400, // 30 days
+    isRevoked: false
+  };
+
+  refreshTokensDb.set(`${titleId}:${token}`, record);
+  return token;
+}
+
+/**
+ * Rotates an existing refresh token and issues a fresh 2-hour Ed25519 JWT.
+ * Implements strict Refresh Token Rotation (RTR) to prevent token reuse attacks.
+ */
+export async function rotateRefreshToken(titleId: string, oldRefreshToken: string): Promise<{
+  token: string;
+  refreshToken: string;
+  player: Player;
+}> {
+  const key = `${titleId}:${oldRefreshToken}`;
+  const record = refreshTokensDb.get(key);
+
+  if (!record || record.isRevoked) {
+    throw new Error("INVALID_OR_REVOKED_REFRESH_TOKEN");
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (record.expiresAt < now) {
+    throw new Error("REFRESH_TOKEN_EXPIRED");
+  }
+
+  const store = getTitleStore(titleId);
+  const player = Array.from(store.values()).find(p => p.id === record.playerId);
+  if (!player) {
+    throw new Error("PLAYER_NOT_FOUND");
+  }
+
+  if (player.status === "Banned") {
+    throw new Error("PLAYER_BANNED");
+  }
+
+  // 1. Revoke the old refresh token (prevents replay)
+  record.isRevoked = true;
+
+  // 2. Issue rotated refresh token
+  const newRefreshToken = issueRefreshToken(titleId, player.id, record.deviceId);
+
+  // 3. Issue fresh 2-hour JWT
+  const token = await signPlayerJwt({
+    sub: player.id,
+    titleId: player.titleId,
+    deviceId: player.deviceId,
+    username: player.username
+  });
+
+  return {
+    token,
+    refreshToken: newRefreshToken,
+    player
+  };
 }
 
 /**
@@ -123,7 +240,7 @@ export async function verifyPlayerJwt(token: string): Promise<TokenVerificationR
 }
 
 /**
- * Authenticates a device ID, creates or retrieves player profile, and issues JWT.
+ * Authenticates a device ID, creates or retrieves player profile, and issues JWT + refresh token.
  */
 export async function authenticateDevice(params: {
   titleId: string;
@@ -159,7 +276,8 @@ export async function authenticateDevice(params: {
       createdAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
       wallet: { "GOLD": 1000, "GEMS": 50 },
-      inventory: []
+      inventory: [],
+      linkedAccounts: []
     };
     store.set(deviceId, player);
   } else {
@@ -175,10 +293,122 @@ export async function authenticateDevice(params: {
     username: player.username
   });
 
+  // Issue cryptographic 30-day Refresh Token
+  const refreshToken = issueRefreshToken(titleId, player.id, player.deviceId);
+
   return {
     token,
+    refreshToken,
+    expiresIn: 7200,
     isNewPlayer,
     player
+  };
+}
+
+/**
+ * Links a federated identity (Steam, Google, Apple, Email) with Conflict Resolution.
+ */
+export async function linkFederatedAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
+  const { titleId, playerId, provider, providerId, conflictResolution = "ABORT" } = params;
+  const store = getTitleStore(titleId);
+
+  const currentPlayer = Array.from(store.values()).find(p => p.id === playerId);
+  if (!currentPlayer) {
+    throw new Error(`Player ${playerId} not found`);
+  }
+
+  // Search if this providerId is already linked to ANY player in this title
+  let conflictingPlayer: Player | undefined;
+  for (const p of store.values()) {
+    if (p.id !== playerId && p.linkedAccounts.some(l => l.provider === provider && l.providerId === providerId)) {
+      conflictingPlayer = p;
+      break;
+    }
+  }
+
+  // 1. Conflict Detected
+  if (conflictingPlayer) {
+    if (conflictResolution === "ABORT") {
+      return {
+        success: false,
+        conflict: true,
+        player: currentPlayer,
+        conflictDetails: {
+          conflictingPlayerId: conflictingPlayer.id,
+          conflictingUsername: conflictingPlayer.username,
+          conflictingWallet: conflictingPlayer.wallet
+        }
+      };
+    }
+
+    if (conflictResolution === "SWITCH_ACCOUNT") {
+      // Log the client into the existing conflicting master account
+      const token = await signPlayerJwt({
+        sub: conflictingPlayer.id,
+        titleId: conflictingPlayer.titleId,
+        deviceId: conflictingPlayer.deviceId,
+        username: conflictingPlayer.username
+      });
+      const refreshToken = issueRefreshToken(titleId, conflictingPlayer.id, conflictingPlayer.deviceId);
+
+      return {
+        success: true,
+        conflict: true,
+        resolutionApplied: "SWITCHED",
+        player: conflictingPlayer,
+        token,
+        refreshToken
+      };
+    }
+
+    if (conflictResolution === "MERGE_PROFILES") {
+      // Merge guest currencies into the master account
+      for (const [curr, bal] of Object.entries(currentPlayer.wallet || {})) {
+        conflictingPlayer.wallet[curr] = (conflictingPlayer.wallet[curr] || 0) + bal;
+      }
+      // Merge guest inventory into master account
+      conflictingPlayer.inventory = [...conflictingPlayer.inventory, ...currentPlayer.inventory];
+
+      // Re-point device to master account
+      store.set(currentPlayer.deviceId, conflictingPlayer);
+
+      const token = await signPlayerJwt({
+        sub: conflictingPlayer.id,
+        titleId: conflictingPlayer.titleId,
+        deviceId: conflictingPlayer.deviceId,
+        username: conflictingPlayer.username
+      });
+      const refreshToken = issueRefreshToken(titleId, conflictingPlayer.id, conflictingPlayer.deviceId);
+
+      return {
+        success: true,
+        conflict: true,
+        resolutionApplied: "MERGED",
+        player: conflictingPlayer,
+        token,
+        refreshToken
+      };
+    }
+  }
+
+  // 2. No conflict: Link seamlessly
+  const existingLinkIndex = currentPlayer.linkedAccounts.findIndex(l => l.provider === provider);
+  if (existingLinkIndex >= 0) {
+    currentPlayer.linkedAccounts[existingLinkIndex].providerId = providerId;
+    currentPlayer.linkedAccounts[existingLinkIndex].linkedAt = new Date().toISOString();
+  } else {
+    currentPlayer.linkedAccounts.push({
+      provider,
+      providerId,
+      linkedAt: new Date().toISOString()
+    });
+  }
+
+  return {
+    success: true,
+    conflict: false,
+    resolutionApplied: "LINKED",
+    player: currentPlayer
   };
 }
 

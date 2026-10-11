@@ -8,11 +8,36 @@ export interface AuthenticateDeviceParams {
 
 export interface PlayerSession {
   token: string;
+  refreshToken: string;
+  expiresIn: number;
   playerId: string;
   deviceId: string;
   username: string;
   isNewPlayer: boolean;
   wallet: Record<string, number>;
+}
+
+export interface LinkAccountParams {
+  titleId: string;
+  playerId: string;
+  provider: "Steam" | "Google" | "Apple" | "Email";
+  providerId: string;
+  conflictResolution?: "ABORT" | "SWITCH_ACCOUNT" | "MERGE_PROFILES";
+  endpoint?: string;
+}
+
+export interface LinkAccountResponse {
+  success: boolean;
+  conflict?: boolean;
+  resolutionApplied?: "LINKED" | "SWITCHED" | "MERGED";
+  player: any;
+  token?: string;
+  refreshToken?: string;
+  conflictDetails?: {
+    conflictingPlayerId: string;
+    conflictingUsername: string;
+    conflictingWallet: Record<string, number>;
+  };
 }
 
 export class DakshAuth {
@@ -45,6 +70,8 @@ export class DakshAuth {
     const data = await res.json();
     const session: PlayerSession = {
       token: data.token,
+      refreshToken: data.refreshToken,
+      expiresIn: data.expiresIn || 7200,
       playerId: data.player.id,
       deviceId: data.player.deviceId,
       username: data.player.username,
@@ -54,6 +81,59 @@ export class DakshAuth {
 
     DakshAuth.activeSession = session;
     return session;
+  }
+
+  /**
+   * Refreshes an expired JWT session using the cryptographic 30-day refresh token.
+   */
+  public static async refreshSessionAsync(titleId: string, refreshToken: string, endpoint = "http://localhost:3000"): Promise<PlayerSession> {
+    const url = `${endpoint}/api/titles/${titleId}/players/refresh`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: "Token refresh failed" }));
+      throw new Error(`[Daksh.Auth] Refresh failed: ${err.error || res.statusText}`);
+    }
+
+    const data = await res.json();
+    if (DakshAuth.activeSession) {
+      DakshAuth.activeSession.token = data.token;
+      DakshAuth.activeSession.refreshToken = data.refreshToken;
+    }
+    return DakshAuth.activeSession!;
+  }
+
+  /**
+   * Links a federated identity (Steam, Google, Apple) with conflict resolution.
+   */
+  public static async linkAccountAsync(params: LinkAccountParams): Promise<LinkAccountResponse> {
+    const endpoint = params.endpoint || "http://localhost:3000";
+    const url = `${endpoint}/api/titles/${params.titleId}/players/link`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        playerId: params.playerId,
+        provider: params.provider,
+        providerId: params.providerId,
+        conflictResolution: params.conflictResolution || "ABORT"
+      })
+    });
+
+    const data = await res.json();
+    if (data.success && data.token) {
+      if (DakshAuth.activeSession) {
+        DakshAuth.activeSession.token = data.token;
+        DakshAuth.activeSession.refreshToken = data.refreshToken;
+        DakshAuth.activeSession.playerId = data.player.id;
+      }
+    }
+    return data;
   }
 
   public static getSession(): PlayerSession | null {
