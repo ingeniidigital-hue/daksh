@@ -1,0 +1,23 @@
+name: daksh-node-1
+data_dir: "/nakama/data"
+
+logger:
+  stdout: true
+  level: "info"
+
+metrics:
+  prometheus_port: 0
+
+session:
+  token_expiry_sec: 7200 # 2 hours
+  encryption_key: "daksh_deterministic_local_key_32b"
+
+socket:
+  server_key: "defaultkey"
+  port: 7350
+  max_message_size_bytes: 4096
+
+runtime:
+  env:
+    - "DAKSH_ENVIRONMENT=development"
+    - "AIR_GAPPED=true"

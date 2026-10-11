@@ -3,7 +3,7 @@
     "id": "STORY-01",
     "title": "Local-First Core Engine & 1-Command CLI Bootstrapper",
     "category": "core",
-    "status": "todo",
+    "status": "done",
     "priority": "critical",
     "user_story": "As a game developer, I want to execute npx daksh dev and have a local Nakama + PostgreSQL + Redis stack running in under 60 seconds without creating any cloud accounts, so that I can build and test my game completely free and offline.",
     "deliverables": [
