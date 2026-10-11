@@ -42,8 +42,13 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
     if (saved) {
       const titles = JSON.parse(saved);
       const found = titles.find((t: any) => t.id === id);
-      if (found) setTitleName(found.name);
+      if (found) {
+        setTitleName(found.name);
+        return;
+      }
     }
+    const formatted = id.replace(/TITLE_/g, "").replace(/_/g, " ");
+    setTitleName(formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase() : "Cyberpunk: Neon Legends");
   }, [id]);
 
   const SidebarLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {

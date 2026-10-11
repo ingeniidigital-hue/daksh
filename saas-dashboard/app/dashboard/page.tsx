@@ -23,7 +23,16 @@ export default function Dashboard() {
   useEffect(() => {
     setIsClient(true);
     const saved = localStorage.getItem("daksh_titles");
-    if (saved) setTitles(JSON.parse(saved));
+    if (saved && JSON.parse(saved).length > 0) {
+      setTitles(JSON.parse(saved));
+    } else {
+      const defaultTitles = [
+        { id: "TITLE_CYBERPUNK", name: "Cyberpunk: Neon Legends", status: "Active (Production)", players: "5,240 CCU", secretKey: "sk_live_CYBER_8f7e6d5c4b3a2019", tsVersion: "v1.4.2" },
+        { id: "TITLE_MYTHIC", name: "Mythic Arena: Battle Royale", status: "Active (Production)", players: "1,890 CCU", secretKey: "sk_live_MYTH_1a2b3c4d5e6f7a8b", tsVersion: "v1.2.0" }
+      ];
+      localStorage.setItem("daksh_titles", JSON.stringify(defaultTitles));
+      setTitles(defaultTitles);
+    }
 
     const user = localStorage.getItem("daksh_user");
     if (user) {
