@@ -269,8 +269,21 @@ export async function POST(request: NextRequest) {
         conversationalReply = `⚡ Updated Title Data configuration key **${parsedIntent.payload.key}** with revision **${parsed.revision}**. Connected Unity & Unreal clients will receive this config on their next cache refresh cycle.`;
         simulationSummary = `Remote configuration committed.`;
 
+      } else if (
+        lower.includes("help") || 
+        lower.includes("what can you do") || 
+        lower.includes("how to use") || 
+        lower.includes("guide") || 
+        lower.includes("options") || 
+        lower.includes("what to write") ||
+        lower.includes("hello") || 
+        lower.includes("hi")
+      ) {
+        thoughtProcess = `User is requesting liveops guidance. Formulating friendly plain-English assistance for ${titleId}...`;
+        conversationalReply = `👋 **Hi! I am your AI LiveOps Co-pilot for ${titleId}.**\n\nYou don't need to know any technical code or server commands. Just ask in everyday English, and I will manage your live game for you!\n\nHere are the top things you can ask me to do right now:\n\n1. 🛒 **Add items to your in-game store**\n   *Try*: *"Add an Epic Dragon Armor to the shop for 500 Gems"*\n\n2. 🎁 **Send rewards or currencies to players**\n   *Try*: *"Give 1,000 Gold to player Player_01"*\n\n3. 🏆 **Launch weekend events & bonuses**\n   *Try*: *"Start a weekend event with double XP and bonus rewards"*\n\n4. ⚙️ **Update game settings & balance**\n   *Try*: *"Set XP multiplier to 2.0"*\n\n5. 🛡️ **Player moderation & account review**\n   *Try*: *"Check account details for Player_01"*\n\n👉 **Just type what you want in the box below, or click any suggestion card above!**`;
+        simulationSummary = `Interactive guide provided. Ready for commands.`;
       } else {
-        // Fallback: Health check or general assistance
+        // Fallback: General assistance and system audit
         thoughtProcess = `Interpreted query as general operations audit for game title ${titleId}. Querying system health & listing catalog items via MCP...`;
         const healthRes = await MCPService.callTool({
           name: "daksh_get_system_health",
@@ -290,8 +303,8 @@ export async function POST(request: NextRequest) {
         });
 
         const catData = JSON.parse(catRes.content[0].text);
-        conversationalReply = `🤖 **Daksh AI Orchestrator Listening**:\n\nI have evaluated your request and verified live backend subsystems for **${titleId}**:\n- **Cluster Health**: All core microservices (Nakama, PostgreSQL, Redis) are **Operational**.\n- **Catalog**: Currently **${catData.total} items** active in Economy V2.\n- **Simulation Engine**: Ready to simulate live events, balance economy formulas, or adjust game parameters.\n\n*Tip*: Try asking me: *"Simulate a weekend double XP event with a rare blade"*, *"Roll 10 loot drops"*, or *"Grant 500 gold to Player_01"*.`;
-        simulationSummary = `LiveOps audit completed with 0 errors.`;
+        conversationalReply = `👋 **LiveOps Assistant Ready for ${titleId}**\n\nI reviewed your live game status:\n- **Game Servers & Storage**: Online and operational.\n- **In-Game Store**: Currently **${catData.total} items** active.\n\n💡 **What would you like to do?** You can ask in plain English:\n- *"Add a new weapon to the shop for 300 gems"*\n- *"Give 500 gold to player Player_01"*\n- *"Start a weekend double XP event"*\n\nOr click one of the quick starter cards above to see it in action!`;
+        simulationSummary = `Game status checked. Ready for liveops commands.`;
       }
     }
 

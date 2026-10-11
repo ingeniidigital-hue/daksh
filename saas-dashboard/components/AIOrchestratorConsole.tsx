@@ -7,7 +7,8 @@ import {
   Bot, Sparkles, Terminal, Wrench, Send, CheckCircle2, AlertCircle, 
   ChevronDown, ChevronUp, Layers, RefreshCw, ShoppingBag, Coins, 
   Database, ShieldAlert, Server, Activity, ArrowRight, X, Clock, Code,
-  Key, Trash2, Cpu, User, Gamepad2, Plus, Sliders
+  Key, Trash2, Cpu, User, Gamepad2, Plus, Sliders, Trophy, SlidersHorizontal,
+  Lightbulb, HelpCircle, Gift, Play
 } from "lucide-react";
 import MCPToolsModal from "./MCPToolsModal";
 import ApiKeyModal from "./ApiKeyModal";
@@ -132,11 +133,11 @@ export default function AIOrchestratorConsole({
           id: "msg_select_project",
           sender: "orchestrator",
           timestamp: "Just now",
-          text: `👋 **Welcome to Daksh LiveOps AI Orchestrator.**\n\nI am listening and ready to autonomously manage your game infrastructure via the **Model Context Protocol (MCP)**.\n\n👉 **Please select your game project below to begin:**`,
+          text: `👋 **Welcome to Daksh LiveOps!**\n\nI am your AI LiveOps co-pilot. I help you run events, manage your in-game store, reward players, and monitor your game in plain everyday English—no code or technical knowledge required.\n\n👉 **Please select your game project below to begin:**`,
           isProjectSelectCard: true,
           simulationResult: {
             status: "ready",
-            summary: "12 MCP microservice tools connected."
+            summary: "Daksh LiveOps Co-pilot Ready"
           }
         }
       ];
@@ -147,10 +148,10 @@ export default function AIOrchestratorConsole({
         id: "msg_welcome",
         sender: "orchestrator",
         timestamp: "Just now",
-        text: `👋 **Connected to Project: ${titleName} (\`${titleId}\`)**\n\nMicroservices verified: Nakama v3.22, PostgreSQL 16, and Redis 7.2 are **Operational**.\nAll **12 MCP tools** are loaded and active. What would you like to simulate or execute today?`,
+        text: `👋 **Welcome to ${titleName}!** I'm your LiveOps Co-pilot.\n\nYour game backend is connected and ready. You don't need any technical setup—tell me what you want to do in plain English, or pick a task below to get started:`,
         simulationResult: {
           status: "connected",
-          summary: `Active project: ${titleName} (${titleId})`
+          summary: `Connected to ${titleName} · LiveOps Operational`
         }
       }
     ];
@@ -173,7 +174,7 @@ export default function AIOrchestratorConsole({
   const menuCategories = [
     {
       id: "catalog",
-      label: "Catalog & Store",
+      label: "Shop & Catalog",
       icon: ShoppingBag,
       prompts: [
         "Create an Epic Dragon Armor for 500 Gems",
@@ -183,18 +184,8 @@ export default function AIOrchestratorConsole({
       ]
     },
     {
-      id: "simulation",
-      label: "LiveOps Simulations",
-      icon: Sparkles,
-      prompts: [
-        "Simulate a weekend event with double XP, an event blade, and 500 gold airdrop",
-        "Simulate 10 cryptographic loot drops with pity tracking",
-        "Simulate 5,000 CCU fleet auto-scaling in us-east-1"
-      ]
-    },
-    {
       id: "wallets",
-      label: "Players & Currencies",
+      label: "Player Rewards",
       icon: Coins,
       prompts: [
         "Give 1000 Gold to player Player_01",
@@ -203,9 +194,19 @@ export default function AIOrchestratorConsole({
       ]
     },
     {
+      id: "simulation",
+      label: "Live Events & Tournaments",
+      icon: Trophy,
+      prompts: [
+        "Simulate a weekend event with double XP, an event blade, and 500 gold airdrop",
+        "Simulate 10 cryptographic loot drops with pity tracking",
+        "Simulate 5,000 CCU fleet auto-scaling in us-east-1"
+      ]
+    },
+    {
       id: "config",
-      label: "Remote Config & Title Data",
-      icon: Database,
+      label: "Game Balance & Config",
+      icon: SlidersHorizontal,
       prompts: [
         "Set config XP_Multiplier to 2.0",
         "Set config Active_Season to 'Dragon_Festival_2026'",
@@ -214,13 +215,65 @@ export default function AIOrchestratorConsole({
     },
     {
       id: "moderation",
-      label: "Anti-Cheat & Fleet",
+      label: "Player Support & Anti-Cheat",
       icon: ShieldAlert,
       prompts: [
         "Ban IP 198.51.100.99 for speedhacking",
-        "Probe cluster health of Nakama, Postgres, and Redis",
-        "Scale regional server fleet to 8 pods in ap-south-1"
+        "Inspect wallet and inventory of Player_01",
+        "Probe cluster health of Nakama, Postgres, and Redis"
       ]
+    }
+  ];
+
+  // Layman-friendly Quick Starter Cards for fresh title view
+  const quickStartGuides = [
+    {
+      title: "Add Items to Shop",
+      category: "Store & Catalog",
+      description: "Create new weapons, skins, equipment, or bundles and set prices in Coins or Gems.",
+      prompt: "Create an Epic Dragon Armor for 500 Gems",
+      icon: ShoppingBag,
+      iconBg: "bg-emerald-50 text-emerald-600 border-emerald-100"
+    },
+    {
+      title: "Reward Players",
+      category: "Gifts & Currency",
+      description: "Send coins, gems, gift packs, or compensation directly to player wallets.",
+      prompt: "Give 1000 Gold to player Player_01",
+      icon: Coins,
+      iconBg: "bg-amber-50 text-amber-600 border-amber-100"
+    },
+    {
+      title: "Weekend LiveOps Event",
+      category: "Events & Tournaments",
+      description: "Launch weekend tournaments, double XP events, and holiday drop campaigns.",
+      prompt: "Simulate a weekend event with double XP, an event blade, and 500 gold airdrop",
+      icon: Trophy,
+      iconBg: "bg-purple-50 text-purple-600 border-purple-100"
+    },
+    {
+      title: "Game Balance & Config",
+      category: "Remote Config",
+      description: "Update level formulas, active season names, or multipliers without deploying new app builds.",
+      prompt: "Set config XP_Multiplier to 2.0",
+      icon: SlidersHorizontal,
+      iconBg: "bg-blue-50 text-blue-600 border-blue-100"
+    },
+    {
+      title: "View Current Shop Catalog",
+      category: "Audit & Economy",
+      description: "Inspect active items, rarities, and currency prices currently live in your game store.",
+      prompt: "List all catalog items and prices",
+      icon: Database,
+      iconBg: "bg-indigo-50 text-indigo-600 border-indigo-100"
+    },
+    {
+      title: "Player Account & Support",
+      category: "Player Moderation",
+      description: "Inspect player inventory, verify wallet balances, or take action on abusive accounts.",
+      prompt: "Inspect wallet and inventory of Player_01",
+      icon: ShieldAlert,
+      iconBg: "bg-rose-50 text-rose-600 border-rose-100"
     }
   ];
 
@@ -399,19 +452,20 @@ export default function AIOrchestratorConsole({
           {/* Mode Switcher: Manual vs AI */}
           <ModeSwitcher />
 
-          {/* MCP Tools Button */}
+          {/* Capabilities / Actions Button */}
           <button
             onClick={() => setIsToolsModalOpen(true)}
-            className="flex items-center space-x-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center space-x-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+            title="View 12 liveops actions Daksh can perform"
           >
             <Wrench className="w-3.5 h-3.5 text-gray-500" />
-            <span className="hidden sm:inline">12 Tools</span>
+            <span className="hidden sm:inline">12 Actions</span>
           </button>
 
           {/* API Key Modal Button */}
           <button
             onClick={() => setIsApiKeyModalOpen(true)}
-            className="flex items-center space-x-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center space-x-1.5 text-xs text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
           >
             <Key className="w-3.5 h-3.5 text-gray-500" />
             <span className="font-mono text-[11px] hidden md:inline truncate max-w-[80px]">{apiKey.slice(0, 10)}...</span>
@@ -421,22 +475,22 @@ export default function AIOrchestratorConsole({
           {showInspectorToggle && onToggleInspector && (
             <button
               onClick={onToggleInspector}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs border transition-colors cursor-pointer ${
                 isInspectorOpen 
                   ? "bg-gray-900 text-white border-gray-900 font-medium" 
                   : "bg-gray-50 hover:bg-gray-100 text-gray-600 border-gray-200"
               }`}
-              title="Toggle manual raw tables inspector"
+              title="Inspect raw database tables"
             >
               <Sliders className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{isInspectorOpen ? "Hide Inspector" : "Inspector"}</span>
+              <span className="hidden md:inline">{isInspectorOpen ? "Hide Raw Tables" : "Raw Tables"}</span>
             </button>
           )}
 
           {/* Clear Chat */}
           <button
             onClick={clearChat}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
             title="Clear chat history"
           >
             <Trash2 className="w-4 h-4" />
@@ -481,7 +535,7 @@ export default function AIOrchestratorConsole({
                     >
                       <span className="flex items-center gap-1.5 font-medium">
                         <Cpu className="w-3.5 h-3.5 text-blue-600" />
-                        <span>Simulation Reasoning</span>
+                        <span>Execution Reasoning</span>
                       </span>
                       <span>{expandedThoughtId === msg.id ? "▲ Hide" : "▼ Expand"}</span>
                     </button>
@@ -497,6 +551,66 @@ export default function AIOrchestratorConsole({
                 <div className="space-y-1">
                   {formatChatMessage(msg.text)}
                 </div>
+
+                {/* Layman-friendly Quick Starter Cards for fresh title view */}
+                {!isProjectSelector && messages.filter(m => m.sender === "user").length === 0 && (
+                  <div className="pt-3 space-y-4">
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-5">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          What would you like to do with {titleName}?
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Pick any task below to see it run immediately, or describe what you want in plain words:
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {quickStartGuides.map((guide, gIdx) => {
+                        const IconComp = guide.icon;
+                        return (
+                          <button
+                            key={gIdx}
+                            onClick={() => handleSendMessage(guide.prompt)}
+                            disabled={isProcessing}
+                            className="text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl p-4.5 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group cursor-pointer"
+                          >
+                            <div>
+                              <div className="flex items-center justify-between mb-2.5">
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${guide.iconBg}`}>
+                                  <IconComp className="w-4 h-4" />
+                                </div>
+                                <span className="text-[11px] font-medium text-gray-400 group-hover:text-gray-900 flex items-center gap-1 transition-colors">
+                                  <span>Try this</span>
+                                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                </span>
+                              </div>
+                              <div className="font-semibold text-gray-900 text-sm">{guide.title}</div>
+                              <div className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{guide.description}</div>
+                            </div>
+
+                            <div className="mt-3.5 pt-2.5 border-t border-gray-100 flex items-center gap-1.5 text-[11px] text-gray-600 font-mono">
+                              <span className="text-gray-400">e.g.</span>
+                              <span className="truncate group-hover:text-gray-900 transition-colors font-medium">"{guide.prompt}"</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Friendly Layman Guidance Banner */}
+                    <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900">
+                      <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <span className="font-semibold text-amber-950">How to use Daksh LiveOps:</span>
+                        <p className="leading-relaxed text-amber-900">
+                          You don't need to write code, configure database servers, or remember command syntax. Just click any card above to execute it, or type your request in everyday English in the message box below (e.g. <em>"Add a new diamond blade to the store for 200 gems"</em> or <em>"Send 500 gold to player 1"</em>).
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Project Selection Cards */}
                 {msg.isProjectSelectCard && (
@@ -520,7 +634,7 @@ export default function AIOrchestratorConsole({
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
                               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                              <span>Nakama :7350 · PostgreSQL :5432</span>
+                              <span>Backend Online · Microservices Ready</span>
                             </div>
                           </div>
 
@@ -545,7 +659,7 @@ export default function AIOrchestratorConsole({
                           <Plus className="w-4 h-4" />
                         </div>
                         <span className="font-semibold text-xs text-gray-900">Provision New Title</span>
-                        <span className="text-[11px] text-gray-500 mt-0.5">Spin up isolated microservices</span>
+                        <span className="text-[11px] text-gray-500 mt-0.5">Spin up isolated backend services</span>
                       </button>
                     </div>
                   </div>
@@ -567,7 +681,7 @@ export default function AIOrchestratorConsole({
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-medium ${
                             tc.isError ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
                           }`}>
-                            {tc.isError ? "Error" : "Success"} · {tc.latencyMs}ms
+                            {tc.isError ? "Error" : "Executed"} · {tc.latencyMs}ms
                           </span>
                         </div>
                         <div className="text-gray-500 text-[11px] truncate">
@@ -591,6 +705,34 @@ export default function AIOrchestratorConsole({
                   </div>
                 )}
 
+                {/* Contextual follow-up suggestions for non-empty conversation */}
+                {msg.sender === "orchestrator" && !msg.isProjectSelectCard && (
+                  <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] text-gray-400 font-medium">Suggested actions:</span>
+                    <button
+                      onClick={() => handleSendMessage("List all catalog items and prices")}
+                      disabled={isProcessing}
+                      className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                    >
+                      <span>🛒 View Store Items</span>
+                    </button>
+                    <button
+                      onClick={() => handleSendMessage("Give 1000 Gold to player Player_01")}
+                      disabled={isProcessing}
+                      className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                    >
+                      <span>🎁 Reward Player</span>
+                    </button>
+                    <button
+                      onClick={() => handleSendMessage("Help - what else can I do?")}
+                      disabled={isProcessing}
+                      className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                    >
+                      <span>💡 What else can you do?</span>
+                    </button>
+                  </div>
+                )}
+
               </div>
             </div>
           ))}
@@ -601,7 +743,7 @@ export default function AIOrchestratorConsole({
               <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                 <Sparkles className="w-4 h-4 text-emerald-400 animate-spin" />
               </div>
-              <span className="animate-pulse">Thinking & executing via MCP...</span>
+              <span className="animate-pulse">Executing LiveOps operation...</span>
             </div>
           )}
 
@@ -610,24 +752,50 @@ export default function AIOrchestratorConsole({
       </div>
 
       {/* Signature ChatGPT Bottom Floating Input Area */}
-      <div className="shrink-0 bg-white/95 backdrop-blur-md pt-2 pb-5 px-4 border-t border-gray-100">
-        <div className="max-w-3xl mx-auto w-full space-y-2.5">
+      <div className="shrink-0 bg-white/95 backdrop-blur-md pt-3 pb-5 px-4 border-t border-gray-100">
+        <div className="max-w-3xl mx-auto w-full space-y-3">
           
-          {/* Suggestion Chips */}
+          {/* Category Tabs & Quick Action Pills */}
           {!isProjectSelector && (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {menuCategories
-                .find((c) => c.id === activeCategory)
-                ?.prompts.slice(0, 3).map((p, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSendMessage(p)}
-                    disabled={isProcessing}
-                    className="bg-white hover:bg-gray-50 text-gray-700 text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:border-gray-400 transition-all shadow-2xs whitespace-nowrap"
-                  >
-                    <span>"{p}"</span>
-                  </button>
-                ))}
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+                <span className="text-[11px] text-gray-400 font-medium shrink-0 mr-1">Categories:</span>
+                {menuCategories.map((cat) => {
+                  const CatIcon = cat.icon;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs transition-colors shrink-0 cursor-pointer ${
+                        activeCategory === cat.id
+                          ? "bg-gray-900 text-white font-medium"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <CatIcon className="w-3 h-3" />
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Action Prompt Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <span className="text-[11px] text-gray-400 shrink-0">Click to run:</span>
+                {menuCategories
+                  .find((c) => c.id === activeCategory)
+                  ?.prompts.map((p, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSendMessage(p)}
+                      disabled={isProcessing}
+                      className="bg-white hover:bg-gray-50 text-gray-800 text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:border-gray-900 transition-all shadow-2xs whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Play className="w-2.5 h-2.5 text-gray-400 fill-gray-400" />
+                      <span>"{p}"</span>
+                    </button>
+                  ))}
+              </div>
             </div>
           )}
 
@@ -647,7 +815,7 @@ export default function AIOrchestratorConsole({
               placeholder={
                 isProjectSelector 
                   ? "Select a project above or type a command..." 
-                  : `Ask Daksh to manage liveops, simulate events for ${titleName}...`
+                  : `Ask Daksh in everyday English (e.g. "Add a dragon sword for 500 gold" or "Give 1,000 coins to player 1")...`
               }
               className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"
             />
@@ -655,7 +823,8 @@ export default function AIOrchestratorConsole({
               <button
                 type="button"
                 onClick={() => setInputPrompt("")}
-                className="text-gray-400 hover:text-gray-600 p-1.5"
+                className="text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer"
+                title="Clear input"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -663,7 +832,8 @@ export default function AIOrchestratorConsole({
             <button
               type="submit"
               disabled={isProcessing || !inputPrompt.trim()}
-              className="w-8 h-8 rounded-full bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-300 text-white flex items-center justify-center transition-colors shrink-0 shadow-xs"
+              className="w-8 h-8 rounded-full bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-300 text-white flex items-center justify-center transition-colors shrink-0 shadow-xs cursor-pointer"
+              title="Send message (Enter)"
             >
               {isProcessing ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -673,8 +843,9 @@ export default function AIOrchestratorConsole({
             </button>
           </form>
 
-          <div className="text-[11px] text-gray-400 text-center font-sans">
-            Daksh LiveOps AI Orchestrator · Autonomous microservice management via Model Context Protocol
+          <div className="flex items-center justify-between text-[11px] text-gray-400 font-sans px-1">
+            <span>⚡ Connected to {titleName} · All operations server-authoritative</span>
+            <span className="hidden sm:inline">Press Enter ↵ to send</span>
           </div>
         </div>
       </div>
