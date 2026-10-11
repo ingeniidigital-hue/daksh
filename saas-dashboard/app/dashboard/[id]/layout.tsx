@@ -10,9 +10,10 @@ import {
   Swords, Server, Target, 
   UsersRound, Trophy, 
   Save, BarChart3, LineChart, Network, TrendingUp, Package,
-  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard
+  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard, Download
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
+import EjectModal from "../../../components/EjectModal";
 
 function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -21,6 +22,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   
   const [titleName, setTitleName] = useState("Loading...");
   const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
+  const [isEjectModalOpen, setIsEjectModalOpen] = useState(false);
   const [operatingMode, setOperatingMode] = useState<"ai" | "manual">("ai");
 
   useEffect(() => {
@@ -116,6 +118,16 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex items-center space-x-3 sm:space-x-4">
+          {/* 1-Click Eject Button */}
+          <button
+            onClick={() => setIsEjectModalOpen(true)}
+            className="flex items-center space-x-1.5 bg-[#252A33] hover:bg-amber-600/20 text-amber-400 hover:text-amber-300 px-3 py-1.5 rounded-xl text-xs font-semibold border border-amber-500/30 hover:border-amber-500/60 transition-all shadow-sm"
+            title="1-Click Eject: Download complete Helm v3 chart and PostgreSQL dump"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Eject Title</span>
+          </button>
+
           {/* AI Command Menu Trigger */}
           <button
             onClick={() => setIsAIMenuOpen(true)}
@@ -234,6 +246,14 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
       <AICommandMenu 
         isOpen={isAIMenuOpen}
         onClose={() => setIsAIMenuOpen(false)}
+        titleId={id}
+        titleName={titleName}
+      />
+
+      {/* 1-Click Eject Modal */}
+      <EjectModal
+        isOpen={isEjectModalOpen}
+        onClose={() => setIsEjectModalOpen(false)}
         titleId={id}
         titleName={titleName}
       />

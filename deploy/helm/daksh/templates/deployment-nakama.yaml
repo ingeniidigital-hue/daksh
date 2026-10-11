@@ -21,10 +21,22 @@ spec:
         app.kubernetes.io/component: nakama
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
         - name: nakama
           image: "{{ .Values.nakama.image.repository }}:{{ .Values.nakama.image.tag }}"
           imagePullPolicy: {{ .Values.nakama.image.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
           command: ["/nakama/nakama"]
           args: ["--config", "/nakama/data/local.yml"]
           ports:
@@ -51,8 +63,12 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /nakama/data
+            - name: tmp-volume
+              mountPath: /tmp
       volumes:
         - name: config-volume
           configMap:
             name: {{ .Release.Name }}-nakama-config
+        - name: tmp-volume
+          emptyDir: {}
 {{- end }}

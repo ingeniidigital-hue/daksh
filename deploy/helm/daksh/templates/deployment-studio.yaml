@@ -21,10 +21,22 @@ spec:
         app.kubernetes.io/component: studio
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
         - name: studio
           image: "{{ .Values.studio.image.repository }}:{{ .Values.studio.image.tag }}"
           imagePullPolicy: {{ .Values.studio.image.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: {{ .Values.studio.service.port }}
@@ -49,4 +61,10 @@ spec:
             periodSeconds: 5
           resources:
             {{- toYaml .Values.studio.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
 {{- end }}

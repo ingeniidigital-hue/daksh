@@ -10,3 +10,4 @@ export * from "./analytics";
 export * from "./cache";
 export * from "./ota";
 export * from "./cloud";
+export * from "./eject";
