@@ -34,48 +34,54 @@
 
 ```mermaid
 flowchart TD
-    subgraph CLIENTS["Multi-Client SDK Tier"]
+    %% PLAYER & GAME CLIENT FLOW
+    subgraph CLIENTS["Game Clients & Players Tier (In-Game Gameplay & Economy)"]
         U3D["Unity C# SDK (UPM)<br>Addressables OTA • AES-256 Cache"]
         UE5["Unreal Engine Plugin<br>IoStore Chunks • UDP Netcode"]
         HTML["HTML5 / WebGL SDK<br>Direct Browser WebSocket"]
         REST["Direct HTTPS REST API<br>(Zero-SDK Integration)"]
     end
 
-    subgraph EDGE["Global Anycast & CDN Edge (5 Super-Regions)"]
-        ANY["Anycast Edge PoP Routing<br>(&lt;45ms Latency • DDoS Shield)"]
+    subgraph EDGE["Global Game Traffic Edge (5 Super-Regions)"]
+        ANY["Anycast Edge PoP Routing<br>(&lt;45ms Latency • Anti-DDoS Shield)"]
         CDN["Cloud OTA CDN<br>(Unity .bundle / Unreal .pak)"]
-        GEO["Geo-IP Billing Router<br>(INR vs USD)"]
     end
 
-    subgraph MANAGED_CLOUD["Daksh Managed Cloud GaaS Platform (Or Self-Hosted Helm)"]
+    subgraph MANAGED_CLOUD["Daksh Managed Game Backend (Or Self-Hosted Helm)"]
         subgraph REGIONS["5 Super-Regions: IAD • FRA • BOM • NRT • GRU"]
-            CORE["Nakama V8 Game Core<br>Economy • Title Data • Rulesets"]
+            CORE["Nakama V8 Game Core<br>Economy V2 • Title Data • Rulesets"]
             AGONES["Agones DGS Fleet<br>Unreal / Unity Headless Servers"]
         end
-        PG[("Managed Multi-AZ PostgreSQL 16<br>WAL Archiving & PITR")]
+        PG[("Managed PostgreSQL 16<br>Atomic Row-Locks & PITR")]
         RD[("Managed Redis 7 Cluster<br>MM Queues & Leaderboards")]
         CH[("ClickHouse OLAP<br>10K Evt/s Telemetry")]
     end
 
-    subgraph PM["AI-Friendly Project Management"]
-        PLANE["Dedicated Plane Community Edition<br>(deploy/pm/plane/)"]
-        IN_APP["Studio Task Board<br>(/dashboard/tasks)"]
+    %% STUDIO DEVELOPER & CLOUD SERVICE BILLING FLOW
+    subgraph STUDIO["Game Studio Developers & LiveOps (Studio Management)"]
+        DASH["Daksh Studio Dashboard<br>(/dashboard • LiveOps • Cmd+K MCP)"]
+        PLANKA["Planka Open-Source Project Tracker<br>(localhost:1337)"]
     end
 
-    subgraph BILLING["Daksh Cloud B2B SaaS Billing (Studio Cloud Subscriptions)"]
-        RZP["Razorpay India (UPI/RuPay/GST) - INR"]
-        PDL["Paddle Global (Cards/PayPal/MoR/VAT) - USD"]
+    subgraph CLOUD_BILLING["Daksh Cloud B2B Platform Billing (Studio Cloud Subscriptions Only)"]
+        GEO["Geo-IP SaaS Billing Router<br>(Routes Studio IP by Region)"]
+        RZP["Razorpay India (UPI / RuPay / NetBanking / GST) - INR"]
+        PDL["Paddle Global (Cards / PayPal / MoR / EU VAT) - USD"]
     end
 
+    %% CONNECTIONS: PLAYERS
     CLIENTS --> ANY
     CLIENTS --> CDN
     ANY --> REGIONS
     REGIONS --> PG
     REGIONS --> RD
     REGIONS --> CH
+
+    %% CONNECTIONS: STUDIO & CLOUD BILLING
+    STUDIO --> MANAGED_CLOUD
+    DASH --> GEO
     GEO --> RZP
     GEO --> PDL
-    MANAGED_CLOUD <--> PM
 ```
 
 ---
