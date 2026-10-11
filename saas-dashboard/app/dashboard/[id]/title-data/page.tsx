@@ -143,7 +143,7 @@ export default function TitleDataPage() {
     }
   };
 
-  // Initial Load
+  // Initial Load & AI Orchestrator MCP Sync
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -152,6 +152,9 @@ export default function TitleDataPage() {
       setLoading(false);
     };
     init();
+
+    window.addEventListener("daksh_data_updated", init);
+    return () => window.removeEventListener("daksh_data_updated", init);
   }, [titleId]);
 
   // Validate JSON string

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronRight, FlaskConical, Plus, CheckCircle2 } from "lucide-react";
@@ -9,15 +9,22 @@ function ExperimentsPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
 
-  const [experiments, setExperiments] = useState<any[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [experiments, setExperiments] = useState<any[]>([]);
+
+  const reloadExperiments = () => {
     try {
       const saved = localStorage.getItem(`daksh_experiments_${titleId}`);
-      return saved ? JSON.parse(saved) : [];
+      setExperiments(saved ? JSON.parse(saved) : []);
     } catch(e) {
-      return [];
+      setExperiments([]);
     }
-  });
+  };
+
+  useEffect(() => {
+    reloadExperiments();
+    window.addEventListener("daksh_data_updated", reloadExperiments);
+    return () => window.removeEventListener("daksh_data_updated", reloadExperiments);
+  }, [titleId]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expName, setExpName] = useState("");

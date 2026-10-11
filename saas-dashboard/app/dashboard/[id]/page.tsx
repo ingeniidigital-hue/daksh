@@ -101,6 +101,9 @@ function TitleDetailsContent() {
     };
 
     loadRealData();
+
+    window.addEventListener("daksh_data_updated", loadRealData);
+    return () => window.removeEventListener("daksh_data_updated", loadRealData);
   }, [id]);
 
   const handleCopy = () => {

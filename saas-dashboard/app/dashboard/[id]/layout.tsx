@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
 import EjectModal from "../../../components/EjectModal";
+import ModeSwitcher from "../../../components/ModeSwitcher";
+import AIOrchestratorConsole from "../../../components/AIOrchestratorConsole";
+import { useOperatingMode } from "../../../context/OperatingModeContext";
 
 function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -23,7 +26,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   const [titleName, setTitleName] = useState(id || "Game Title");
   const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
   const [isEjectModalOpen, setIsEjectModalOpen] = useState(false);
-  const [operatingMode, setOperatingMode] = useState<"ai" | "manual">("ai");
+  const { mode } = useOperatingMode();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,6 +101,9 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Mode Switcher: Manual vs AI Mode */}
+          <ModeSwitcher />
+
           {/* Quick Search / Command Palette */}
           <button 
             onClick={() => setIsAIMenuOpen(true)}
@@ -205,6 +211,9 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto bg-[#f4f6f9]">
+          {mode === "ai" && (
+            <AIOrchestratorConsole titleId={id} titleName={titleName} />
+          )}
           {children}
         </main>
       </div>

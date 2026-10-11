@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronRight, ShieldAlert, UserX, Plus, CheckCircle2, AlertOctagon } from "lucide-react";
@@ -9,17 +9,24 @@ function BansPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
 
-  const [bans, setBans] = useState<any[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = localStorage.getItem(`daksh_bans_${titleId}`);
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [bans, setBans] = useState<any[]>([]);
   const [newIp, setNewIp] = useState("");
   const [newReason, setNewReason] = useState("");
+
+  const reloadBans = () => {
+    try {
+      const saved = localStorage.getItem(`daksh_bans_${titleId}`);
+      setBans(saved ? JSON.parse(saved) : []);
+    } catch (e) {
+      setBans([]);
+    }
+  };
+
+  useEffect(() => {
+    reloadBans();
+    window.addEventListener("daksh_data_updated", reloadBans);
+    return () => window.removeEventListener("daksh_data_updated", reloadBans);
+  }, [titleId]);
 
   const handleAddBan = (e: React.FormEvent) => {
     e.preventDefault();

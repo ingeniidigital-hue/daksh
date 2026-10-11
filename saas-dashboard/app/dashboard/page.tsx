@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, ChevronRight, Cloud, Server, Activity, CheckCircle2, AlertCircle, Database, Zap } from "lucide-react";
+import ModeSwitcher from "../../components/ModeSwitcher";
+import AIOrchestratorConsole from "../../components/AIOrchestratorConsole";
+import { useOperatingMode } from "../../context/OperatingModeContext";
 
 interface Title {
   id: string;
@@ -19,6 +22,7 @@ export default function Dashboard() {
   const [newTitleName, setNewTitleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [systemHealth, setSystemHealth] = useState<any>(null);
+  const { mode } = useOperatingMode();
 
   useEffect(() => {
     setIsClient(true);
@@ -147,6 +151,9 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="flex items-center space-x-3">
+          {/* Mode Switcher: Manual vs AI Mode */}
+          <ModeSwitcher />
+
           <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="text-[11px] font-mono">Core: {systemHealth?.status === "healthy" ? "Online" : "Connecting"}</span>
@@ -160,6 +167,14 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
+
+      {/* AI Orchestrator Console (Visible only in AI Mode) */}
+      {mode === "ai" && (
+        <AIOrchestratorConsole
+          titleId={titles[0]?.id || "YCSLW"}
+          titleName={titles[0]?.name || "Main Game Title"}
+        />
+      )}
 
       {/* AdminLTE Content Header with Breadcrumb */}
       <div className="max-w-6xl mx-auto px-6 pt-6 pb-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

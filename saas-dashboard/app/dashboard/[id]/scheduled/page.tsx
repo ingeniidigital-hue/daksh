@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronRight, Clock, Plus, CheckCircle2 } from "lucide-react";
@@ -9,15 +9,22 @@ function ScheduledTasksPageContent() {
   const params = useParams();
   const titleId = params?.id as string;
 
-  const [tasks, setTasks] = useState<any[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [tasks, setTasks] = useState<any[]>([]);
+
+  const reloadTasks = () => {
     try {
-      const saved = localStorage.getItem(`daksh_scheduled_${titleId}`);
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem(`daksh_scheduled_${titleId}`) || localStorage.getItem(`daksh_tasks_${titleId}`);
+      setTasks(saved ? JSON.parse(saved) : []);
     } catch (e) {
-      return [];
+      setTasks([]);
     }
-  });
+  };
+
+  useEffect(() => {
+    reloadTasks();
+    window.addEventListener("daksh_data_updated", reloadTasks);
+    return () => window.removeEventListener("daksh_data_updated", reloadTasks);
+  }, [titleId]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskName, setTaskName] = useState("");
