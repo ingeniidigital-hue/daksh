@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   planka:
     image: ghcr.io/plankanban/planka:latest
@@ -13,6 +11,10 @@ services:
       - BASE_URL=http://localhost:1337
       - DATABASE_URL=postgresql://postgres:postgres@planka-db:5432/planka
       - SECRET_KEY=daksh_open_source_pm_secret_key_change_in_production
+      - DEFAULT_ADMIN_EMAIL=admin@daksh.io
+      - DEFAULT_ADMIN_PASSWORD=dakshpassword123
+      - DEFAULT_ADMIN_NAME=Daksh Admin
+      - DEFAULT_ADMIN_USERNAME=admin
     ports:
       - "1337:1337"
     depends_on:

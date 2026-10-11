@@ -4,15 +4,15 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Release: v0.1.0-alpha](https://img.shields.io/badge/Release-v0.1.0--alpha-emerald.svg)](https://github.com/ingeniidigital-hue/daksh/releases)
-[![Build Status](https://img.shields.io/badge/Next.js%2016-25%2F25%20Routes%20Green-brightgreen.svg)]()
+[![Build Status](https://img.shields.io/badge/Next.js%2016-22%2F22%20Routes%20Green-brightgreen.svg)]()
 [![Vitest Passing](https://img.shields.io/badge/Tests-9%2F9%20Passing-success.svg)]()
 [![Architecture](https://img.shields.io/badge/Deployment-Helm%20v3%20%7C%20Managed%20GaaS-cyan.svg)]()
-[![AI Project Management](https://img.shields.io/badge/PM-Plane%20Community%20Edition-purple.svg)]()
+[![AI Project Management](https://img.shields.io/badge/PM-Planka%20Kanban-purple.svg)](http://localhost:1337)
 
 **A production-grade, open-source Game BaaS and fully managed Game-as-a-Service (GaaS) platform.**  
 *PlayFab parity on an open-source Nakama, Agones, PostgreSQL 16 & Redis 7 foundation with zero vendor lock-in.*
 
-[Quickstart](#quickstart) • [Architecture](#system-architecture) • [Feature Pillars](#core-feature-pillars) • [Plane Community Edition Setup](#dedicated-plane-community-edition-setup) • [Multi-Client SDKs](#multi-client-sdk-suite) • [Branching & Releases](#branching--release-governance) • [License](#license)
+[Quickstart](#quickstart) • [Architecture](#system-architecture) • [Feature Pillars](#core-feature-pillars) • [Project Management (Planka)](#dedicated-open-source-project-management-planka) • [Multi-Client SDKs](#multi-client-sdk-suite) • [Branching & Releases](#branching--release-governance) • [License](#license)
 
 </div>
 
@@ -121,45 +121,31 @@ flowchart TD
 
 ---
 
-## Dedicated Plane Community Edition Setup
+## Dedicated Open-Source Project Management (Planka)
 
-To track all 17 master stories with an open-source, AI-friendly project management tool, Daksh includes a dedicated, self-hosted deployment of **Plane Community Edition** (the premier open-source Linear/Jira alternative).
+Daksh uses **[Planka](https://github.com/plankanban/planka)** as its dedicated, lightweight, open-source project management software to track all 17 End-to-End Master Stories.
 
-### 1-Command Quickstart
+### Quick Access
+- **Web URL**: **`http://localhost:1337`**
+- **Default Credentials**:
+  - **Email / Username**: `admin@daksh.io` (or `admin`)
+  - **Password**: `dakshpassword123`
+
+### Pre-Populated Board:
+Planka is automatically pre-configured with:
+- **Project**: `Daksh Game BaaS`
+- **Board**: `Master Stories & AI Roadmap`
+- **Lists**: `Backlog`, `To Do`, `In Progress`, `Review & TDD`, and `Done & Verified`
+- **All 17 Master Stories**: Pre-loaded as cards with full User Stories, Deliverables, Security & Compliance, and Acceptance Criteria.
+
+### Launch / Manage Planka
 ```bash
-# Launch Plane Community Edition containers (Backend, Frontend, DB, Redis, Nginx Proxy)
-./scripts/start_plane.sh
+# Start Planka & Postgres containers
+docker compose -f deploy/pm/docker-compose.planka.yml up -d
+
+# Re-import / sync stories at any time
+node scripts/import_stories_to_planka.js
 ```
-*Access the Plane Web UI at **`http://localhost:8090`**.*
-
-### Importing All 17 Master Stories into Plane
-1. Open `http://localhost:8090` and create your workspace (e.g., `daksh`) and project (`Daksh Game BaaS`).
-2. Navigate to **Project Settings ➔ Import ➔ CSV**.
-3. Select the pre-generated file: **`tasks/daksh_stories_plane_import.csv`**.
-4. All 17 stories will populate with User Stories, Deliverables, Security rules, and Acceptance Criteria.
-
-### Automated Sync CLI
-```bash
-# Regenerate CSV or sync to Plane REST API
-node scripts/sync_to_plane.js
-```
-
----
-
-## Built-in Studio AI Project Board
-
-You can also track tasks directly inside the Daksh Studio without launching external tools:
-- **Interactive UI**: Open **`http://localhost:3000/dashboard/tasks`**
-- **Programmatic REST API for AI Agents**:
-  ```bash
-  # Query backlog or active stories
-  curl -s "http://localhost:3000/api/tasks?category=cloud"
-
-  # AI updates task status & verification gate
-  curl -X PATCH http://localhost:3000/api/tasks \
-    -H "Content-Type: application/json" \
-    -d '{"id":"STORY-15","status":"done","verification_gate":"5 Super-Regions deployed"}'
-  ```
 
 ---
 

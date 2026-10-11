@@ -10,7 +10,7 @@ import {
   Swords, Server, Target, 
   UsersRound, Trophy, 
   Save, BarChart3, LineChart, Network, 
-  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard, CheckSquare
+  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
 
@@ -171,7 +171,6 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
             
             <SidebarSection title="Title Overview">
               <SidebarLink href={`/dashboard/${id}`} icon={LayoutDashboard} label="Dashboard" />
-              <SidebarLink href={`/dashboard/${id}/tasks`} icon={CheckSquare} label="AI Task Board" />
               <SidebarLink href={`/dashboard/${id}/title-data`} icon={Database} label="Title Data" />
             </SidebarSection>
 
