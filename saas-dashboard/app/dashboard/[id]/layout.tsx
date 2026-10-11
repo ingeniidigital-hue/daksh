@@ -9,7 +9,7 @@ import {
   ShoppingBag, DollarSign, Gift, 
   Swords, Server, Target, 
   UsersRound, Trophy, 
-  Save, BarChart3, LineChart, Network, 
+  Save, BarChart3, LineChart, Network, TrendingUp,
   LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
@@ -211,6 +211,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarSection>
 
             <SidebarSection title="Data & Analytics">
+              <SidebarLink href={`/dashboard/${id}/analytics`} icon={TrendingUp} label="Executive Analytics" />
               <SidebarLink href={`/dashboard/${id}/events`} icon={LineChart} label="Events" />
               <SidebarLink href={`/dashboard/${id}/webhooks`} icon={Network} label="Webhooks" />
             </SidebarSection>
