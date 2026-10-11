@@ -135,55 +135,41 @@ export default function Dashboard() {
   if (!isClient) return null;
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9] text-gray-800 font-sans pb-16">
-      {/* AdminLTE Top Navbar */}
-      <nav className="bg-[#1f2937] text-white border-b border-gray-700 sticky top-0 z-40 h-12 flex items-center px-4 justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-sm tracking-wider text-white shadow-xs">
-            D
-          </div>
-          <span className="font-bold text-sm tracking-tight text-white uppercase">Daksh Console</span>
-          <div className="h-4 w-px bg-gray-600"></div>
-          <Link href="/dashboard" className="text-xs font-semibold text-white">
-            Titles Directory
-          </Link>
-          <Link href="/dashboard/marketplace" className="text-xs text-gray-300 hover:text-white transition-colors">
-            Marketplace
-          </Link>
-        </div>
-        <div className="flex items-center space-x-3">
-          {/* Mode Switcher: Manual vs AI Mode */}
-          <ModeSwitcher />
-
-          {/* Optional Manual Inspector Toggle in AI Mode */}
-          {mode === "ai" && (
-            <button
-              onClick={() => setShowManualInspector(!showManualInspector)}
-              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs border transition-colors ${
-                showManualInspector
-                  ? "bg-indigo-600 text-white border-indigo-500 font-medium"
-                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700"
-              }`}
-              title="Toggle manual raw tables inspector"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">{showManualInspector ? "Hide Inspector" : "Manual Inspector"}</span>
-            </button>
-          )}
-
-          <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-[11px] font-mono">Core: {systemHealth?.status === "healthy" ? "Online" : "Connecting"}</span>
-          </div>
-          <div className="h-4 w-px bg-gray-700"></div>
-          <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-200 border border-slate-600">
-              AD
+    <div className={`min-h-screen font-sans ${mode === "ai" ? "h-screen bg-white overflow-hidden flex flex-col" : "bg-[#f4f6f9] text-gray-800 pb-16"}`}>
+      {/* AdminLTE Top Navbar (Only in Manual Mode or when Inspector is toggled) */}
+      {(mode === "manual" || showManualInspector) && (
+        <nav className="bg-[#1f2937] text-white border-b border-gray-700 sticky top-0 z-40 h-12 flex items-center px-4 justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-sm tracking-wider text-white shadow-xs">
+              D
             </div>
-            <span className="text-xs font-medium text-gray-300">{userName}</span>
+            <span className="font-bold text-sm tracking-tight text-white uppercase">Daksh Console</span>
+            <div className="h-4 w-px bg-gray-600"></div>
+            <Link href="/dashboard" className="text-xs font-semibold text-white">
+              Titles Directory
+            </Link>
+            <Link href="/dashboard/marketplace" className="text-xs text-gray-300 hover:text-white transition-colors">
+              Marketplace
+            </Link>
           </div>
-        </div>
-      </nav>
+          <div className="flex items-center space-x-3">
+            {/* Mode Switcher: Manual vs AI Mode */}
+            <ModeSwitcher />
+
+            <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-[11px] font-mono">Core: {systemHealth?.status === "healthy" ? "Online" : "Connecting"}</span>
+            </div>
+            <div className="h-4 w-px bg-gray-700"></div>
+            <div className="flex items-center space-x-2">
+              <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-200 border border-slate-600">
+                AD
+              </div>
+              <span className="text-xs font-medium text-gray-300">{userName}</span>
+            </div>
+          </div>
+        </nav>
+      )}
 
       {/* AI Orchestrator Console (Visible only in AI Mode) */}
       {mode === "ai" && (

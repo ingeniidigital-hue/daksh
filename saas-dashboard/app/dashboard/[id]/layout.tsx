@@ -83,10 +83,11 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9] flex flex-col font-sans text-gray-800">
+    <div className="h-screen bg-white flex flex-col font-sans text-gray-800 overflow-hidden">
       
-      {/* AdminLTE-Style Top Navigation Bar */}
-      <nav className="bg-[#1f2937] text-white flex items-center justify-between px-4 h-12 shrink-0 sticky top-0 z-50 border-b border-gray-700">
+      {/* AdminLTE-Style Top Navigation Bar (Only in Manual Mode or when Inspector is toggled) */}
+      {(mode === "manual" || showManualInspector) && (
+        <nav className="bg-[#1f2937] text-white flex items-center justify-between px-4 h-12 shrink-0 sticky top-0 z-50 border-b border-gray-700">
         <div className="flex items-center space-x-3">
           <Link href="/dashboard" className="flex items-center space-x-2.5 hover:opacity-90 transition-opacity">
             <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-sm tracking-wider text-white shadow-xs">
@@ -162,6 +163,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </nav>
+      )}
 
       {/* Main Container */}
       <div className="flex flex-1 overflow-hidden">
@@ -235,7 +237,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Clean AI Workspace / Content Area */}
         {mode === "ai" ? (
-          <div className="flex-1 flex flex-col overflow-y-auto bg-[#f4f6f9]">
+          <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
             <AIOrchestratorConsole 
               titleId={id} 
               titleName={titleName} 
@@ -244,7 +246,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
               isInspectorOpen={showManualInspector}
             />
             {showManualInspector && (
-              <div className="border-t-2 border-gray-300 bg-[#f4f6f9] p-6 animate-in fade-in duration-200">
+              <div className="h-1/2 border-t-2 border-gray-300 bg-[#f4f6f9] p-6 overflow-y-auto animate-in fade-in duration-200">
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-300">
                   <div className="flex items-center space-x-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
