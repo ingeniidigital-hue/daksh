@@ -1,10 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { 
-  Sparkles, Terminal, X, Check, ArrowRight, ShieldCheck, 
-  Coins, ShoppingBag, Trophy, CloudLightning, Database, 
-  CheckCircle2, AlertCircle, RefreshCw, Cpu, Layers, Flame
+import {
+  Sparkles,
+  Terminal,
+  X,
+  Check,
+  ArrowRight,
+  ShieldCheck,
+  ShoppingBag,
+  Coins,
+  Database,
+  CheckCircle2,
+  AlertCircle,
+  Cpu,
+  Layers,
+  Flame,
+  Code2,
+  Lock
 } from "lucide-react";
 
 interface AICommandMenuProps {
@@ -14,37 +27,19 @@ interface AICommandMenuProps {
   titleName: string;
 }
 
-interface GeneratedItem {
-  id: string;
-  name: string;
-  type: string;
-  price: string;
-  isStackable: boolean;
-  customData: string;
-  imageUrls: string[];
-}
-
-interface ActionPlan {
-  title: string;
-  description: string;
-  category: "Catalog" | "Bundle" | "Leaderboard" | "Rule" | "TitleData" | "Simulation";
-  itemsToCreate?: GeneratedItem[];
-  bundleToCreate?: any;
-  leaderboardToCreate?: any;
-  ruleToCreate?: any;
-  titleDataToCreate?: any;
-  simulationResult?: {
-    totalMatches: number;
-    inflationRisk: "Low" | "Moderate" | "High";
-    sinkSourceRatio: string;
-    advice: string;
-  };
+interface ParsedActionPreview {
+  action: "CREATE_CATALOG_ITEM" | "ADJUST_WALLET" | "SET_TITLE_DATA" | "REJECTED";
+  confidence: number;
+  payload: any;
+  suggestions?: string[];
+  error?: string;
 }
 
 export default function AICommandMenu({ isOpen, onClose, titleId, titleName }: AICommandMenuProps) {
   const [prompt, setPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [parsedIntent, setParsedIntent] = useState<ParsedActionPreview | null>(null);
+  const [executionResult, setExecutionResult] = useState<any>(null);
   const [appliedSuccess, setAppliedSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,215 +47,127 @@ export default function AICommandMenu({ isOpen, onClose, titleId, titleName }: A
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
       setAppliedSuccess(false);
+      setExecutionResult(null);
     }
   }, [isOpen]);
 
-  // Quick Action Recipes
+  // Quick Action Recipes for instant inspiration
   const quickRecipes = [
     {
-      label: "⚔️ 5-Tier Weapon Progression",
-      prompt: "Generate a complete 5-tier fantasy sword progression: Wooden Practice Blade, Iron Broadsword, Steel Longsword, Mithril Claymore, and Dragon Slayer with balanced damage and gold prices."
+      label: "⚔️ Epic Dragon Armor",
+      prompt: "Create an Epic Dragon Armor for 500 Gems"
     },
     {
-      label: "🎁 Weekend Flash Sale Bundle",
-      prompt: "Create a 48-Hour Cyber Neon Bundle containing a Legendary Cyber Rifle, 1,000 Neon Credits, and a 30% discount store override."
+      label: "🗡️ Rare Mithril Sword",
+      prompt: "Create a Rare Mithril Sword for 350 Gold"
     },
     {
-      label: "🏆 Season 1 Ranked Leaderboard",
-      prompt: "Create a Weekly PvP Ranked Leaderboard resetting every Sunday midnight GMT with automated rewards for top 100 players."
+      label: "💰 Credit Player Currency",
+      prompt: "Give 1000 Gold to player hero_99"
     },
     {
-      label: "⚡ Level-Up Reward Automation Rule",
-      prompt: "Set up an automation rule: when a player achieves level 10, grant 250 Gems and unlock the Veteran Player Title."
-    },
-    {
-      label: "🧪 1M Match Economy Simulation",
-      prompt: "Simulate our game economy for 1,000,000 matches: test if dropping 15-25 gold per victory causes runaway potion inflation."
+      label: "⚡ Remote Title Data Config",
+      prompt: "Set config XP_Multiplier to 2.5"
     }
   ];
 
-  const handleRunPrompt = (promptText: string) => {
-    const text = promptText.trim().toLowerCase();
-    if (!text) return;
+  // Parse prompt via real backend AI route with Zod schema validation
+  const handleParsePrompt = async (textToParse: string) => {
+    const text = textToParse || prompt;
+    if (!text.trim()) return;
 
-    setIsGenerating(true);
-    setActionPlan(null);
-    setAppliedSuccess(false);
+    setIsProcessing(true);
+    setExecutionResult(null);
 
-    setTimeout(() => {
-      setIsGenerating(false);
+    try {
+      const res = await fetch("/api/ai/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titleId: titleId || "TITLE_GAME_01",
+          prompt: text,
+          execute: false
+        })
+      });
 
-      if (text.includes("simulation") || text.includes("simulate") || text.includes("inflation")) {
-        setActionPlan({
-          title: "Monte Carlo Economy Balance Simulation",
-          description: "Simulated 1,000,000 matches with 45,000 synthetic player profiles over 30 virtual days.",
-          category: "Simulation",
-          simulationResult: {
-            totalMatches: 1000000,
-            inflationRisk: "Low",
-            sinkSourceRatio: "1.08 : 1.00 (Healthy Sinks Exceed Sources)",
-            advice: "Gold faucet is well counterbalanced by repair costs and potion consumable sinks. Economy is stable to publish."
-          }
-        });
-      } else if (text.includes("leaderboard") || text.includes("ranked") || text.includes("pvp")) {
-        setActionPlan({
-          title: "Create Season 1 PvP Ranked Leaderboard",
-          description: "Configures global ranked leaderboard with weekly reset cadence and top-tier reward tiers.",
-          category: "Leaderboard",
-          leaderboardToCreate: {
-            name: "Arena_PvP_Season_1",
-            reset: "Weekly",
-            aggregation: "Max",
-            rewardTierTop10: "500 Gems + Mythic Badge",
-            rewardTierTop100: "150 Gems"
-          }
-        });
-      } else if (text.includes("rule") || text.includes("automation") || text.includes("reward")) {
-        setActionPlan({
-          title: "Create Player Progression Automation Rule",
-          description: "Listens for level_up events and automatically executes reward grants without backend code.",
-          category: "Rule",
-          ruleToCreate: {
-            id: `rule_lvl10_${Date.now()}`,
-            name: "Grant Level 10 Veteran Rewards",
-            triggerEvent: "player_level_up",
-            condition: "player.level >= 10",
-            action: "GrantVirtualCurrency(250, 'GEMS')"
-          }
-        });
-      } else if (text.includes("bundle") || text.includes("sale") || text.includes("flash")) {
-        setActionPlan({
-          title: "Generate Flash Sale & Cyber Neon Bundle",
-          description: "Creates bundle package and attaches a 30% store discount override.",
-          category: "Bundle",
-          itemsToCreate: [
-            {
-              id: "item_cyber_rifle_legendary",
-              name: "Cyber Neon Plasma Rifle",
-              type: "Weapon",
-              price: "1200",
-              isStackable: false,
-              customData: JSON.stringify({ rarity: "Legendary", elemental: "Plasma", dps: 245 }),
-              imageUrls: ["https://picsum.photos/seed/cyberrifle/200", "", ""]
-            }
-          ],
-          bundleToCreate: {
-            id: "bundle_cyber_flash_48h",
-            name: "48H Cyber Neon Starter Pack",
-            price: "1500",
-            imageUrls: ["https://picsum.photos/seed/bundlecyber/200", "", ""],
-            items: [
-              { itemId: "item_cyber_rifle_legendary", quantity: 1 }
-            ]
-          }
-        });
+      const data = await res.json();
+      if (res.ok && data.intent) {
+        setParsedIntent(data.intent);
+      } else if (data.intent) {
+        setParsedIntent(data.intent);
       } else {
-        // Default: 5-Tier Weapon Progression
-        setActionPlan({
-          title: "Generate 5-Tier Fantasy Sword Progression",
-          description: "Synthesized 5 normalized weapons with scaled stats, prices, and Economy V2 item metadata.",
-          category: "Catalog",
-          itemsToCreate: [
-            {
-              id: "wpn_sword_t1_wood",
-              name: "Wooden Practice Blade",
-              type: "Weapon",
-              price: "50",
-              isStackable: false,
-              customData: JSON.stringify({ tier: 1, damage: 12, rarity: "Common" }),
-              imageUrls: ["https://picsum.photos/seed/woodsword/200", "", ""]
-            },
-            {
-              id: "wpn_sword_t2_iron",
-              name: "Iron Broadsword",
-              type: "Weapon",
-              price: "180",
-              isStackable: false,
-              customData: JSON.stringify({ tier: 2, damage: 28, rarity: "Uncommon" }),
-              imageUrls: ["https://picsum.photos/seed/ironsword/200", "", ""]
-            },
-            {
-              id: "wpn_sword_t3_steel",
-              name: "Steel Longsword",
-              type: "Weapon",
-              price: "450",
-              isStackable: false,
-              customData: JSON.stringify({ tier: 3, damage: 55, rarity: "Rare" }),
-              imageUrls: ["https://picsum.photos/seed/steelsword/200", "", ""]
-            },
-            {
-              id: "wpn_sword_t4_mithril",
-              name: "Mithril Claymore",
-              type: "Weapon",
-              price: "1200",
-              isStackable: false,
-              customData: JSON.stringify({ tier: 4, damage: 110, rarity: "Epic" }),
-              imageUrls: ["https://picsum.photos/seed/mithrilsword/200", "", ""]
-            },
-            {
-              id: "wpn_sword_t5_dragon",
-              name: "Dragon Slayer Blade",
-              type: "Weapon",
-              price: "3500",
-              isStackable: false,
-              customData: JSON.stringify({ tier: 5, damage: 240, rarity: "Legendary", effect: "Flame Strike" }),
-              imageUrls: ["https://picsum.photos/seed/dragonsword/200", "", ""]
-            }
-          ]
+        setParsedIntent({
+          action: "REJECTED",
+          confidence: 0,
+          error: data.error || "Failed to parse command",
+          suggestions: data.suggestions || ["Try: 'Create an Epic Sword for 200 Gold'"],
+          payload: null
         });
       }
-    }, 1200);
+    } catch (err: any) {
+      setParsedIntent({
+        action: "REJECTED",
+        confidence: 0,
+        error: err.message,
+        suggestions: ["Try: 'Create an Epic Sword for 200 Gold'"],
+        payload: null
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleApplyAction = () => {
-    if (!actionPlan) return;
+  // Execute confirmed intent against real backend API
+  const handleExecuteAction = async () => {
+    if (!parsedIntent || parsedIntent.action === "REJECTED") return;
 
-    // Apply Catalog Items
-    if (actionPlan.itemsToCreate && actionPlan.itemsToCreate.length > 0) {
-      const existingItems = JSON.parse(localStorage.getItem(`catalog_items_${titleId}`) || "[]");
-      const updatedItems = [...actionPlan.itemsToCreate, ...existingItems];
-      localStorage.setItem(`catalog_items_${titleId}`, JSON.stringify(updatedItems));
+    setIsProcessing(true);
+    try {
+      const res = await fetch("/api/ai/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titleId: titleId || "TITLE_GAME_01",
+          prompt: prompt,
+          execute: true
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.execution) {
+        setExecutionResult(data.execution);
+        setAppliedSuccess(true);
+
+        // Dispatch global CustomEvent for zero-reload live views
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("daksh_data_updated", {
+              detail: data.execution.eventPayload || { titleId }
+            })
+          );
+        }
+
+        setTimeout(() => {
+          onClose();
+          setParsedIntent(null);
+          setPrompt("");
+          setAppliedSuccess(false);
+        }, 1800);
+      } else {
+        alert(data.error || "Failed to execute command");
+      }
+    } catch (err: any) {
+      alert(`Execution error: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
     }
-
-    // Apply Bundle
-    if (actionPlan.bundleToCreate) {
-      const existingBundles = JSON.parse(localStorage.getItem(`catalog_bundles_${titleId}`) || "[]");
-      const updatedBundles = [actionPlan.bundleToCreate, ...existingBundles];
-      localStorage.setItem(`catalog_bundles_${titleId}`, JSON.stringify(updatedBundles));
-    }
-
-    // Apply Leaderboard
-    if (actionPlan.leaderboardToCreate) {
-      const existingBoards = JSON.parse(localStorage.getItem(`leaderboards_${titleId}`) || "[]");
-      const updatedBoards = [actionPlan.leaderboardToCreate, ...existingBoards];
-      localStorage.setItem(`leaderboards_${titleId}`, JSON.stringify(updatedBoards));
-    }
-
-    // Apply Automation Rule
-    if (actionPlan.ruleToCreate) {
-      const existingRules = JSON.parse(localStorage.getItem(`liveops_rules_${titleId}`) || "[]");
-      const updatedRules = [actionPlan.ruleToCreate, ...existingRules];
-      localStorage.setItem(`liveops_rules_${titleId}`, JSON.stringify(updatedRules));
-    }
-
-    // Dispatch global event for open views to reload
-    window.dispatchEvent(new CustomEvent("daksh_data_updated", { detail: { titleId } }));
-
-    setAppliedSuccess(true);
-    setTimeout(() => {
-      onClose();
-      setActionPlan(null);
-      setPrompt("");
-      setAppliedSuccess(false);
-    }, 1800);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
       <div className="bg-[#1C2026] text-white w-full max-w-2xl rounded-3xl shadow-2xl border border-gray-700/80 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
-        
         {/* Header Bar */}
         <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-[#161A1F]">
           <div className="flex items-center space-x-2.5">
@@ -268,225 +175,205 @@ export default function AICommandMenu({ isOpen, onClose, titleId, titleName }: A
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="font-bold text-sm tracking-tight text-white">AI Command Menu</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-semibold border border-blue-500/30">
-                  Primary Mode
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm tracking-tight text-white">AI Command Menu</span>
+                <span className="text-[10px] font-mono uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded">
+                  Open MCP Ready
                 </span>
               </div>
-              <p className="text-xs text-gray-400 font-medium">Zero-Click Game Backend Automation • {titleName}</p>
+              <p className="text-[11px] text-gray-400">
+                Natural language game ops engine for <span className="text-gray-200">{titleName || "Active Game"}</span>
+              </p>
             </div>
           </div>
-
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono text-gray-400 bg-gray-800 rounded border border-gray-700">
+              ESC
+            </kbd>
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Search & Prompt Input */}
-        <div className="p-6 border-b border-gray-800/80 bg-[#1A1E24]">
-          <div className="relative">
-            <input 
+        {/* Input Bar */}
+        <div className="p-4 border-b border-gray-800 bg-[#191D24]">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleParsePrompt(prompt);
+            }}
+            className="relative flex items-center"
+          >
+            <Terminal className="w-5 h-5 text-blue-400 absolute left-4 shrink-0" />
+            <input
               ref={inputRef}
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleRunPrompt(prompt);
-                }
-              }}
-              placeholder="Tell AI what to build: 'Create a 5-tier sword catalog', 'Launch weekend flash sale', 'Simulate inflation'..."
-              className="w-full bg-[#12151A] text-white placeholder-gray-500 text-sm px-4 py-3.5 pl-11 rounded-2xl border border-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="e.g. 'Create an Epic Dragon Armor for 500 Gems' or 'Give 1000 Gold to player hero_99'"
+              className="w-full bg-[#13161B] text-white placeholder-gray-500 text-sm rounded-2xl pl-12 pr-28 py-3.5 border border-gray-700/60 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono"
             />
-            <Terminal className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
-            {prompt && (
-              <button 
-                onClick={() => handleRunPrompt(prompt)}
-                disabled={isGenerating}
-                className="absolute right-2 top-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl flex items-center transition-colors shadow-sm disabled:opacity-50"
-              >
-                {isGenerating ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5 mr-1" />
-                )}
-                Generate
-              </button>
-            )}
-          </div>
+            <button
+              type="submit"
+              disabled={isProcessing || !prompt.trim()}
+              className="absolute right-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-blue-600/30"
+            >
+              {isProcessing ? (
+                <span>Parsing...</span>
+              ) : (
+                <>
+                  <span>Parse</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
+            </button>
+          </form>
 
-          {/* Quick Action Recipes */}
-          <div className="mt-4">
-            <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-amber-400" /> Instant LiveOps Recipes (Click to Generate):
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {quickRecipes.map((recipe, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setPrompt(recipe.prompt);
-                    handleRunPrompt(recipe.prompt);
-                  }}
-                  className="px-3 py-1.5 bg-[#252A33] hover:bg-[#2F3542] border border-gray-700 text-xs text-gray-300 hover:text-white rounded-xl transition-colors font-medium flex items-center"
-                >
-                  {recipe.label}
-                </button>
-              ))}
-            </div>
+          {/* Quick Recipe Chips */}
+          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider shrink-0">
+              Quick:
+            </span>
+            {quickRecipes.map((r, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setPrompt(r.prompt);
+                  handleParsePrompt(r.prompt);
+                }}
+                className="text-xs bg-[#242933] hover:bg-[#2F3542] text-gray-300 hover:text-white px-3 py-1 rounded-full border border-gray-700/60 whitespace-nowrap transition-all"
+              >
+                {r.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          
-          {isGenerating && (
-            <div className="py-12 text-center">
-              <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-              <p className="text-sm font-semibold text-gray-200">AI Synthesizing Game Backend Objects...</p>
-              <p className="text-xs text-gray-500 mt-1">Generating Economy V2 schemas, balance curves, and automated rules.</p>
-            </div>
-          )}
-
-          {appliedSuccess && (
-            <div className="p-5 bg-green-500/10 border border-green-500/30 rounded-2xl flex items-center space-x-3 text-green-400">
-              <CheckCircle2 className="w-6 h-6 shrink-0" />
-              <div>
-                <h4 className="text-sm font-bold text-white">LiveOps Data Committed Instantly!</h4>
-                <p className="text-xs text-green-300/80 mt-0.5">
-                  The data has been injected into your game backend. You can inspect it right now in the PlayFab manual view.
-                </p>
+        {/* Content Body: Preview & Execution */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-4">
+          {appliedSuccess ? (
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 animate-in zoom-in-75">
+                <Check className="w-6 h-6 stroke-[3]" />
               </div>
+              <h3 className="text-lg font-bold text-white">Action Executed Live!</h3>
+              <p className="text-xs text-gray-400 max-w-sm">
+                Changes committed to backend database and event <code className="text-blue-400">daksh_data_updated</code> was broadcast.
+              </p>
             </div>
-          )}
-
-          {!isGenerating && actionPlan && !appliedSuccess && (
+          ) : parsedIntent ? (
             <div className="space-y-4">
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
-                    Proposed AI Action Plan • {actionPlan.category}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-blue-400/20 text-blue-300 font-mono">
-                    Zero-Click Ready
-                  </span>
-                </div>
-                <h4 className="text-base font-bold text-white">{actionPlan.title}</h4>
-                <p className="text-xs text-gray-300 mt-1">{actionPlan.description}</p>
-              </div>
-
-              {/* Items Preview */}
-              {actionPlan.itemsToCreate && (
-                <div>
-                  <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Generated Economy V2 Items ({actionPlan.itemsToCreate.length})
+              {parsedIntent.action === "REJECTED" ? (
+                <div className="p-4 bg-rose-950/30 border border-rose-500/40 rounded-2xl space-y-3 text-xs">
+                  <div className="flex items-center gap-2 text-rose-400 font-bold">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Command Rejected</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {actionPlan.itemsToCreate.map((item) => (
-                      <div key={item.id} className="p-3 bg-[#242A34] rounded-xl border border-gray-700/60 flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-blue-400 shrink-0 font-bold text-xs">
-                            ⚔️
-                          </div>
-                          <div>
-                            <div className="text-xs font-semibold text-white">{item.name}</div>
-                            <div className="text-[10px] text-gray-400 font-mono">{item.id}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs font-bold text-amber-400">{item.price} Gold</span>
+                  <p className="text-rose-200">{parsedIntent.error}</p>
+                  {parsedIntent.suggestions && (
+                    <div className="pt-2 border-t border-rose-900/40">
+                      <p className="text-gray-400 font-semibold mb-1">Suggestions:</p>
+                      <ul className="space-y-1 list-disc list-inside text-gray-300">
+                        {parsedIntent.suggestions.map((s, idx) => (
+                          <li key={idx} className="font-mono">{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#15181E] border border-gray-800 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span className="font-semibold text-sm text-white">Parsed Intent Preview</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                        {parsedIntent.action}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300">
+                        {Math.round(parsedIntent.confidence * 100)}% Confidence
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Intent Details */}
+                  {parsedIntent.action === "CREATE_CATALOG_ITEM" && (
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 bg-black/40 rounded-xl border border-gray-800 space-y-1">
+                        <span className="text-gray-400 block">Item Name & ID</span>
+                        <span className="font-bold text-white block">{parsedIntent.payload.name}</span>
+                        <code className="text-[11px] text-gray-400 font-mono">{parsedIntent.payload.id}</code>
+                      </div>
+                      <div className="p-3 bg-black/40 rounded-xl border border-gray-800 space-y-1">
+                        <span className="text-gray-400 block">Prices & Rarity</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-emerald-400 font-bold">
+                            {JSON.stringify(parsedIntent.payload.prices)}
+                          </span>
+                          {parsedIntent.payload.metadata?.rarity && (
+                            <span className="px-1.5 py-0.2 text-[10px] rounded bg-purple-500/20 text-purple-300">
+                              {parsedIntent.payload.metadata.rarity}
+                            </span>
+                          )}
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  {parsedIntent.action === "ADJUST_WALLET" && (
+                    <div className="p-3 bg-black/40 rounded-xl border border-gray-800 text-xs space-y-1">
+                      <span className="text-gray-400">Target Player & Balance</span>
+                      <div className="font-mono text-emerald-400">
+                        Grant +{parsedIntent.payload.amount} {parsedIntent.payload.currencyCode} to player{" "}
+                        <span className="text-white font-bold">{parsedIntent.payload.playerId}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {parsedIntent.action === "SET_TITLE_DATA" && (
+                    <div className="p-3 bg-black/40 rounded-xl border border-gray-800 text-xs space-y-1">
+                      <span className="text-gray-400">Remote Config Key</span>
+                      <div className="font-mono text-amber-400">
+                        {parsedIntent.payload.key} = {parsedIntent.payload.value}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex justify-end gap-2 border-t border-gray-800">
+                    <button
+                      onClick={() => setParsedIntent(null)}
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleExecuteAction}
+                      disabled={isProcessing}
+                      className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/30"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Execute Action Live</span>
+                    </button>
                   </div>
                 </div>
               )}
-
-              {/* Simulation Result */}
-              {actionPlan.simulationResult && (
-                <div className="p-4 bg-[#242A34] rounded-2xl border border-gray-700 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-300">Simulation Volume</span>
-                    <span className="text-xs font-mono font-bold text-white">1,000,000 Matches</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-300">Inflation Risk</span>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-400">
-                      {actionPlan.simulationResult.inflationRisk} Risk
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-300">Sink to Source Ratio</span>
-                    <span className="text-xs font-mono text-blue-400 font-bold">{actionPlan.simulationResult.sinkSourceRatio}</span>
-                  </div>
-                  <div className="pt-2 border-t border-gray-700 text-xs text-gray-300 italic">
-                    💡 {actionPlan.simulationResult.advice}
-                  </div>
-                </div>
-              )}
-
-              {/* Leaderboard Result */}
-              {actionPlan.leaderboardToCreate && (
-                <div className="p-4 bg-[#242A34] rounded-2xl border border-gray-700 space-y-2 text-xs">
-                  <div className="flex justify-between"><span className="text-gray-400">Leaderboard Name:</span><span className="font-bold text-white">{actionPlan.leaderboardToCreate.name}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Reset Cadence:</span><span className="text-blue-400 font-semibold">{actionPlan.leaderboardToCreate.reset}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Top 10 Reward:</span><span className="text-amber-400 font-semibold">{actionPlan.leaderboardToCreate.rewardTierTop10}</span></div>
-                </div>
-              )}
-
-              {/* Automation Rule Result */}
-              {actionPlan.ruleToCreate && (
-                <div className="p-4 bg-[#242A34] rounded-2xl border border-gray-700 space-y-2 text-xs">
-                  <div className="flex justify-between"><span className="text-gray-400">Rule Name:</span><span className="font-bold text-white">{actionPlan.ruleToCreate.name}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Trigger:</span><span className="text-blue-400 font-mono">{actionPlan.ruleToCreate.triggerEvent}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-400">Action:</span><span className="text-green-400 font-mono">{actionPlan.ruleToCreate.action}</span></div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-gray-800 flex justify-end space-x-3">
-                <button
-                  onClick={() => setActionPlan(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  Discard
-                </button>
-                <button
-                  onClick={handleApplyAction}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-600/20 flex items-center transition-all"
-                >
-                  <Check className="w-4 h-4 mr-1.5" />
-                  Execute & Commit to LiveOps
-                </button>
-              </div>
             </div>
-          )}
-
-          {!isGenerating && !actionPlan && !appliedSuccess && (
-            <div className="py-8 text-center text-gray-500">
-              <Cpu className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-              <p className="text-xs">Select an instant recipe above or prompt any custom LiveOps action.</p>
-              <p className="text-[11px] text-gray-600 mt-1">
-                Tip: Press <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-gray-400 font-mono">Esc</kbd> to close anytime.
+          ) : (
+            <div className="text-center py-10 text-gray-500 space-y-2">
+              <Code2 className="w-8 h-8 mx-auto text-gray-600" />
+              <p className="text-xs">Type a command above or click one of the quick action recipes.</p>
+              <p className="text-[11px] text-gray-600">
+                Supports catalog creation, wallet adjustments, and title configuration.
               </p>
             </div>
           )}
         </div>
-
-        {/* Footer Info */}
-        <div className="px-6 py-3 bg-[#161A1F] border-t border-gray-800 flex items-center justify-between text-[11px] text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-            AI Mode is primary. Manual PlayFab view remains available for inspection.
-          </span>
-          <span className="font-mono text-gray-500">Shortcut: ⌘K / Ctrl+K</span>
-        </div>
-
       </div>
     </div>
   );
