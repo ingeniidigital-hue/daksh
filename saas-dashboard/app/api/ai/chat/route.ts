@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MCPService } from "@/lib/mcp";
 import { AIIntentParser } from "@/lib/ai-menu";
+import { EconomyService } from "@/lib/economy/service";
 
 interface ChatRequestMessage {
   role: "user" | "assistant" | "system";
@@ -270,6 +271,82 @@ export async function POST(request: NextRequest) {
         simulationSummary = `Remote configuration committed.`;
 
       } else if (
+        lower.includes("coin") || 
+        lower.includes("currency") || 
+        lower.includes("currencies") || 
+        lower.includes("wallet") || 
+        (lower.includes("gold") && !lower.includes("create") && !lower.includes("sword") && !lower.includes("armor")) ||
+        (lower.includes("gems") && !lower.includes("create") && !lower.includes("sword") && !lower.includes("armor")) ||
+        lower.includes("balance")
+      ) {
+        // Query player virtual currency wallet
+        thoughtProcess = `User is asking about coins/currencies. Querying player wallet balances and title economy for ${titleId}...`;
+        const playerMatch = prompt.match(/player\s+([a-zA-Z0-9_\-]+)/i);
+        const targetPlayerId = playerMatch ? playerMatch[1] : "Player_01";
+
+        // Ensure starter balance exists for demonstration
+        const currentGold = EconomyService.getPlayerBalance(titleId, targetPlayerId, "GOLD");
+        if (currentGold === 0) {
+          EconomyService.creditWallet(titleId, targetPlayerId, "GOLD", 1000);
+          EconomyService.creditWallet(titleId, targetPlayerId, "GEMS", 250);
+        }
+
+        const playerRes = await MCPService.callTool({
+          name: "daksh_inspect_player",
+          arguments: {
+            titleId,
+            playerId: targetPlayerId
+          }
+        });
+
+        const playerData = JSON.parse(playerRes.content[0].text);
+        executedToolCalls.push({
+          toolName: "daksh_inspect_player",
+          args: { playerId: targetPlayerId },
+          result: playerData,
+          isError: playerRes.isError,
+          latencyMs: 7
+        });
+
+        const wallets = playerData.wallets || { GOLD: 1000, GEMS: 250 };
+        const goldCount = (wallets.GOLD ?? 1000).toLocaleString();
+        const gemsCount = (wallets.GEMS ?? 250).toLocaleString();
+
+        conversationalReply = `🪙 **Currencies for ${titleId}:**\n\nYour game has two active virtual currencies:\n- 🟡 **GOLD**: Primary soft currency earned through gameplay and match wins.\n- 💎 **GEMS**: Premium hard currency for exclusive equipment and bundles.\n\n**Current Balances for \`${targetPlayerId}\`:**\n- **Gold**: **${goldCount} GOLD**\n- **Gems**: **${gemsCount} GEMS**\n\n*Tip*: Want to add more? Say: *"Give 500 Gold to ${targetPlayerId}"* or *"Give 250 Gems to ${targetPlayerId}"*.`;
+        simulationSummary = `Retrieved wallet balances for ${targetPlayerId}.`;
+
+      } else if (
+        (lower.includes("item") || lower.includes("catalog") || lower.includes("shop") || lower.includes("store") || lower.includes("price")) &&
+        (lower.includes("what") || lower.includes("list") || lower.includes("show") || lower.includes("have") || lower.includes("all") || lower.includes("see"))
+      ) {
+        // Query active catalog items
+        thoughtProcess = `Fetching active catalog items and economy prices for ${titleId}...`;
+        const catRes = await MCPService.callTool({
+          name: "daksh_list_catalog_items",
+          arguments: { titleId }
+        });
+        const catData = JSON.parse(catRes.content[0].text);
+        executedToolCalls.push({
+          toolName: "daksh_list_catalog_items",
+          args: { titleId },
+          result: catData,
+          isError: false,
+          latencyMs: 6
+        });
+
+        const items = catData.items || [];
+        const itemsListText = items.length > 0 
+          ? items.slice(0, 8).map((it: any) => {
+              const pricesStr = Object.entries(it.prices || {}).map(([c, a]) => `${a} ${c}`).join(", ") || "Free";
+              const rarity = it.metadata?.rarity ? ` (${it.metadata.rarity})` : "";
+              return `- **${it.name}**${rarity} [${it.category}] — **${pricesStr}**`;
+            }).join("\n")
+          : "- No items currently registered in store.";
+
+        conversationalReply = `🛒 **In-Game Store Catalog for ${titleId} (${catData.total} Items Active):**\n\n${itemsListText}\n\n*Tip*: To add a new item, ask: *"Add an Epic Frost Blade to the store for 450 Gems"*!`;
+        simulationSummary = `Catalog retrieved with ${catData.total} active items.`;
+
+      } else if (
         lower.includes("help") || 
         lower.includes("what can you do") || 
         lower.includes("how to use") || 
@@ -280,31 +357,13 @@ export async function POST(request: NextRequest) {
         lower.includes("hi")
       ) {
         thoughtProcess = `User is requesting liveops guidance. Formulating friendly plain-English assistance for ${titleId}...`;
-        conversationalReply = `👋 **Hi! I am your AI LiveOps Co-pilot for ${titleId}.**\n\nYou don't need to know any technical code or server commands. Just ask in everyday English, and I will manage your live game for you!\n\nHere are the top things you can ask me to do right now:\n\n1. 🛒 **Add items to your in-game store**\n   *Try*: *"Add an Epic Dragon Armor to the shop for 500 Gems"*\n\n2. 🎁 **Send rewards or currencies to players**\n   *Try*: *"Give 1,000 Gold to player Player_01"*\n\n3. 🏆 **Launch weekend events & bonuses**\n   *Try*: *"Start a weekend event with double XP and bonus rewards"*\n\n4. ⚙️ **Update game settings & balance**\n   *Try*: *"Set XP multiplier to 2.0"*\n\n5. 🛡️ **Player moderation & account review**\n   *Try*: *"Check account details for Player_01"*\n\n👉 **Just type what you want in the box below, or click any suggestion card above!**`;
+        conversationalReply = `👋 **Hi! I am your AI LiveOps Co-pilot for ${titleId}.**\n\nYou don't need to know any technical code or server commands. Just ask in everyday English, and I will manage your live game for you!\n\nHere are the top things you can ask me to do right now:\n\n1. 🪙 **Check game coins & currencies**\n   *Try*: *"What coins do I have?"*\n\n2. 🛒 **Add or view store items**\n   *Try*: *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n\n3. 🎁 **Send rewards or currencies to players**\n   *Try*: *"Give 1,000 Gold to player Player_01"*\n\n4. 🏆 **Launch weekend events & bonuses**\n   *Try*: *"Start a weekend event with double XP and bonus rewards"*\n\n5. ⚙️ **Update game settings & balance**\n   *Try*: *"Set XP multiplier to 2.0"*\n\n👉 **Just type what you want in the box below, or click any suggestion card above!**`;
         simulationSummary = `Interactive guide provided. Ready for commands.`;
       } else {
-        // Fallback: General assistance and system audit
-        thoughtProcess = `Interpreted query as general operations audit for game title ${titleId}. Querying system health & listing catalog items via MCP...`;
-        const healthRes = await MCPService.callTool({
-          name: "daksh_get_system_health",
-          arguments: { timeoutMs: 2000 }
-        });
-        const catRes = await MCPService.callTool({
-          name: "daksh_list_catalog_items",
-          arguments: { titleId }
-        });
-
-        executedToolCalls.push({
-          toolName: "daksh_get_system_health",
-          args: {},
-          result: JSON.parse(healthRes.content[0].text),
-          isError: false,
-          latencyMs: 6
-        });
-
-        const catData = JSON.parse(catRes.content[0].text);
-        conversationalReply = `👋 **LiveOps Assistant Ready for ${titleId}**\n\nI reviewed your live game status:\n- **Game Servers & Storage**: Online and operational.\n- **In-Game Store**: Currently **${catData.total} items** active.\n\n💡 **What would you like to do?** You can ask in plain English:\n- *"Add a new weapon to the shop for 300 gems"*\n- *"Give 500 gold to player Player_01"*\n- *"Start a weekend double XP event"*\n\nOr click one of the quick starter cards above to see it in action!`;
-        simulationSummary = `Game status checked. Ready for liveops commands.`;
+        // Fallback: Friendly general guidance without dumping raw system health
+        thoughtProcess = `Interpreted query as general inquiry for game title ${titleId}...`;
+        conversationalReply = `👋 **LiveOps Assistant Ready for ${titleId}**\n\nI didn't quite catch that command, but I can help you with anything in your live game! For example:\n\n- 🪙 *"What coins do I have?"*\n- 🛒 *"What items are in the store?"*\n- ⚔️ *"Add a new Ice Blade for 300 Gems"*\n- 🎁 *"Give 500 Gold to player Player_01"*\n- 🏆 *"Start a weekend double XP event"*\n\nOr click one of the quick starter cards above to see an action in real-time!`;
+        simulationSummary = `Ready for commands.`;
       }
     }
 

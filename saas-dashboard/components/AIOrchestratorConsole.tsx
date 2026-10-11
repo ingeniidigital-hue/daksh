@@ -57,31 +57,62 @@ interface ChatMessage {
 
 function formatChatMessage(text: string) {
   const lines = text.split("\n");
-  return lines.map((line, lineIdx) => {
-    if (!line.trim()) return <div key={lineIdx} className="h-2" />;
+  return lines.map((rawLine, lineIdx) => {
+    if (!rawLine.trim()) return <div key={lineIdx} className="h-2" />;
+    
+    // Check if line is a bullet item
+    const isBullet = rawLine.trimStart().startsWith("- ") || rawLine.trimStart().startsWith("• ");
+    const line = isBullet ? rawLine.trimStart().replace(/^[-•]\s+/, "") : rawLine;
+
+    // Parse bold parts: **text**
     const boldParts = line.split(/(\*\*.*?\*\*)/g);
+    const lineContent = boldParts.map((bPart, bIdx) => {
+      const isBold = bPart.startsWith("**") && bPart.endsWith("**");
+      const content = isBold ? bPart.slice(2, -2) : bPart;
+      
+      // Parse italic parts within: *text*
+      const italicParts = content.split(/(\*[^*]+?\*)/g);
+      const renderedItalics = italicParts.map((iPart, iIdx) => {
+        const isItalic = iPart.startsWith("*") && iPart.endsWith("*") && iPart.length > 2;
+        const iContent = isItalic ? iPart.slice(1, -1) : iPart;
+
+        // Parse inline code: `code`
+        const codeParts = iContent.split(/(`.*?`)/g);
+        const renderedCode = codeParts.map((cPart, cIdx) => {
+          if (cPart.startsWith("`") && cPart.endsWith("`")) {
+            return (
+              <code key={cIdx} className="bg-gray-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px] border border-gray-300 font-semibold">
+                {cPart.slice(1, -1)}
+              </code>
+            );
+          }
+          return cPart;
+        });
+
+        if (isItalic) {
+          return <em key={iIdx} className="italic text-gray-700">{renderedCode}</em>;
+        }
+        return <span key={iIdx}>{renderedCode}</span>;
+      });
+
+      if (isBold) {
+        return <strong key={bIdx} className="font-bold text-gray-900">{renderedItalics}</strong>;
+      }
+      return <span key={bIdx}>{renderedItalics}</span>;
+    });
+
+    if (isBullet) {
+      return (
+        <div key={lineIdx} className="flex items-start gap-2 pl-2 leading-relaxed">
+          <span className="text-gray-400 font-bold shrink-0 mt-0.5">•</span>
+          <div className="flex-1">{lineContent}</div>
+        </div>
+      );
+    }
+
     return (
       <div key={lineIdx} className="leading-relaxed">
-        {boldParts.map((bPart, bIdx) => {
-          const isBold = bPart.startsWith("**") && bPart.endsWith("**");
-          const content = isBold ? bPart.slice(2, -2) : bPart;
-          const codeParts = content.split(/(`.*?`)/g);
-          const renderedContent = codeParts.map((cPart, cIdx) => {
-            if (cPart.startsWith("`") && cPart.endsWith("`")) {
-              return (
-                <code key={cIdx} className="bg-gray-100 text-blue-700 px-1.5 py-0.5 rounded font-mono text-[11px] border border-gray-300 font-semibold">
-                  {cPart.slice(1, -1)}
-                </code>
-              );
-            }
-            return cPart;
-          });
-
-          if (isBold) {
-            return <strong key={bIdx} className="font-bold text-gray-900">{renderedContent}</strong>;
-          }
-          return <span key={bIdx}>{renderedContent}</span>;
-        })}
+        {lineContent}
       </div>
     );
   });
@@ -699,9 +730,9 @@ export default function AIOrchestratorConsole({
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       <span>{msg.simulationResult.summary}</span>
                     </span>
-                    {msg.simulationResult.latencyMs && (
+                    {typeof msg.simulationResult.latencyMs === "number" && msg.simulationResult.latencyMs > 0 ? (
                       <span className="text-gray-500 text-[11px] font-mono">{msg.simulationResult.latencyMs}ms</span>
-                    )}
+                    ) : null}
                   </div>
                 )}
 
