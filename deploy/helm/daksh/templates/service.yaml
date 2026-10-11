@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-nakama-service
+  labels:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: nakama
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.nakama.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.nakama.service.httpPort }}
+      targetPort: {{ .Values.nakama.service.httpPort }}
+    - name: console
+      port: {{ .Values.nakama.service.consolePort }}
+      targetPort: {{ .Values.nakama.service.consolePort }}
+    - name: grpc
+      port: {{ .Values.nakama.service.grpcPort }}
+      targetPort: {{ .Values.nakama.service.grpcPort }}
+  selector:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: nakama
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-studio-service
+  labels:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: studio
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: {{ .Values.studio.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.studio.service.port }}
+      targetPort: {{ .Values.studio.service.port }}
+  selector:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: studio
+    app.kubernetes.io/instance: {{ .Release.Name }}

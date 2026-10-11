@@ -1,0 +1,58 @@
+{{- if .Values.nakama.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-nakama
+  labels:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: nakama
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.nakama.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: daksh
+      app.kubernetes.io/component: nakama
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: daksh
+        app.kubernetes.io/component: nakama
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: nakama
+          image: "{{ .Values.nakama.image.repository }}:{{ .Values.nakama.image.tag }}"
+          imagePullPolicy: {{ .Values.nakama.image.pullPolicy }}
+          command: ["/nakama/nakama"]
+          args: ["--config", "/nakama/data/local.yml"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.nakama.service.httpPort }}
+            - name: console
+              containerPort: {{ .Values.nakama.service.consolePort }}
+            - name: grpc
+              containerPort: {{ .Values.nakama.service.grpcPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.nakama.service.httpPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.nakama.service.httpPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.nakama.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /nakama/data
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-nakama-config
+{{- end }}

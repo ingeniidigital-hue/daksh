@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    container_name: daksh-pm-planka
+    restart: unless-stopped
+    volumes:
+      - planka_user_avatars:/app/public/user-avatars
+      - planka_project_background_images:/app/public/project-background-images
+      - planka_attachments:/app/private/attachments
+    environment:
+      - BASE_URL=http://localhost:1337
+      - DATABASE_URL=postgresql://postgres:postgres@planka-db:5432/planka
+      - SECRET_KEY=daksh_open_source_pm_secret_key_change_in_production
+    ports:
+      - "1337:1337"
+    depends_on:
+      - planka-db
+
+  planka-db:
+    image: postgres:16-alpine
+    container_name: daksh-pm-db
+    restart: unless-stopped
+    volumes:
+      - planka_db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=planka
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  planka_user_avatars:
+  planka_project_background_images:
+  planka_attachments:
+  planka_db_data:

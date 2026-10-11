@@ -1,0 +1,15 @@
+apiVersion: v2
+name: daksh
+description: Production Helm Chart for Daksh Game BaaS (Nakama Core + Next.js Studio + PostgreSQL + Redis)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - game-backend
+  - baas
+  - nakama
+  - multiplayer
+  - playfab-alternative
+maintainers:
+  - name: Daksh Core Team
+    email: dev@daksh.io

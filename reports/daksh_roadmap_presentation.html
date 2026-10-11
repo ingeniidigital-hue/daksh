@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daksh Game BaaS — Master End-to-End Product Stories & Architecture</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #090D16;
+      color: #F1F5F9;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .filter-btn.active {
+      background: #4F46E5;
+      color: #FFFFFF;
+      border-color: #6366F1;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+    .badge-core { background: rgba(56, 189, 248, 0.12); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.25); }
+    .badge-multiplayer { background: rgba(129, 140, 248, 0.12); color: #818CF8; border: 1px solid rgba(129, 140, 248, 0.25); }
+    .badge-economy { background: rgba(245, 158, 11, 0.12); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .badge-analytics { background: rgba(34, 197, 94, 0.12); color: #4ADE80; border: 1px solid rgba(34, 197, 94, 0.25); }
+    .badge-payments { background: rgba(236, 72, 153, 0.12); color: #F472B6; border: 1px solid rgba(236, 72, 153, 0.25); }
+    .badge-sdk { background: rgba(168, 85, 247, 0.12); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.25); }
+    .badge-cloud { background: rgba(6, 182, 212, 0.12); color: #22D3EE; border: 1px solid rgba(6, 182, 212, 0.3); }
+  </style>
+</head>
+<body class="min-h-screen p-6 md:p-10 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <div class="max-w-7xl mx-auto w-full">
+
+    <!-- EXECUTIVE PRESENTATION HEADER -->
+    <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800/80">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/25">
+            D
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-2xl font-black tracking-tight text-white">Daksh Game BaaS</h1>
+              <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                17 End-to-End Master Stories
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Fully Managed Cloud GaaS • Multi-Client SDK Suite • In-Game Economy & Title Data • AccelByte Matchmaking • 10K/s Telemetry
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- KEY ARCHITECTURE PILLARS -->
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <div class="px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-700/40 text-cyan-300 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>☁️ Fully Managed Cloud GaaS</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-indigo-950/40 border border-indigo-700/40 text-indigo-300 flex items-center gap-1.5">
+          <span>🎮 Unity • Unreal • HTML5 • REST</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1.5">
+          <span>💳 Razorpay + Paddle</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1.5">
+          <span>☸️ 1-Click Helm Eject</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Cloud Deployment</div>
+        <div class="text-xl font-extrabold text-cyan-400 mt-0.5">5 Super-Regions</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Anycast &lt;45ms • Agones DGS Fleet</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Multiplayer Netcode</div>
+        <div class="text-xl font-extrabold text-indigo-400 mt-0.5">Turn-Based + Relay</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">AccelByte Rulesets • Live X-Ray</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">LiveOps & Assets</div>
+        <div class="text-xl font-extrabold text-amber-400 mt-0.5">Title Data + OTA</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Addressables & Unreal Chunks CDN</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Quality Assurance</div>
+        <div class="text-xl font-extrabold text-emerald-400 mt-0.5">100% Automated</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Air-Gapped + 5,000 CCU Stress Test</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="filterCards('all')" id="btn-all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-800 transition">
+          All 17 Stories
+        </button>
+        <button onclick="filterCards('cloud')" id="btn-cloud" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          ☁️ Managed Cloud GaaS & Eject
+        </button>
+        <button onclick="filterCards('multiplayer')" id="btn-multiplayer" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          🎮 Multiplayer Netcode
+        </button>
+        <button onclick="filterCards('economy')" id="btn-economy" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          💎 Economy, Title Data & Cmd+K
+        </button>
+        <button onclick="filterCards('analytics')" id="btn-analytics" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          📊 Analytics (10K/s) & KPIs
+        </button>
+        <button onclick="filterCards('sdk')" id="btn-sdk" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          📦 Multi-Client SDKs & OTA CDN
+        </button>
+        <button onclick="filterCards('payments')" id="btn-payments" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          💳 Dual Payments
+        </button>
+      </div>
+
+      <div class="hidden sm:block text-xs font-mono text-slate-400">
+        Click any category to isolate stories
+      </div>
+    </div>
+
+    <!-- 17-STORY PRESENTATION GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- STORY 01 -->
+      <div class="card-item cloud core bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">STORY-01</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-core">Core Engine</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Local-First Engine & 1-Command CLI</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Zero-account developer experience: <code>npx daksh dev</code> spins up local Nakama 3.22, PostgreSQL 16 & Redis in under 60 seconds.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Healthcheck HTTP 200 on port 7350 in &lt;15s</span>
+        </div>
+      </div>
+
+      <!-- STORY 02 -->
+      <div class="card-item sdk core bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">STORY-02</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-sdk">Auth & Identity</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Player Identity & Account Federation</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Frictionless onboarding: Device ID auth with Steam, Google Play & Apple linking. Ed25519 JWT & GDPR/DPDP data export.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Asymmetric Ed25519 JWT validated & refreshed</span>
+        </div>
+      </div>
+
+      <!-- STORY 03 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">STORY-03</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-economy">Economy V2</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">PlayFab Economy V2 & Atomic Wallets</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Dual currencies (Gold/Gems), item catalogs, and bundle purchases in TypeScript V8 with row-level PostgreSQL locks.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Zero race condition double-spends on wallets</span>
+        </div>
+      </div>
+
+      <!-- STORY 04 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">STORY-04</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-economy">LiveOps Remote Config</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Title Data (Remote Config) & Drop Tables</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Remote Config KV store (Public vs Server-Only Internal Title Data for game tuning) + weighted mystery boxes and idempotency keys.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">GetTitleData &lt;20ms; 0 duplicate charges on retry</span>
+        </div>
+      </div>
+
+      <!-- STORY 05 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">STORY-05</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-economy">AI Studio</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">AI Command Menu (Cmd+K) & MCP</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Natural language LiveOps operations: prompt generates full game economies and seasonal balances. Open Model Context Protocol server.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Natural language prompt generates catalog in &lt;1.5s</span>
+        </div>
+      </div>
+
+      <!-- STORY 06 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">STORY-06</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-multiplayer">Turn Netcode</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Turn-Based Multiplayer Engine</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Async & sync room state machine for board, card, and pool games with zero-DB in-memory simulation and atomic win commits.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Turn handoff, timeout forfeited & win committed</span>
+        </div>
+      </div>
+
+      <!-- STORY 07 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">STORY-07</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-multiplayer">Relay Netcode</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Real-Time Relay Netcode (WS/UDP)</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Client-authoritative packet relay for fast-paced action titles up to 64 players per room with delta compression & packet validation.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">32 WebSocket clients broadcast with &lt;10ms jitter</span>
+        </div>
+      </div>
+
+      <!-- STORY 08 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">STORY-08</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-multiplayer">Matchmaking</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">AccelByte Matchmaking & Rule Flexing</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Configurable JSON rulesets: MMR skill tolerance, ping boundaries, and automated rule flexing step-downs as queue time increases.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">100 simulated queue players matched with rule flexing</span>
+        </div>
+      </div>
+
+      <!-- STORY 09 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">STORY-09</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-multiplayer">Admin Portal</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Matchmaking X-Ray & Leaderboards</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Live queue inspection portal in Studio to observe matches forming in real time + high-throughput Redis sorted set leaderboards.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Live SSE queue stream & 500 leaderboard updates verified</span>
+        </div>
+      </div>
+
+      <!-- STORY 10 -->
+      <div class="card-item analytics bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">STORY-10</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-analytics">Telemetry</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">High-Volume Telemetry (10,000 evt/s)</h3>
+          <p class="text-xs text-slate-300 mt-1.5">High-speed ingestion buffer flushing gameplay events into ClickHouse/Postgres with ring-buffer backpressure protection.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">10,000 events/sec batch flush with 0 dropped events</span>
+        </div>
+      </div>
+
+      <!-- STORY 11 -->
+      <div class="card-item analytics bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">STORY-11</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-analytics">Executive KPIs</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Live Executive KPIs (DAU/Retention)</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Visual Studio analytics: Daily Active Users, D1/D7/D30 retention cohorts, ARPU & Churn curves with read-only OLAP query isolation.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">OLAP aggregations over 100K events rendered &lt;250ms</span>
+        </div>
+      </div>
+
+      <!-- STORY 12 -->
+      <div class="card-item payments bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-pink-400 bg-pink-950/60 px-2 py-0.5 rounded border border-pink-800/40">STORY-12</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-payments">Dual Payments</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">B2B Platform Billing (Razorpay + Paddle)</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Intelligent geo-routed checkout for game studios: India UPI/RuPay via Razorpay (INR) + Global Merchant of Record via Paddle (USD).</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">HMAC-SHA256 signature verifier blocks tampered webhooks</span>
+        </div>
+      </div>
+
+      <!-- STORY 13 -->
+      <div class="card-item sdk bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">STORY-13</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-sdk">Client SDK Suite</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">SDK Data Caching & Version Diffing</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Unity UPM, Unreal Engine, HTML5 & Direct REST SDK with local AES-256 disk cache, ETag 304 diffing, and offline action replay queue.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">304 Not Modified &amp; zero lost actions on reconnect</span>
+        </div>
+      </div>
+
+      <!-- STORY 14 -->
+      <div class="card-item sdk bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">STORY-14</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-sdk">Cloud OTA CDN</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Cloud OTA Asset Hosting (Addressables/PAKs)</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Global CDN hosting for Unity Addressables (<code>.bundle</code>) and Unreal Chunks (<code>.pak</code>) with SHA-256 integrity and HTTP byte-range resume.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Delta bundle downloads &amp; mounts without app update</span>
+        </div>
+      </div>
+
+      <!-- STORY 15: DAKSH MANAGED CLOUD GAAS -->
+      <div class="card-item cloud bg-gradient-to-b from-cyan-950/80 to-slate-900 border-2 border-cyan-500/80 rounded-xl p-4 shadow-xl shadow-cyan-950/30 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-400/50">STORY-15</span>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded badge-cloud">⭐ Managed Cloud GaaS</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Daksh Managed Cloud Game-as-a-Service</h3>
+          <p class="text-xs text-cyan-100 mt-1.5">100% managed from our side: 5 Global Super-Regions (Virginia, Frankfurt, Mumbai, Tokyo, São Paulo) with Anycast &lt;45ms routing, Agones Dedicated Game Servers, and Multi-AZ 99.99% SLA.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-cyan-800/60 text-xs font-mono text-cyan-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-cyan-200">1-click cloud deploy provisions 5 regions in &lt;60s</span>
+        </div>
+      </div>
+
+      <!-- STORY 16 -->
+      <div class="card-item cloud bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">STORY-16</span>
+            <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded badge-cloud">Self-Hosting</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Helm-Only Infrastructure & 1-Click Eject</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Zero lock-in guarantee: Clean Helm v3 chart in <code>deploy/helm/daksh</code> + 1-click button exports Helm chart and isolated PostgreSQL dump into a standalone zip.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-slate-300">Helm dry-run passes; exported archive boots cleanly</span>
+        </div>
+      </div>
+
+      <!-- STORY 17 -->
+      <div class="card-item cloud core bg-gradient-to-b from-indigo-950/90 to-slate-900 border-2 border-emerald-500 rounded-xl p-4 shadow-xl shadow-emerald-950/20 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">STORY-17</span>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">FINAL RELEASE</span>
+          </div>
+          <h3 class="font-bold text-white text-sm">Air-Gapped Test & 5,000 CCU Load Test</h3>
+          <p class="text-xs text-slate-300 mt-1.5">Wi-Fi killed: entire local loop verified offline. 5,000 CCU load stress test asserts sub-50ms p99 latency with zero 5xx errors. Releases Git v1.0.0.</p>
+        </div>
+        <div class="mt-3 pt-2.5 border-t border-emerald-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Gate:</span>
+          <span class="text-emerald-300 font-bold">22/22 routes build green; 5,000 CCU p99 &lt;50ms</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ARCHITECTURE SUMMARY -->
+    <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>Every story provides end-to-end functionality, high-level verification gate, and strict security compliance.</span>
+      </div>
+      <div class="font-mono text-slate-500">
+        Daksh Game BaaS Directorate • Cloud GaaS + Self-Hosted Helm
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INTERACTIVE FILTER LOGIC -->
+  <script>
+    function filterCards(category) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(b => b.classList.remove('active', 'bg-indigo-600', 'text-white'));
+      
+      const activeBtn = document.getElementById('btn-' + category);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+
+      const cards = document.querySelectorAll('.card-item');
+      cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

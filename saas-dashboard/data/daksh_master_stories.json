@@ -1,0 +1,418 @@
+[
+  {
+    "id": "STORY-01",
+    "title": "Local-First Core Engine & 1-Command CLI Bootstrapper",
+    "category": "core",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a game developer, I want to execute npx daksh dev and have a local Nakama + PostgreSQL + Redis stack running in under 60 seconds without creating any cloud accounts, so that I can build and test my game completely free and offline.",
+    "deliverables": [
+      "docker-compose.yml with Nakama 3.22, PostgreSQL 16 & Redis 7 alpine containers",
+      "packages/cli with standalone CLI binary (npx daksh dev) and port check",
+      "Studio Dashboard landing view displaying local container health"
+    ],
+    "security_compliance": [
+      "Deterministic local credentials; zero telemetry to external servers",
+      "Air-gapped offline data isolation"
+    ],
+    "acceptance_criteria": [
+      "Given Docker is running on macOS, Linux, or Windows WSL",
+      "When the developer runs npx daksh dev",
+      "Then ports 7350 and 3000 bind successfully in <60s, and GET /v2/healthcheck returns HTTP 200"
+    ],
+    "verification_gate": "Healthcheck :7350 HTTP 200 in <15s",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-02",
+    "title": "Player Identity Federation & Device Authentication",
+    "category": "sdk",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a mobile game studio, I want players to authenticate instantly via Device ID and link Steam, Google Play, or Apple accounts later, so that onboarding has zero friction while retaining cross-platform account recovery.",
+    "deliverables": [
+      "Nakama RPC daksh.auth.authenticate_device with Ed25519 JWT generation",
+      "Studio UI /dashboard/[id]/players listing active players and credentials",
+      "Client SDK hook Daksh.Auth.AuthenticateDeviceAsync() in C# and TypeScript"
+    ],
+    "security_compliance": [
+      "Ed25519 JWT signed with 256-bit asymmetric keys and 2-hour expiration",
+      "GDPR / India DPDP Right to be Forgotten deletion pipeline"
+    ],
+    "acceptance_criteria": [
+      "Given a game client with a hardware device identifier",
+      "When the client submits AuthenticateDevice(deviceId)",
+      "Then a valid JWT token is returned, player row is created, and re-authenticating returns existing profile"
+    ],
+    "verification_gate": "Asymmetric JWT validated & refreshed cleanly",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-03",
+    "title": "PlayFab Economy V2 & Atomic Wallet Concurrency",
+    "category": "economy",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a game designer, I want to create dual currencies (Gold and Gems), item catalogs, and stores where purchases deduct balances atomically, so that players can buy in-game items without wallet balance glitches or race condition exploits.",
+    "deliverables": [
+      "TypeScript V8 Nakama extension economy_v2.ts registering daksh.economy.purchase_item",
+      "PostgreSQL row-level locks (SELECT balance FROM player_wallets WHERE player_id = $1 FOR UPDATE)",
+      "Studio UI /dashboard/[id]/catalog for visual item and currency creation"
+    ],
+    "security_compliance": [
+      "ACID Transaction Isolation wrapping wallet deduction and inventory grant",
+      "PostgreSQL CHECK (balance >= 0) database constraint"
+    ],
+    "acceptance_criteria": [
+      "Given a player has 100 GOLD and an item costs 100 GOLD",
+      "When 2 concurrent purchase requests arrive simultaneously",
+      "Then exactly 1 purchase succeeds (balance becomes 0) and the second fails with INSUFFICIENT_FUNDS"
+    ],
+    "verification_gate": "Zero race-condition double-spends on wallets",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-04",
+    "title": "Title Data (Remote Config KV Store), Internal Title Data & Loot Drop Tables",
+    "category": "economy",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a live game director, I want a centralized Title Data (Key-Value Remote Config) and Internal Title Data store, so that our studio can update game constants, seasonal events, maintenance flags, and loot drop tables on the fly without releasing a new client binary.",
+    "deliverables": [
+      "Title Data Key-Value Store endpoints (GetTitleData, SetTitleData) for JSON configs",
+      "Internal Title Data (Secret / Server-Only) KV store accessible only by backend CloudScript",
+      "Weighted mystery loot drop tables with cryptographically random RNG",
+      "Studio UI /dashboard/[id]/title-data for managing public and internal configs"
+    ],
+    "security_compliance": [
+      "Access Isolation: Internal title data completely hidden from game client responses",
+      "Cryptographic Randomness: RNG utilizes crypto/rand to prevent seed exploitation"
+    ],
+    "acceptance_criteria": [
+      "Given a game client queries GetTitleData()",
+      "When Title Data contains public configs and internal secret server flags",
+      "Then public configs return in <20ms while internal secrets are completely omitted"
+    ],
+    "verification_gate": "GetTitleData <20ms; Internal secrets omitted from client",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-05",
+    "title": "AI Command Menu (Cmd+K) & Open MCP Server",
+    "category": "economy",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As a studio operator, I want to press Cmd+K in Daksh Studio and enter natural language prompts to generate catalogs, adjust currency rates, or inspect economy metrics, so that LiveOps management requires zero repetitive manual forms.",
+    "deliverables": [
+      "AICommandMenu.tsx React modal with Cmd+K listener and structured prompt parser",
+      "Open Model Context Protocol (MCP) server endpoints in /api/mcp",
+      "Automated catalog and title data generation from natural language prompts"
+    ],
+    "security_compliance": [
+      "Prompt sanitization and Zod JSON schema validation before database execution",
+      "Audit logging for every AI-generated state change"
+    ],
+    "acceptance_criteria": [
+      "Given an operator presses Cmd+K and types 'Create a Halloween bundle for 250 Gems'",
+      "When the prompt is submitted",
+      "Then the AI parses the intent and creates the bundle in the catalog in <1.5s"
+    ],
+    "verification_gate": "Natural language prompt generates valid catalog in <1.5s",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-06",
+    "title": "Turn-Based Multiplayer Engine (Sync/Async)",
+    "category": "multiplayer",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As an indie developer building a board, card, or pool game, I want turn-based match rooms with state machines, turn timers, and timeout forfeits, so that my game has multiplayer without dedicated server hosting costs.",
+    "deliverables": [
+      "Nakama Match Handler turn_match.ts managing player turns, moves, and board state",
+      "Turn timer watchdog with automated forfeit on timeout (e.g. 30 seconds)",
+      "Atomic match completion handler transferring entry fees and rating updates"
+    ],
+    "security_compliance": [
+      "Server-authoritative move validation checking legal actions before applying state",
+      "In-memory match simulation with zero database writes per turn"
+    ],
+    "acceptance_criteria": [
+      "Given a 2-player turn-based match",
+      "When Player 1 submits a move within their turn timer",
+      "Then move is broadcast to Player 2 and active turn switches; if timer expires, inactive player is forfeited"
+    ],
+    "verification_gate": "Turn handoff, timeout forfeit & win commit verified",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-07",
+    "title": "Real-Time Relay Netcode (WebSocket / UDP)",
+    "category": "multiplayer",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As a developer of action or sports games, I want a client-authoritative UDP/WebSocket relay netcode supporting up to 64 players per room, so that players experience low-latency multiplayer without complex dedicated server logic.",
+    "deliverables": [
+      "Nakama real-time relay handler relay_match.ts with sub-10ms packet dispatch",
+      "Opcode-based message packing (position, velocity, rotation, animation states)",
+      "Client smoothing and dead-reckoning extrapolation utilities in Unity C# SDK"
+    ],
+    "security_compliance": [
+      "Packet rate-limiting (max 60 packets/sec per client) to prevent DDoS floods",
+      "Payload sanitization checking max packet size (1024 bytes per datagram)"
+    ],
+    "acceptance_criteria": [
+      "Given 32 connected clients in a relay room",
+      "When one client sends position packets at 30 Hz",
+      "Then all peers receive broadcasts with <10ms server processing overhead and zero packet drops"
+    ],
+    "verification_gate": "32 WebSocket clients broadcast with <10ms jitter",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-08",
+    "title": "AccelByte Matchmaking Rulesets with Dynamic Rule Flexing",
+    "category": "multiplayer",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As a competitive multiplayer game producer, I want matchmaking rules defined in JSON with skill rating (MMR) tolerances, ping boundaries, and automated rule flexing step-downs, so that players find fair matches quickly without queue starvation.",
+    "deliverables": [
+      "Matchmaker rules engine parsing JSON rulesets (min/max players, skill delta, max ping)",
+      "Dynamic rule flexing loop relaxing MMR tolerance every 5 seconds in queue",
+      "Multi-ticket batching pairing compatible parties into optimal rooms"
+    ],
+    "security_compliance": [
+      "Anti-smurfing constraints preventing high-discrepancy party smurfs",
+      "Geographic latency boundary enforcement protecting regional ping quality"
+    ],
+    "acceptance_criteria": [
+      "Given 100 players queueing with diverse MMRs",
+      "When high-MMR players wait longer than 15 seconds",
+      "Then rule flexing activates, expanding tolerance until match forms without indefinite stalls"
+    ],
+    "verification_gate": "100 simulated queue players matched with rule flexing",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-09",
+    "title": "Matchmaking X-Ray Admin Portal & Global Leaderboards",
+    "category": "multiplayer",
+    "status": "done",
+    "priority": "medium",
+    "user_story": "As a game producer, I want a live Matchmaking X-Ray visualizer in Daksh Studio to inspect active queues, ticket pools, and forming matches in real time, plus tiered Redis leaderboards, so that I can monitor competitive health live.",
+    "deliverables": [
+      "Studio UI /dashboard/[id]/matchmaking with live SSE visualizer showing queues and wait times",
+      "Redis sorted set leaderboard engine with daily, weekly, and all-time resets",
+      "RPC submit_score with automated anti-cheat rate limiting"
+    ],
+    "security_compliance": [
+      "Score injection protection rejecting impossible delta spikes",
+      "Deterministic leaderboard rank tie-breakers using submission timestamps"
+    ],
+    "acceptance_criteria": [
+      "Given players queueing for matches and submitting scores",
+      "When the producer opens Matchmaking X-Ray",
+      "Then live queue pools render with active wait times, and leaderboard ranks update instantaneously"
+    ],
+    "verification_gate": "Live SSE queue stream & 500 leaderboard updates verified",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-10",
+    "title": "High-Volume Telemetry Ingestion (10,000 events/sec)",
+    "category": "analytics",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As a data engineer, I want the backend to ingest up to 10,000 gameplay events per second (kills, loot, deaths, level ups) buffered into ClickHouse or PostgreSQL, so that all gameplay analytics are captured without slowing down the game server.",
+    "deliverables": [
+      "High-throughput HTTP/gRPC ingestion endpoint /api/telemetry/events",
+      "In-memory ring buffer batch flusher flushing in 1,000-event chunks every 1 second",
+      "ClickHouse OLAP schema with partitioning by title_id and event_date"
+    ],
+    "security_compliance": [
+      "Payload size limits (max 4KB per event) and rate-limiting per client token",
+      "PII redaction scrubbing IP addresses and sensitive metadata before storage"
+    ],
+    "acceptance_criteria": [
+      "Given an incoming stream of 10,000 events/sec",
+      "When the telemetry ingestion pipeline processes the stream",
+      "Then all events buffer and flush into ClickHouse/PostgreSQL with 0 dropped events and sub-5ms ack"
+    ],
+    "verification_gate": "10,000 events/sec batch flush with 0 dropped packets",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-11",
+    "title": "Live Executive KPIs Dashboard (DAU, Retention, ARPU)",
+    "category": "analytics",
+    "status": "done",
+    "priority": "medium",
+    "user_story": "As a studio executive or investor, I want an executive analytics dashboard showing DAU, WAU, MAU, D1/D7/D30 retention cohorts, and ARPU graphs, so that our team can make data-driven decisions on monetization and retention.",
+    "deliverables": [
+      "Studio UI /dashboard/[id]/analytics with interactive KPI cards and cohort tables",
+      "OLAP aggregation queries calculating rolling active users and cohort retention",
+      "CSV/JSON raw metric export button for external BI tools"
+    ],
+    "security_compliance": [
+      "Read-only database query isolation preventing analytics from impacting game server latency",
+      "Role-based access control (RBAC) restricting financial ARPU metrics to studio admins"
+    ],
+    "acceptance_criteria": [
+      "Given 100,000 historical telemetry events in the database",
+      "When the studio executive loads the Analytics dashboard",
+      "Then DAU, MAU, D1-D30 retention curves, and ARPU render in <250ms"
+    ],
+    "verification_gate": "OLAP aggregations over 100K historical events rendered <250ms",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-12",
+    "title": "B2B SaaS Platform Monetization (Razorpay + Paddle)",
+    "category": "payments",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a Daksh finance operator, I want our B2B SaaS platform to charge game studios for cloud tiers via Razorpay (India UPI/RuPay) and Paddle (Global USD Merchant of Record), so that studios worldwide can subscribe effortlessly.",
+    "deliverables": [
+      "Geo-routed checkout router /api/billing/create-checkout (India -> Razorpay, Global -> Paddle)",
+      "Razorpay webhook handler /api/billing/webhooks/razorpay with HMAC-SHA256 signature verification",
+      "Paddle webhook handler /api/billing/webhooks/paddle with cryptographic signature check",
+      "Studio UI /dashboard/[id]/billing showing active tier (Local Free, Pro, Studio Cloud) and invoices"
+    ],
+    "security_compliance": [
+      "Cryptographic HMAC-SHA256 verification rejecting tampered webhook payloads",
+      "Global tax compliance: Paddle acts as Merchant of Record handling VAT, GST, and sales taxes"
+    ],
+    "acceptance_criteria": [
+      "Given a studio subscribing to a Daksh Cloud tier",
+      "When an Indian studio checks out, Razorpay opens in INR; when a US studio checks out, Paddle opens in USD",
+      "Then upon webhook delivery with valid HMAC, the title cloud_tier updates instantly in PostgreSQL"
+    ],
+    "verification_gate": "HMAC-SHA256 verifier blocks tampered webhooks; geo-routing passes",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-13",
+    "title": "Multi-Client SDK Suite, Data Caching & Version Diffing",
+    "category": "sdk",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a cross-platform game developer using Unity, Unreal, HTML5, or direct HTTPS REST, I want client SDKs with local AES-256 caching, ETag 304 diffing, and offline action queues, so that my game runs smoothly over intermittent mobile networks.",
+    "deliverables": [
+      "Unity C# UPM Package com.daksh.sdk with async/await, persistent cache, and offline queue",
+      "Unreal Engine 5 C++ Plugin with native UObject wrappers and async tasks",
+      "HTML5 / WebGL TypeScript SDK with browser WebSocket and LocalStorage cache",
+      "Direct HTTPS REST Endpoints for zero-SDK integrations",
+      "ETag & Last-Modified caching headers returning HTTP 304 Not Modified when catalog is unchanged"
+    ],
+    "security_compliance": [
+      "Local AES-256 encrypted disk cache protecting cached player inventories",
+      "Persistent offline action replay queue guaranteeing zero lost purchases or progress"
+    ],
+    "acceptance_criteria": [
+      "Given a game client in Unity, Unreal, HTML5, or REST mode",
+      "When the client fetches catalog data repeatedly",
+      "Then server responds with HTTP 304 Not Modified; when network disconnects, offline actions queue and flush upon reconnect"
+    ],
+    "verification_gate": "304 Not Modified & zero lost actions on reconnect across all 4 client SDKs",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-14",
+    "title": "Cloud OTA Asset Hosting (Addressables & Unreal Chunks)",
+    "category": "sdk",
+    "status": "done",
+    "priority": "high",
+    "user_story": "As a live mobile/PC game developer, I want Daksh to host and serve Unity Addressables (.bundle) and Unreal Chunks (.pak) via global Edge CDN, so that our studio can push new skins, maps, and audio without releasing new app store updates.",
+    "deliverables": [
+      "Cloud OTA Asset Storage pipeline with global Edge CDN caching",
+      "Studio UI /dashboard/[id]/ota for uploading, versioning, and promoting asset bundles",
+      "Multi-platform asset channels (iOS, Android, Windows) with 1-click instant rollback",
+      "HTTP Byte-Range Resume support for large interrupted asset bundle downloads"
+    ],
+    "security_compliance": [
+      "Cryptographic Asset Integrity: SHA-256 checksum headers verified by client before memory mounting",
+      "Signed CDN download URLs with configurable expiration preventing unauthorized hotlinking"
+    ],
+    "acceptance_criteria": [
+      "Given a newly built character skin bundle via Unity Addressables or Unreal Chunk Packaging",
+      "When the studio uploads the build to Daksh OTA and promotes it to Global Live",
+      "Then game clients detect new asset hash on next launch, download delta bundle via CDN, and mount seamlessly"
+    ],
+    "verification_gate": "Delta bundle downloads via CDN with byte-range resume and mounts without app update",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-15",
+    "title": "Daksh Fully Managed Cloud Game-as-a-Service (GaaS) Platform",
+    "category": "cloud",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a game studio founder or producer, I want Daksh to provide a 100% fully managed Cloud Game-as-a-Service (GaaS) platform operated entirely from Daksh's side with multi-region global deployment, automated server orchestration, and 99.99% uptime, so that my team can launch multiplayer games instantly across the globe without setting up servers, managing Kubernetes clusters, or hiring DevOps engineers.",
+    "deliverables": [
+      "1-Click Global Cloud Deployment pipeline (daksh cloud deploy) provisioning instances across 5 Super-Regions: Virginia (iad), Frankfurt (fra), Mumbai (bom), Tokyo (nrt), and São Paulo (gru)",
+      "Global Anycast Dynamic Routing directing incoming players to the nearest active game server cluster with sub-45ms ping",
+      "Managed Agones Dedicated Game Server (DGS) fleet auto-scaling headless Unreal and Unity server containers with warm buffer pools and fast allocation (<200ms)",
+      "Enterprise Multi-AZ Managed Storage: PostgreSQL 16 with automated failover and PITR WAL archiving + distributed Redis 7 cluster",
+      "Unified Cloud Operations Portal & SLA Dashboard monitoring CPU, RAM, active CCU, tick rates, and 99.99% multi-region uptime"
+    ],
+    "security_compliance": [
+      "Multi-Tenant Cloud Isolation: ISO 27001 & SOC 2 Type II compliant network policies and dedicated database schemas",
+      "Automated Edge DDoS Mitigation: Layer 4 SYN/UDP flood scrubbing and Layer 7 rate-limiting at Edge PoPs",
+      "Zero-Trust TLS: Automated Let's Encrypt / Cloudflare Edge certificates with HTTP/2 and HTTP/3 support"
+    ],
+    "acceptance_criteria": [
+      "Given a studio creates a new game title in Daksh Dashboard",
+      "When the developer selects 'Deploy to Daksh Cloud' across global regions",
+      "Then Daksh automatically provisions the backend cluster, database, Redis cache, and Agones game server fleet within 60 seconds with sub-45ms latency and 99.99% uptime"
+    ],
+    "verification_gate": "1-click cloud deploy provisions 5 regions in <60s; Anycast routes <45ms; Agones allocates <200ms",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-16",
+    "title": "Helm-Only Infrastructure & The Famous 1-Click Eject Button",
+    "category": "cloud",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As a studio CTO, I want the entire backend defined as a clean Helm v3 chart where every setting is in values.yaml, and a 1-click Eject button, so that our studio can self-host on our own Kubernetes cluster at any time with zero vendor lock-in.",
+    "deliverables": [
+      "Production Helm v3 Chart in deploy/helm/daksh containing Chart.yaml, values.yaml, and modular templates",
+      "Eject Export Pipeline /api/titles/[id]/eject bundling the Helm chart and isolated PostgreSQL database dump into a standalone .zip",
+      "Studio UI 1-click Eject Title modal with instant download"
+    ],
+    "security_compliance": [
+      "Data Sovereignty: Studio receives 100% of their raw SQL data and server configuration; zero locked formats",
+      "Kubernetes Security: Helm manifests run as non-root containers with read-only root filesystems and dropped capabilities"
+    ],
+    "acceptance_criteria": [
+      "Given a studio CTO clicks 'Eject Title'",
+      "When the export completes",
+      "Then a .zip archive downloads containing the Helm chart and database dump; executing helm install on a clean cluster boots the backend with 100% fidelity"
+    ],
+    "verification_gate": "Helm dry-run lint passes; unzipped export archive boots cleanly",
+    "assigned_agent": "Any AI / Squad"
+  },
+  {
+    "id": "STORY-17",
+    "title": "Air-Gapped Verification & 5,000 CCU Load Stress Test",
+    "category": "core",
+    "status": "done",
+    "priority": "critical",
+    "user_story": "As the executive directorate, I want the platform to pass an air-gapped test with Wi-Fi killed, followed by a simulated 5,000 CCU load stress test, so that we have mathematical proof of performance and reliability before public release.",
+    "deliverables": [
+      "Air-Gapped Test Runner script shutting down network interfaces and executing CLI boot, auth, and purchases locally",
+      "Load Stress Test Script (k6 / autocannon) simulating 5,000 concurrent virtual players executing auth, catalog, and netcode packets",
+      "Production Release Tag with 22/22 Next.js routes green and Git release tag v1.0.0"
+    ],
+    "security_compliance": [
+      "OWASP Top 10 Hardening: Validated against SQL injection, XSS, broken auth, and security misconfigurations",
+      "Performance SLA: 99th-percentile API response times under 50ms during peak 5,000 CCU simulation"
+    ],
+    "acceptance_criteria": [
+      "Given machine internet connection is completely disabled",
+      "When the air-gapped test executes, 100% of the game developer loop functions locally with zero network calls",
+      "When the 5,000 CCU load test runs, server maintains sub-50ms p99 latency with zero 5xx errors"
+    ],
+    "verification_gate": "22/22 routes build green; 5,000 CCU maintains p99 <50ms with 0 errors",
+    "assigned_agent": "Any AI / Squad"
+  }
+]

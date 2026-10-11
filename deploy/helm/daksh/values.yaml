@@ -1,0 +1,112 @@
+# Default values for Daksh Game BaaS Helm Chart
+# Override any of these values using: helm install daksh ./deploy/helm/daksh -f my-values.yaml
+
+global:
+  environment: production
+  domain: daksh.example.com
+
+# Nakama Game Core Engine
+nakama:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: heroiclabs/nakama
+    tag: 3.22.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    httpPort: 7350
+    consolePort: 7351
+    grpcPort: 7349
+  config:
+    serverKey: "defaultkey_change_in_production"
+    sessionEncryptionKey: "encryptionkey_change_in_production"
+    socket:
+      maxMessageSizeBytes: 4096
+      pingPeriodMs: 15000
+      pongWaitMs: 25000
+    runtime:
+      env:
+        DAKSH_ENV: "production"
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+# Daksh Next.js Studio Dashboard
+studio:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: daksh-studio
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  env:
+    NEXT_PUBLIC_API_URL: "https://api.daksh.example.com"
+    RAZORPAY_KEY_ID: ""
+    PADDLE_API_KEY: ""
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# PostgreSQL Database (External or Bundled)
+postgresql:
+  enabled: true
+  host: "daksh-postgresql"
+  port: 5432
+  database: "daksh"
+  username: "postgres"
+  password: "password_change_in_production"
+  sslmode: "disable"
+  maxConnections: 100
+
+# Redis Cache (Optional for Matchmaking Queue State)
+redis:
+  enabled: true
+  host: "daksh-redis"
+  port: 6379
+  password: ""
+
+# Ingress Configuration (Routing traffic from the internet)
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "nakama-service"
+  hosts:
+    - host: studio.daksh.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: studio-service
+          servicePort: 3000
+    - host: api.daksh.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          serviceName: nakama-service
+          servicePort: 7350
+  tls:
+    - secretName: daksh-tls-secret
+      hosts:
+        - studio.daksh.example.com
+        - api.daksh.example.com

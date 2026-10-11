@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daksh — 15-Day Autonomous AI Code & Test Roadmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#0B0F17] text-slate-100 min-h-screen p-5 md:p-8 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP BAR -->
+  <div class="max-w-7xl mx-auto w-full">
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/20">
+          D
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-xl tracking-tight text-white">Daksh — 15-Day AI Execution & Automated Testing Grid</h1>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">100% AI WRITTEN & TESTED</span>
+          </div>
+          <p class="text-xs text-slate-400">Zero Human Coding • Automated Unit, Integration, Load & Air-Gap Testing</p>
+        </div>
+      </div>
+
+      <!-- SQUAD & ARCHITECTURE CHIPS -->
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">🤖 Antigravity + Claude + Codex</span>
+        <span class="px-2.5 py-1 rounded bg-indigo-950/60 border border-indigo-700/50 text-indigo-300">🇮🇳 Razorpay + 🌍 Paddle</span>
+        <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">☸️ Helm Only</span>
+        <span class="px-2.5 py-1 rounded bg-emerald-950/50 border border-emerald-700/50 text-emerald-300">🧪 Vitest + k6 + Unity Tests</span>
+      </div>
+    </header>
+
+    <!-- 15-DAY AUTONOMOUS SPRINT GRID -->
+    <div class="mt-6">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-3 uppercase tracking-wider">
+        <span>15-Day Pipeline (Code + Automated Test on every single day)</span>
+        <span class="text-indigo-400">Exit Criteria: 100% Green Test Suite on Day 15</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+
+        <!-- D1 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 01</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Nakama + Postgres Infra</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes Docker Compose, Nakama config & DB schema.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Container Health</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Automated script tests port 7350, 5432 & schema migration.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: HTTP 200 in &lt;15s</div>
+        </div>
+
+        <!-- D2 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 02</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold">Codex</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ npx daksh dev CLI</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes CLI binary, auto Docker boot & browser launcher.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: CLI Subprocess</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Vitest runs CLI in child process, asserts browser URL emitted.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: Exit 0, &lt;60s to ready</div>
+        </div>
+
+        <!-- D3 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 03</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Identity & Device Auth</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes deviceUniqueIdentifier auth & JWT token issuance.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Auth & Tokens</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Automated test verifies token signature, expiry & re-auth.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 0-Auth failure on reconnect</div>
+        </div>
+
+        <!-- D4 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 04</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Economy V2 V8 Engine</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes Nakama TypeScript runtime for currencies & catalogs.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Row-Lock Tests</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Postgres FOR UPDATE test asserts zero race condition on balance.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: Accurate wallet balance</div>
+        </div>
+
+        <!-- D5 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 05</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold">Codex</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Idempotency Engine</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes transaction token tables to block double charges.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Double-Spend</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Spams 50 parallel identical requests; asserts 1 success, 49 dedupe.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 0 Duplicate purchases</div>
+        </div>
+
+        <!-- D6 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 06</span>
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[9px] font-bold">Antigravity</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ AI Command Menu (Cmd+K)</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes prompt recipe generator & studio event bus dispatch.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Prompt Parser</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Tests 20 prompt variations; verifies valid catalog JSON emitted.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: &lt;1.5s UI table reload</div>
+        </div>
+
+        <!-- D7 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 07</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Razorpay Gateway (India)</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes INR orders, UPI subscriptions & webhook listener.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: HMAC Crypto</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Simulates signature tamper; tests legitimate payment.captured.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 400 on fake, 200 on valid</div>
+        </div>
+
+        <!-- D8 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 08</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Paddle Gateway (Global)</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes Paddle Billing v2 transactions & MoR tax handling.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Paddle Signature</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Tests ts + h1 header verification & entitlement state change.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: Title flips to 'pro'</div>
+        </div>
+
+        <!-- D9 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 09</span>
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[9px] font-bold">Antigravity</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Geo-IP Billing Router</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes Next.js checkout router & INR vs USD UI switcher.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Geo Routing</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Mocks cf-ipcountry='IN' & 'US'; asserts correct gateway selected.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 100% correct routing</div>
+        </div>
+
+        <!-- D10 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 10</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold">Codex</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Unity C# UPM SDK</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes DakshClient, Auth & Economy C# client classes.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: C# NUnit Suite</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Automated mock tests authenticate, fetch catalog & purchase.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: All 18 NUnit tests pass</div>
+        </div>
+
+        <!-- D11 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 11</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-bold">Codex</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Unity Offline Disk Queue</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes persistent disk queue for dropped mobile connections.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Connection Drop</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Mocks network outage; queues requests; asserts auto replay on reconnect.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 0 Lost transactions</div>
+        </div>
+
+        <!-- D12 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 12</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Helm K8s Chart Only</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes deploy/helm/daksh with values.yaml & templates.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Helm Linting</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Automated linter checks syntax, values overrides & dry-run.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 0 Lint errors/warnings</div>
+        </div>
+
+        <!-- D13 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 13</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[9px] font-bold">Claude</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ The Famous Eject Export</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI writes 1-click Helm + isolated PostgreSQL dump packager.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Export Boots Clean</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Unzips export in isolated sandbox; verifies backend boots standalone.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: 100% self-hosted run</div>
+        </div>
+
+        <!-- D14 -->
+        <div class="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 transition rounded-xl p-3.5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-indigo-400 font-bold">DAY 14</span>
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[9px] font-bold">Antigravity</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🛠️ Air-Gap & Load Testing</div>
+            <p class="text-[11px] text-slate-400 leading-tight">AI executes flight mode test & 5,000 CCU k6 stress scripts.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: 0-WiFi + 5K Stress</div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Disables WiFi; runs full test suite; benchmarks &lt;15ms latency.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-slate-500">Pass: p99 &lt; 20ms, 0 drops</div>
+        </div>
+
+        <!-- D15 -->
+        <div class="bg-gradient-to-b from-indigo-950/80 to-slate-900 border-2 border-emerald-500 rounded-xl p-3.5 flex flex-col justify-between shadow-lg shadow-emerald-950/30">
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-mono mb-2">
+              <span class="text-emerald-400 font-bold">DAY 15</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-bold">All AIs</span>
+            </div>
+            <div class="text-xs font-bold text-white mb-1">🚀 Zero-Human Launch</div>
+            <p class="text-[11px] text-slate-300 leading-tight">AI compiles Next.js 22/22 routes, tags Git v1.0.0 & releases.</p>
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80">
+              <div class="text-[10px] font-bold text-emerald-400 font-mono">🧪 AI Test: Master Verification</div>
+              <p class="text-[10px] text-slate-300 mt-0.5">Runs all 8 test suites across all components with 0 errors.</p>
+            </div>
+          </div>
+          <div class="mt-2 text-[9px] font-mono text-emerald-300 font-bold">Ready for Production</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TESTING MATRIX TIERS -->
+    <div class="mt-8 bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+      <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+        <span>AI Automated Testing Coverage Matrix (Zero Human QA)</span>
+        <span class="text-emerald-400 font-mono text-[11px]">8 Testing Layers • 100% Automated</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-indigo-400 font-bold">1. Container Health</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">Postgres pg_isready & Nakama /healthcheck</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-indigo-400 font-bold">2. Concurrency Locks</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">Row-level locking & race condition tests</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-indigo-400 font-bold">3. Idempotency</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">50 parallel repeat requests deduplicated</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-indigo-400 font-bold">4. Webhook Crypto</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">HMAC-SHA256 signature tampering checks</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-emerald-400 font-bold">5. Geo-Routing</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">IN &rarr; Razorpay (UPI) | US &rarr; Paddle (MoR)</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-emerald-400 font-bold">6. Unity C# NUnit</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">18 mock client unit tests for UPM SDK</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-emerald-400 font-bold">7. Helm Dry-Run</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">values.yaml linting & standalone export</p>
+        </div>
+        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+          <span class="text-emerald-400 font-bold">8. 0-WiFi Air-Gap</span>
+          <p class="text-[10px] text-slate-400 mt-0.5">Complete game loop runs with WiFi killed</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto w-full pt-6 pb-2 text-center text-[10px] font-mono text-slate-600">
+    Daksh Game BaaS — 15-Day Autonomous AI Code & Test Pipeline • Zero Manual Effort Required
+  </footer>
+
+</body>
+</html>

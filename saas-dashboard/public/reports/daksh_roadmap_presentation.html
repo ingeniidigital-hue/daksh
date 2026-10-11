@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daksh — 15-Day Master Roadmap Presentation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #090D16;
+      color: #F1F5F9;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .filter-btn.active {
+      background: #4F46E5;
+      color: #FFFFFF;
+      border-color: #6366F1;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+    .phase-glow-1 { border-top: 3px solid #38BDF8; }
+    .phase-glow-2 { border-top: 3px solid #818CF8; }
+    .phase-glow-3 { border-top: 3px solid #34D399; }
+  </style>
+</head>
+<body class="min-h-screen p-6 md:p-10 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <div class="max-w-7xl mx-auto w-full">
+
+    <!-- EXECUTIVE PRESENTATION HEADER -->
+    <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800/80">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/25">
+            D
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-2xl font-black tracking-tight text-white">Daksh Game BaaS</h1>
+              <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                15-Day Autonomous Sprint
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Full Suite: Multiplayer Netcode • Analytics Telemetry • Economy V2 • Dual Payments • Helm Only</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQUAD & INFRASTRUCTURE STATUS PILLS -->
+      <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+        <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>AI Squad: Antigravity + Claude + Codex</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-indigo-950/50 border border-indigo-700/40 text-indigo-300 flex items-center gap-1.5">
+          <span>💳 Razorpay (INR) + Paddle (USD)</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1.5">
+          <span>☸️ deploy/helm/daksh</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Timeline Window</div>
+        <div class="text-xl font-extrabold text-white mt-0.5">15 Days Max</div>
+        <div class="text-[11px] text-indigo-400 mt-0.5 font-medium">Zero Human Coding Required</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Multiplayer Suite</div>
+        <div class="text-xl font-extrabold text-indigo-400 mt-0.5">Turn-Based + Relay</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">AccelByte Matchmaking X-Ray</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Analytics Engine</div>
+        <div class="text-xl font-extrabold text-cyan-400 mt-0.5">10K Events/Sec</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">DAU • MAU • D1-D30 Retention</div>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3.5">
+        <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Quality Assurance</div>
+        <div class="text-xl font-extrabold text-emerald-400 mt-0.5">100% Automated</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">8 Automated Testing Layers</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="filterCards('all')" id="btn-all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-800 transition">
+          All 15 Days
+        </button>
+        <button onclick="filterCards('multiplayer')" id="btn-multiplayer" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          🎮 Multiplayer Netcode
+        </button>
+        <button onclick="filterCards('analytics')" id="btn-analytics" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          📊 Analytics & Telemetry
+        </button>
+        <button onclick="filterCards('economy')" id="btn-economy" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          💎 Economy & AI Cmd+K
+        </button>
+        <button onclick="filterCards('payments')" id="btn-payments" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          💳 Dual Payments
+        </button>
+        <button onclick="filterCards('client')" id="btn-client" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+          📦 Unity SDK & Helm Eject
+        </button>
+      </div>
+
+      <div class="hidden sm:block text-xs font-mono text-slate-400">
+        Click any filter to isolate modules
+      </div>
+    </div>
+
+    <!-- 15-DAY PRESENTATION GRID (CLEAN, SHARP CARDS) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- DAY 01 -->
+      <div class="card-item core bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-1 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">DAY 01</span>
+            <span class="text-xs font-mono text-slate-400">Foundation</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Containerized Stack & Local CLI</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Docker Compose Nakama 3.22, PostgreSQL 16 & Redis with <code>npx daksh dev</code> runner.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">Healthcheck HTTP 200 & subprocess boot &lt;15s</span>
+        </div>
+      </div>
+
+      <!-- DAY 02 -->
+      <div class="card-item core bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-1 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">DAY 02</span>
+            <span class="text-xs font-mono text-slate-400">Identity</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude + Codex</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Device Auth & Account Federation</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Passwordless Device ID auth + Steam, Google Play, Apple identity linking with JWT.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">100 randomized session token signature & refresh tests</span>
+        </div>
+      </div>
+
+      <!-- DAY 03 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-1 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">DAY 03</span>
+            <span class="text-xs font-mono text-slate-400">Economy</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">PlayFab Economy V2 Runtime</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Dual currencies (Gold/Gems), item catalogs, and bundle purchase handlers in TypeScript V8.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">Row-lock (FOR UPDATE) concurrency test on wallets</span>
+        </div>
+      </div>
+
+      <!-- DAY 04 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-1 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">DAY 04</span>
+            <span class="text-xs font-mono text-slate-400">Economy</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Codex + Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Loot Drop Tables & Idempotency</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Weighted mystery boxes + transaction deduplication keys for flaky mobile connections.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">50 parallel duplicate requests blocked; 0 double-charges</span>
+        </div>
+      </div>
+
+      <!-- DAY 05 -->
+      <div class="card-item economy bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-1 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">DAY 05</span>
+            <span class="text-xs font-mono text-slate-400">AI Ops</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Antigravity</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">AI Command Menu (Cmd+K)</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Prompt-driven catalog ops: natural language prompts generate complete game economies.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">20 prompt variations parse into valid JSON in &lt;1.5s</span>
+        </div>
+      </div>
+
+      <!-- DAY 06 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-2 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">DAY 06</span>
+            <span class="text-xs font-mono text-slate-400">Multiplayer</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Turn-Based Multiplayer Engine</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Async & sync room state machine for board, card, and pool games with zero-DB simulation.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">Turn handoff, timeouts & atomic win commit verified</span>
+        </div>
+      </div>
+
+      <!-- DAY 07 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-2 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">DAY 07</span>
+            <span class="text-xs font-mono text-slate-400">Multiplayer</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Real-Time Relay Netcode (WS/UDP)</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Client-authoritative packet relay for fast-paced action titles up to 64 players per room.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">32 mock WebSocket clients broadcast with &lt;10ms jitter</span>
+        </div>
+      </div>
+
+      <!-- DAY 08 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-2 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">DAY 08</span>
+            <span class="text-xs font-mono text-slate-400">Matchmaking</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Claude + Codex</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">AccelByte Matchmaking Rulesets</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Skill rank delta (MMR), ping limits, and dynamic rule flexing when wait time exceeds 15s.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">100 simulated queue players matched with rule relaxation</span>
+        </div>
+      </div>
+
+      <!-- DAY 09 -->
+      <div class="card-item multiplayer bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-2 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">DAY 09</span>
+            <span class="text-xs font-mono text-slate-400">Admin Portal</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Antigravity + Codex</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Matchmaking X-Ray & Leaderboards</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Live queue visual inspection tab in studio + real-time Redis leaderboards with tiered resets.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">500 score injections assert sorted rank & queue stream</span>
+        </div>
+      </div>
+
+      <!-- DAY 10 -->
+      <div class="card-item analytics bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-2 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/40">DAY 10</span>
+            <span class="text-xs font-mono text-slate-400">Analytics</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">High-Volume Event Telemetry</h3>
+        <p class="text-xs text-slate-300 mt-1.5">High-throughput ingestion of gameplay events (kills, loot, buys) buffered to ClickHouse/Postgres.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">10,000 events/sec batch flush with zero dropped packets</span>
+        </div>
+      </div>
+
+      <!-- DAY 11 -->
+      <div class="card-item analytics bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-3 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">DAY 11</span>
+            <span class="text-xs font-mono text-slate-400">Analytics</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Codex + Antigravity</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Live Executive KPIs (DAU/Retention)</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Visual studio analytics: Daily Active Users, D1/D7/D30 retention cohorts, ARPU & Churn curves.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">OLAP aggregations over 100K historical events verified</span>
+        </div>
+      </div>
+
+      <!-- DAY 12 -->
+      <div class="card-item payments bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-3 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">DAY 12</span>
+            <span class="text-xs font-mono text-slate-400">Billing</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude + Antigravity</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Dual Payments (Razorpay + Paddle)</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Geo-routed checkout: India UPI via Razorpay (INR) + Global Merchant of Record via Paddle (USD).</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">HMAC-SHA256 signature verifier blocks tampered webhooks</span>
+        </div>
+      </div>
+
+      <!-- DAY 13 -->
+      <div class="card-item client bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-3 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">DAY 13</span>
+            <span class="text-xs font-mono text-slate-400">Client SDK</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Codex</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Unity C# SDK & Offline Disk Queue</h3>
+        <p class="text-xs text-slate-300 mt-1.5">UPM package (<code>com.daksh.sdk</code>) with async/await, Device ID auth & persistent disk cache.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">24 NUnit mock tests assert 0 lost actions on reconnect</span>
+        </div>
+      </div>
+
+      <!-- DAY 14 -->
+      <div class="card-item client bg-slate-900/80 border border-slate-800 rounded-xl p-4 phase-glow-3 hover:border-slate-700 transition">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">DAY 14</span>
+            <span class="text-xs font-mono text-slate-400">DevOps</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">Claude + Antigravity</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Helm Chart Only & 1-Click Eject</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Production Helm v3 chart in <code>deploy/helm/daksh</code> + 1-click zip export with Helm & Postgres dump.</p>
+        <div class="mt-3 pt-2.5 border-t border-slate-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-slate-300">Helm dry-run lint passes; unzipped export boots clean</span>
+        </div>
+      </div>
+
+      <!-- DAY 15 -->
+      <div class="card-item core bg-gradient-to-b from-indigo-950/90 to-slate-900 border-2 border-emerald-500 rounded-xl p-4 phase-glow-3 shadow-xl shadow-emerald-950/20">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">DAY 15</span>
+            <span class="text-xs font-mono text-emerald-300 font-bold">RELEASE</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">All AIs</span>
+        </div>
+        <h3 class="font-bold text-white text-sm">Air-Gapped Test & Public Launch</h3>
+        <p class="text-xs text-slate-300 mt-1.5">Kills WiFi; executes complete game loop offline + 5,000 CCU stress test; releases Git v1.0.0.</p>
+        <div class="mt-3 pt-2.5 border-t border-emerald-800/70 text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+          <span>✓ Test:</span>
+          <span class="text-emerald-300 font-bold">22/22 routes build green; 0 TypeScript errors</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ARCHITECTURE SUMMARY -->
+    <div class="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>Every single day delivers production code AND its automated verification suite.</span>
+      </div>
+      <div class="font-mono text-slate-500">
+        Daksh Game BaaS Directorate • 100% AI Authored
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INTERACTIVE FILTER LOGIC -->
+  <script>
+    function filterCards(category) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(b => b.classList.remove('active', 'bg-indigo-600', 'text-white'));
+      
+      const activeBtn = document.getElementById('btn-' + category);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+
+      const cards = document.querySelectorAll('.card-item');
+      cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

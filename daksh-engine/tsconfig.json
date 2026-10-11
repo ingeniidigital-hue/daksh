@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./data/modules",
+    "typeRoots": [
+      "./node_modules"
+    ],
+    "types": [
+      "nakama-runtime"
+    ]
+  },
+  "include": [
+    "*.ts"
+  ]
+}

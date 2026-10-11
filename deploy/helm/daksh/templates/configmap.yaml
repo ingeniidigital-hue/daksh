@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nakama-config
+  labels:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  local.yml: |
+    name: nakama-node-{{ .Release.Name }}
+    database:
+      address:
+        - "{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}?sslmode={{ .Values.postgresql.sslmode }}"
+      max_open_conns: {{ .Values.postgresql.maxConnections }}
+    session:
+      encryption_key: "{{ .Values.nakama.config.sessionEncryptionKey }}"
+      token_expiry_sec: 7200
+    socket:
+      server_key: "{{ .Values.nakama.config.serverKey }}"
+      port: {{ .Values.nakama.service.httpPort }}
+      max_message_size_bytes: {{ .Values.nakama.config.socket.maxMessageSizeBytes }}
+      ping_period_ms: {{ .Values.nakama.config.socket.pingPeriodMs }}
+      pong_wait_ms: {{ .Values.nakama.config.socket.pongWaitMs }}
+    console:
+      port: {{ .Values.nakama.service.consolePort }}
+      username: "admin"
+      password: "{{ .Values.nakama.config.serverKey }}"

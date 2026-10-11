@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nakama-{{TITLE_ID}}
+  labels:
+    app: nakama
+    title: "{{TITLE_ID}}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nakama
+      title: "{{TITLE_ID}}"
+  template:
+    metadata:
+      labels:
+        app: nakama
+        title: "{{TITLE_ID}}"
+    spec:
+      initContainers:
+      - name: nakama-migrate
+        image: daksh/nakama:latest
+        command: ["/nakama/nakama", "migrate", "up", "--database.address", "postgres:localdb@postgres-{{TITLE_ID}}:5432/nakama?sslmode=disable"]
+      containers:
+      - name: nakama
+        image: daksh/nakama:latest
+        command: ["/nakama/nakama", "--database.address", "postgres:localdb@postgres-{{TITLE_ID}}:5432/nakama?sslmode=disable"]
+        ports:
+        - containerPort: 7349
+        - containerPort: 7350
+        - containerPort: 7351
+        env:
+        # The secret key for SDK integration, which we pass from dashboard
+        - name: NAKAMA_RUNTIME_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nakama-{{TITLE_ID}}
+  labels:
+    app: nakama
+    title: "{{TITLE_ID}}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: 7349
+    targetPort: 7349
+  - name: api
+    port: 7350
+    targetPort: 7350
+  - name: console
+    port: 7351
+    targetPort: 7351
+  selector:
+    app: nakama
+    title: "{{TITLE_ID}}"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nakama-ingress-{{TITLE_ID}}
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-prefix-{{TITLE_ID}}@kubernetescrd
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /{{TITLE_ID}}
+        pathType: Prefix
+        backend:
+          service:
+            name: nakama-{{TITLE_ID}}
+            port:
+              number: 7350
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-prefix-{{TITLE_ID}}
+spec:
+  stripPrefix:
+    prefixes:
+      - /{{TITLE_ID}}

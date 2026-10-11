@@ -1,0 +1,49 @@
+version: '3.8'
+
+# Plane Community Edition - Premier Open-Source Linear/Jira Alternative
+# Docs: https://docs.plane.so/self-hosting/docker-compose
+services:
+  plane-api:
+    image: makeplane/plane-backend:v0.22.0
+    container_name: daksh-plane-api
+    restart: unless-stopped
+    command: ./bin/docker-entrypoint-api.sh
+    environment:
+      - DJANGO_SETTINGS_MODULE=plane.settings.production
+      - DATABASE_URL=postgresql://plane:plane_secure_pass@plane-db:5432/plane
+      - REDIS_URL=redis://plane-redis:6379/0
+      - SECRET_KEY=daksh_plane_secret_key_change_in_production
+      - WEB_URL=http://localhost:8090
+    depends_on:
+      - plane-db
+      - plane-redis
+
+  plane-frontend:
+    image: makeplane/plane-frontend:v0.22.0
+    container_name: daksh-plane-web
+    restart: unless-stopped
+    ports:
+      - "8090:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8090/api
+    depends_on:
+      - plane-api
+
+  plane-db:
+    image: postgres:16-alpine
+    container_name: daksh-plane-db
+    restart: unless-stopped
+    volumes:
+      - plane_pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=plane
+      - POSTGRES_USER=plane
+      - POSTGRES_PASSWORD=plane_secure_pass
+
+  plane-redis:
+    image: redis:7-alpine
+    container_name: daksh-plane-redis
+    restart: unless-stopped
+
+volumes:
+  plane_pgdata:

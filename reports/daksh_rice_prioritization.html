@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daksh Product Prioritization & MVP Blueprint (RICE Framework)</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 10mm 11mm 10mm 11mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #0f172a;
+    background: #ffffff;
+    line-height: 1.35;
+    font-size: 10.5px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header {
+    border-bottom: 2px solid #6366f1;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-box {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 18px;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+  }
+
+  .title-group h1 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .title-group p {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .meta-box {
+    text-align: right;
+    font-size: 9.5px;
+    color: #64748b;
+  }
+
+  .badge-confidential {
+    display: inline-block;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+
+  .verdict-banner {
+    background: linear-gradient(to right, #f8fafc, #eff6ff);
+    border-left: 3.5px solid #4f46e5;
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 10px;
+  }
+
+  .verdict-banner h2 {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .verdict-banner p {
+    font-size: 10px;
+    color: #334155;
+    line-height: 1.4;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 3px;
+    margin-top: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .formula-card {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .formula-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 5px 8px;
+  }
+
+  .formula-item h4 {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #4338ca;
+    margin-bottom: 1px;
+  }
+
+  .formula-item p {
+    font-size: 8.5px;
+    color: #64748b;
+    line-height: 1.25;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5px;
+    margin-bottom: 6px;
+  }
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 4.5px 6px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  th.center, td.center {
+    text-align: center;
+  }
+
+  th.right, td.right {
+    text-align: right;
+  }
+
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  tr.rank-mvp td {
+    background: #ecfdf5 !important;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 9999px;
+    font-size: 8px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .pill-mvp {
+    background: #10b981;
+    color: white;
+  }
+
+  .pill-sprint2 {
+    background: #6366f1;
+    color: white;
+  }
+
+  .pill-sprint3 {
+    background: #f59e0b;
+    color: white;
+  }
+
+  .score-badge {
+    font-weight: 800;
+    font-size: 11.5px;
+    color: #0f172a;
+  }
+
+  .score-badge.top {
+    color: #059669;
+  }
+
+  .deep-dive-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+
+  .card {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 7px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .card-score {
+    background: #e0e7ff;
+    color: #3730a3;
+    font-weight: 800;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .card-body {
+    font-size: 10px;
+    color: #475569;
+    line-height: 1.45;
+  }
+
+  .timeline-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #cbd5e1;
+  }
+
+  .timeline-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .timeline-tag {
+    font-weight: 800;
+    font-size: 10px;
+    color: #334155;
+    text-transform: uppercase;
+  }
+
+  .timeline-content {
+    font-size: 10px;
+    color: #475569;
+  }
+
+  .roi-table th {
+    background: #334155;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .footer-note {
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 9px;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo-box">D</div>
+      <div class="title-group">
+        <h1>Daksh Game BaaS — Product Prioritization & MVP</h1>
+        <p>Mathematical RICE Simulation & Definitive "Where to Begin" Execution Blueprint</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <div class="badge-confidential">INTERNAL STRATEGY</div><br>
+      <strong>Framework:</strong> RICE (Reach, Impact, Conf, Effort)<br>
+      <strong>Date:</strong> October 2026 | <strong>Version:</strong> 1.0
+    </div>
+  </div>
+
+  <!-- EXECUTIVE VERDICT BANNER -->
+  <div class="verdict-banner">
+    <h2>🎯 Executive Verdict: Where to Begin (Day 1 / Sprint 1 MVP)</h2>
+    <p>
+      As an unfunded game backend platform, Daksh <strong>cannot boil the ocean</strong>. We must begin with the 
+      <strong>"Zero-Dollar Indie Velocity Loop"</strong>: (1) <code>npx daksh dev</code> local-first CLI, (2) Unity C# SDK, 
+      (3) PlayFab Economy V2 Parity, (4) AI Command Menu (<code>Cmd+K</code>), and (5) The Famous Eject Button. 
+      This delivers an immediate, functional game backend on a developer's laptop with <strong>$0 cloud hosting costs</strong> 
+      and <strong>zero vendor lock-in</strong>.
+    </p>
+  </div>
+
+  <!-- RICE METHODOLOGY FORMULA -->
+  <div class="section-title">
+    <span>1. The RICE Prioritization Framework</span>
+    <span style="font-size:10px; font-weight:600; color:#6366f1;">Score = (R × I × C) ÷ E</span>
+  </div>
+
+  <div class="formula-card">
+    <div class="formula-item">
+      <h4>Reach (R: 0-100)</h4>
+      <p>% of prospective game studios using this feature during their first 90 days.</p>
+    </div>
+    <div class="formula-item">
+      <h4>Impact (I: 0.25-3.0)</h4>
+      <p>3.0 = Massive (Game Changer)<br>2.0 = High | 1.0 = Medium</p>
+    </div>
+    <div class="formula-item">
+      <h4>Confidence (C: 0.5-1.0)</h4>
+      <p>1.0 = High (reusing Nakama core)<br>0.8 = Med | 0.5 = High Risk</p>
+    </div>
+    <div class="formula-item">
+      <h4>Effort (E: Weeks)</h4>
+      <p>Person-weeks for 2 senior engineers to ship production-ready code.</p>
+    </div>
+  </div>
+
+  <!-- COMPLETE RICE SIMULATION MATRIX TABLE -->
+  <div class="section-title">
+    <span>2. Comprehensive RICE Scoring Simulation (15 Candidate Features)</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 45px;" class="center">Rank</th>
+        <th>Feature Name & Scope</th>
+        <th class="center" style="width: 55px;">Reach</th>
+        <th class="center" style="width: 55px;">Impact</th>
+        <th class="center" style="width: 55px;">Conf.</th>
+        <th class="center" style="width: 65px;">Effort</th>
+        <th class="right" style="width: 75px;">RICE Score</th>
+        <th class="center" style="width: 105px;">Milestone</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#1</strong></td>
+        <td><strong>Local-First CLI (<code>npx daksh dev</code>)</strong> — 1-cmd Docker Nakama/Postgres</td>
+        <td class="center">100</td>
+        <td class="center">3.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.0 wks</td>
+        <td class="right"><span class="score-badge top">150.0</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#2</strong></td>
+        <td><strong>Unity C# SDK (<code>com.daksh.sdk</code>)</strong> — UPM package & bootstrap</td>
+        <td class="center">95</td>
+        <td class="center">3.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge top">114.0</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#3</strong></td>
+        <td><strong>PlayFab Economy V2</strong> — Currencies, Catalogs, Stores, Wallets</td>
+        <td class="center">90</td>
+        <td class="center">3.0</td>
+        <td class="center">1.0</td>
+        <td class="center">3.0 wks</td>
+        <td class="right"><span class="score-badge top">90.0</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#4</strong></td>
+        <td><strong>AI Command Menu (<code>Cmd+K</code>) & MCP</strong> — Natural language recipes</td>
+        <td class="center">85</td>
+        <td class="center">3.0</td>
+        <td class="center">0.8</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge top">81.6</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#5</strong></td>
+        <td><strong>The Famous Eject Button</strong> — 1-click Helm + Postgres dump export</td>
+        <td class="center">80</td>
+        <td class="center">2.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.0 wks</td>
+        <td class="right"><span class="score-badge top">80.0</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr class="rank-mvp">
+        <td class="center"><strong>#6</strong></td>
+        <td><strong>Player Auth Federation</strong> — Device ID, Steam, Google Play, Apple</td>
+        <td class="center">90</td>
+        <td class="center">2.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge">72.0</span></td>
+        <td class="center"><span class="pill pill-mvp">Sprint 1 (MVP)</span></td>
+      </tr>
+      <tr>
+        <td class="center">#7</td>
+        <td>Turn-Based Multiplayer Engine — Async & sync card/board room state</td>
+        <td class="center">70</td>
+        <td class="center">2.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.0 wks</td>
+        <td class="right"><span class="score-badge">70.0</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#8</td>
+        <td>Leaderboards & Real-Time Stats — Tiered rankings & seasonal reset</td>
+        <td class="center">80</td>
+        <td class="center">1.0</td>
+        <td class="center">1.0</td>
+        <td class="center">1.5 wks</td>
+        <td class="right"><span class="score-badge">53.3</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#9</td>
+        <td>Real-Time Relay Server — Client-authoritative UDP/WebSocket netcode</td>
+        <td class="center">65</td>
+        <td class="center">2.0</td>
+        <td class="center">0.8</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge">41.6</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#10</td>
+        <td>Matchmaking Rulesets & Flexing — AccelByte parity latency relaxation</td>
+        <td class="center">50</td>
+        <td class="center">2.0</td>
+        <td class="center">0.8</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge">32.0</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#11</td>
+        <td>LiveOps Player Segments & Remote Config — Dynamic game tuning</td>
+        <td class="center">60</td>
+        <td class="center">1.0</td>
+        <td class="center">1.0</td>
+        <td class="center">2.0 wks</td>
+        <td class="right"><span class="score-badge">30.0</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#12</td>
+        <td>Matchmaking X-Ray Admin Portal — Live session inspection & trace</td>
+        <td class="center">45</td>
+        <td class="center">2.0</td>
+        <td class="center">0.8</td>
+        <td class="center">2.5 wks</td>
+        <td class="right"><span class="score-badge">28.8</span></td>
+        <td class="center"><span class="pill pill-sprint2">Sprint 2</span></td>
+      </tr>
+      <tr>
+        <td class="center">#13</td>
+        <td>Agones Dedicated Server (DGS) — Linux binary orchestration on K8s</td>
+        <td class="center">30</td>
+        <td class="center">3.0</td>
+        <td class="center">0.8</td>
+        <td class="center">4.0 wks</td>
+        <td class="right"><span class="score-badge">18.0</span></td>
+        <td class="center"><span class="pill pill-sprint3">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td class="center">#14</td>
+        <td>Managed Multi-Region Cloud Hosting — Anycast 5 Super-Regions</td>
+        <td class="center">40</td>
+        <td class="center">3.0</td>
+        <td class="center">0.5</td>
+        <td class="center">6.0 wks</td>
+        <td class="right"><span class="score-badge">10.0</span></td>
+        <td class="center"><span class="pill pill-sprint3">Sprint 3</span></td>
+      </tr>
+      <tr>
+        <td class="center">#15</td>
+        <td>ClickHouse OLAP Telemetry Engine — High-volume analytics ingestion</td>
+        <td class="center">35</td>
+        <td class="center">2.0</td>
+        <td class="center">0.8</td>
+        <td class="center">6.0 wks</td>
+        <td class="right"><span class="score-badge">9.3</span></td>
+        <td class="center"><span class="pill pill-sprint3">Sprint 3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PAGE BREAK FOR CLEAN 2-PAGE PRINT -->
+  <div class="page-break"></div>
+
+  <!-- HEADER PAGE 2 -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo-box">D</div>
+      <div class="title-group">
+        <h1>Daksh Game BaaS — Product Prioritization & MVP</h1>
+        <p>Sprint Breakdown, Acceptance Criteria & Business Impact</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Page 2 of 2</strong> | Sprint 1 Execution
+    </div>
+  </div>
+
+  <!-- DEEP DIVE: TOP 4 DRIVERS -->
+  <div class="section-title">
+    <span>3. Why the Top Ranked MVP Features Win</span>
+  </div>
+
+  <div class="deep-dive-grid">
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">1. Local-First CLI (<code>npx daksh dev</code>)</span>
+        <span class="card-score">Score: 150.0</span>
+      </div>
+      <p class="card-body">
+        <strong>Strategic Moat:</strong> Solves the #1 complaint against PlayFab: offline friction. Developers boot Nakama + Postgres + Daksh UI in &lt;60s on an airplane with zero accounts or internet access.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">2. Unity C# SDK (<code>com.daksh.sdk</code>)</span>
+        <span class="card-score">Score: 114.0</span>
+      </div>
+      <p class="card-body">
+        <strong>Adoption Driver:</strong> 70%+ of target indie games run on Unity. Wrapping Nakama's C# client gives instantaneous UPM installation, Device ID auth, and automatic offline retry queues.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">3. PlayFab Economy V2 Parity</span>
+        <span class="card-score">Score: 90.0</span>
+      </div>
+      <p class="card-body">
+        <strong>Revenue Core:</strong> Games must monetize. Delivers dual-currency wallets (Gold/Gems), item catalogs, and bundle drop tables with 100% PlayFab migration compatibility.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">4. AI Command Menu (<code>Cmd+K</code>)</span>
+        <span class="card-score">Score: 81.6</span>
+      </div>
+      <p class="card-body">
+        <strong>Pioneer Differentiator:</strong> Kills 14-step manual form filling. Typing <em>"Add 3 tiers of swords and a starter pack"</em> generates the complete catalog instantly. Drives organic Twitter/TikTok virality.
+      </p>
+    </div>
+  </div>
+
+  <!-- PHASED SPRINT ROADMAP -->
+  <div class="section-title">
+    <span>4. Phased Engineering Sprint Roadmap</span>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-row">
+      <div class="timeline-tag" style="color: #059669;">Sprint 1<br><span style="font-size:9px; font-weight:500;">Weeks 1–4</span></div>
+      <div class="timeline-content">
+        <strong>The Core Indie MVP:</strong> Deliver <code>npx daksh dev</code>, Unity UPM package, Economy V2 (Currencies/Catalog), AI Command Menu (<code>Cmd+K</code>), Device Auth, and The Famous Eject Button. Complete local test on air-gapped laptop.
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-tag" style="color: #4f46e5;">Sprint 2<br><span style="font-size:9px; font-weight:500;">Weeks 5–8</span></div>
+      <div class="timeline-content">
+        <strong>Multiplayer & Netcode Suite:</strong> Turn-Based Engine (Async/Sync chess/cards), Real-Time Relay Netcode (WebSocket/UDP), Leaderboards, and AccelByte-grade Matchmaking Rulesets with Matchmaking X-Ray portal.
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-tag" style="color: #d97706;">Sprint 3<br><span style="font-size:9px; font-weight:500;">Weeks 9–12</span></div>
+      <div class="timeline-content">
+        <strong>Paid Cloud & Global Scale:</strong> Anycast Edge routing across 5 Super-Regions (NA, EU, AP, LATAM, MEA), Agones Dedicated Game Server orchestration on Kubernetes, Stripe SaaS billing, and ClickHouse OLAP ingestion.
+      </div>
+    </div>
+  </div>
+
+  <!-- SPRINT 1 DEFINITION OF DONE & BUSINESS ROI -->
+  <div class="section-title">
+    <span>5. Strategic ROI Comparison & Definition of Done</span>
+  </div>
+
+  <table class="roi-table" style="margin-bottom: 8px;">
+    <thead>
+      <tr>
+        <th>Strategic Dimension</th>
+        <th>Naive Approach (Cloud Hosting First)</th>
+        <th style="background: #059669;">Daksh RICE Strategy (Local-First MVP)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Infrastructure Capital</strong></td>
+        <td>$50,000+ (Multi-region K8s, Anycast IPs, AWS egress)</td>
+        <td><strong>$0.00</strong> (Runs on developer laptops)</td>
+      </tr>
+      <tr>
+        <td><strong>Time to First User</strong></td>
+        <td>6 to 9 months</td>
+        <td><strong>4 weeks</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Sales Friction</strong></td>
+        <td>High (Requires credit cards & security reviews)</td>
+        <td><strong>Zero</strong> (1-line open-source CLI install)</td>
+      </tr>
+      <tr>
+        <td><strong>Definition of Done</strong></td>
+        <td colspan="2">
+          <strong>Sprint 1 Success Metric:</strong> A game developer on macOS, Linux, or Windows WSL installs Daksh with <code>npx daksh dev</code>, connects a Unity game via Device ID, buys an item from the AI-generated catalog, and exports a standalone Helm chart in &lt;5 minutes with WiFi disabled.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <span>Daksh Game BaaS Engineering & Product Directorate</span>
+    <span>CONFIDENTIAL & PROPRIETARY — FOR CORE CONTRIBUTORS ONLY</span>
+  </div>
+
+</body>
+</html>

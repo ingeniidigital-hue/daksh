@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daksh Game BaaS — Master Extensive Product Roadmap & Execution Plan</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm 12mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #0f172a;
+    background: #ffffff;
+    line-height: 1.4;
+    font-size: 10.5px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header {
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-box {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 19px;
+  }
+
+  .title-group h1 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .title-group p {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .meta-box {
+    text-align: right;
+    font-size: 9.5px;
+    color: #64748b;
+  }
+
+  .badge-strategy {
+    display: inline-block;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 8.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+  }
+
+  .hero-banner {
+    background: linear-gradient(to right, #f8fafc, #eef2ff);
+    border-left: 4px solid #4f46e5;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 12px;
+  }
+
+  .hero-banner h2 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 3px;
+  }
+
+  .hero-banner p {
+    font-size: 10px;
+    color: #334155;
+    line-height: 1.45;
+  }
+
+  .section-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+
+  .card h3 {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 3px;
+  }
+
+  .card p {
+    font-size: 9.5px;
+    color: #475569;
+    line-height: 1.35;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5px;
+    margin-bottom: 12px;
+  }
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 5px 7px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  th.center, td.center { text-align: center; }
+  th.right, td.right { text-align: right; }
+
+  td {
+    padding: 5px 7px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .pill {
+    display: inline-block;
+    padding: 1.5px 6px;
+    border-radius: 9999px;
+    font-size: 8px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .pill-green { background: #10b981; color: white; }
+  .pill-indigo { background: #6366f1; color: white; }
+  .pill-amber { background: #f59e0b; color: white; }
+  .pill-blue { background: #0284c7; color: white; }
+
+  .timeline-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 85px 120px 1fr 140px;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    align-items: center;
+  }
+
+  .day-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .day-label {
+    font-weight: 800;
+    font-size: 10px;
+    color: #4f46e5;
+  }
+
+  .day-owner {
+    font-size: 9px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .day-desc {
+    font-size: 9.5px;
+    color: #1e293b;
+  }
+
+  .day-kpi {
+    font-size: 8.5px;
+    color: #059669;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .footer-note {
+    margin-top: 10px;
+    padding-top: 6px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 8.5px;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: 10-DAY HYPER-SPRINT -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo-box">D</div>
+      <div class="title-group">
+        <h1>Daksh Game BaaS — Master Extensive Roadmap Plan</h1>
+        <p>10-Day AI Hyper-Sprint • Dual Payments (Razorpay + Paddle) • 90-Day Global Scale</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <div class="badge-strategy">MASTER BLUEPRINT</div><br>
+      <strong>Directorate:</strong> Product & Engineering<br>
+      <strong>Timeline:</strong> Day 1 to Day 90 | <strong>Version:</strong> 2.0
+    </div>
+  </div>
+
+  <div class="hero-banner">
+    <h2>⚡ Executive Directives: AI-Native Execution & Zero-Dollar Launch</h2>
+    <p>
+      Daksh is delivered via a <strong>3-Agent AI Workforce</strong>: <strong>Antigravity</strong> (Lead Orchestrator & Shell Runner), 
+      <strong>Claude</strong> (Deep Systems & Cryptography Architect), and <strong>Codex</strong> (Unity C# SDK & Boilerplate Factory). 
+      Monetization uses a <strong>Dual-Payment Engine</strong>: <strong>Razorpay</strong> for domestic India (UPI, RuPay, e-mandates) 
+      and <strong>Paddle</strong> as Global Merchant of Record (MoR) to eliminate international tax liabilities.
+    </p>
+  </div>
+
+  <div class="section-title">
+    <span>1. The 10-Day AI Hyper-Sprint Breakdown (Hour-by-Hour Deliverables)</span>
+    <span style="font-size:9.5px; color:#4f46e5; font-weight:700;">Zero-to-Launch in 10 Days</span>
+  </div>
+
+  <div class="timeline-box">
+    <div class="day-row">
+      <div class="day-label">Day 1: Infra Core</div>
+      <div class="day-owner">Claude + Antigravity</div>
+      <div class="day-desc">Containerized Nakama + PostgreSQL + Redis Docker Compose, schema migrations & healthchecks.</div>
+      <div class="day-kpi">✓ &lt;250MB RAM footprint</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 2: Local CLI</div>
+      <div class="day-owner">Codex + Antigravity</div>
+      <div class="day-desc"><code>npx daksh dev</code> CLI binary with auto-prerequisite check, auto-port binding & browser launch.</div>
+      <div class="day-kpi">✓ Boots in &lt;60 seconds</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 3: Economy V2</div>
+      <div class="day-owner">Claude + Codex</div>
+      <div class="day-desc">TypeScript V8 Nakama runtime for atomic wallet deductions, catalogs, drop tables & idempotency.</div>
+      <div class="day-kpi">✓ 0 Double-spend guarantee</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 4: AI Cmd+K</div>
+      <div class="day-owner">Antigravity + Codex</div>
+      <div class="day-desc">Global <code>Cmd+K</code> palette in Studio, instant natural language economy recipes & event bus reload.</div>
+      <div class="day-kpi">✓ Generates catalog in &lt;2s</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 5: Razorpay (IN)</div>
+      <div class="day-owner">Claude + Antigravity</div>
+      <div class="day-desc">Domestic India payments: UPI (GPay/PhonePe), RuPay cards, HMAC-SHA256 signature verifier webhook.</div>
+      <div class="day-kpi">✓ 98% transaction success</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 6: Paddle (Global)</div>
+      <div class="day-owner">Claude + Antigravity</div>
+      <div class="day-desc">International Merchant of Record (MoR), EU/UK VAT compliance, cards & PayPal, Studio switcher.</div>
+      <div class="day-kpi">✓ Zero international tax audit risk</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 7: Unity C# SDK</div>
+      <div class="day-owner">Codex + Antigravity</div>
+      <div class="day-desc">Standalone UPM package, <code>DakshClient.cs</code>, Device ID auth & persistent offline disk retry queue.</div>
+      <div class="day-kpi">✓ Drag-and-drop in 10s</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 8: Eject Button</div>
+      <div class="day-owner">Claude + Antigravity</div>
+      <div class="day-desc">1-Click Helm chart + standalone Docker Compose + Postgres schema dump export in a single zip bundle.</div>
+      <div class="day-kpi">✓ Zero vendor lock-in</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 9: Air-Gap Test</div>
+      <div class="day-owner">Antigravity (Solo)</div>
+      <div class="day-desc">Disable WiFi on laptop; verify full game loop: CLI start &rarr; Unity connect &rarr; Buy sword &rarr; Eject.</div>
+      <div class="day-kpi">✓ 100% offline air-gap pass</div>
+    </div>
+
+    <div class="day-row">
+      <div class="day-label">Day 10: Public Launch</div>
+      <div class="day-owner">Director + All AIs</div>
+      <div class="day-desc">Public GitHub repository (MIT SDKs + FSL Core), Show HN post, Product Hunt & Discord community.</div>
+      <div class="day-kpi">✓ 100+ GitHub Stars Target</div>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>2. Dual Payment Architecture Mechanics (Domestic vs. International)</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3>🇮🇳 Razorpay (India Core)</h3>
+      <p><strong>Methods:</strong> UPI (GPay, PhonePe, Paytm), RuPay, Netbanking, e-Mandate.<br>
+      <strong>Pricing:</strong> ₹9,999/mo (Pro) | ₹29,999/mo (Studio).<br>
+      <strong>Advantage:</strong> Eliminates RBI 2FA card failure rates.</p>
+    </div>
+    <div class="card">
+      <h3>🌍 Paddle (Global MoR)</h3>
+      <p><strong>Methods:</strong> Visa/MC/Amex, PayPal, Apple Pay, Wire.<br>
+      <strong>Pricing:</strong> $149/mo (Pro) | $499/mo (Studio).<br>
+      <strong>Advantage:</strong> Remits EU VAT, UK VAT & US sales tax automatically.</p>
+    </div>
+    <div class="card">
+      <h3>🔀 Geo-Routing Controller</h3>
+      <p><strong>Route:</strong> <code>/api/billing/create-checkout</code>.<br>
+      <strong>Detection:</strong> Headers <code>cf-ipcountry</code> & <code>x-vercel-ip-country</code>.<br>
+      <strong>Storage:</strong> Unified PostgreSQL subscription model.</p>
+    </div>
+  </div>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- PAGE 2: 30-90 DAY MACRO ROADMAP -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo-box">D</div>
+      <div class="title-group">
+        <h1>Daksh Game BaaS — Master Extensive Roadmap Plan</h1>
+        <p>Phase 1 (Days 11–30) • Phase 2 (Days 31–90) • Enterprise Horizon</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Page 2 of 2</strong> | Macro Scaling & GTM
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>3. Phased Scaling Horizon (Days 11 to 90+)</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 75px;">Phase</th>
+        <th style="width: 80px;">Timeframe</th>
+        <th>Strategic Focus & Core Technical Deliverables</th>
+        <th style="width: 110px;">Primary KPI Target</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 1: Beta</strong></td>
+        <td>Days 11–30</td>
+        <td>
+          <strong>Multiplayer Netcode & Matchmaking Suite:</strong><br>
+          • Turn-Based Engine (Async/Sync chess/cards with 0-DB state simulation).<br>
+          • Real-Time Relay Netcode (Client-authoritative UDP/WebSocket broadcast).<br>
+          • AccelByte Matchmaking Rulesets with dynamic latency rule flexing.<br>
+          • Matchmaking X-Ray Admin Portal for live queue visual inspection.<br>
+          • Unreal Engine 5 SDK (C++ & Blueprints) drop-in plugin.
+        </td>
+        <td><span class="pill pill-indigo">50 Beta Studios</span><br>100+ GitHub Stars</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2: Cloud</strong></td>
+        <td>Days 31–90</td>
+        <td>
+          <strong>Daksh Managed Cloud & Global Super-Regions:</strong><br>
+          • 5 Global Super-Regions: NA-East, EU-Central, AP-South, AP-East, SA-East.<br>
+          • Anycast Edge network with sub-50ms ping routing worldwide.<br>
+          • Multi-tenant PostgreSQL partitioning with Ed25519 JWT verification.<br>
+          • ClickHouse OLAP Analytics Ingestion (DAU, ARPU, Retention curves).<br>
+          • Godot 4.x & WebGL official SDK packages.
+        </td>
+        <td><span class="pill pill-green">$15,000 MRR</span><br>500 Live Games</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3: AAA</strong></td>
+        <td>Days 91–180+</td>
+        <td>
+          <strong>Enterprise Scale & Studio Franchises:</strong><br>
+          • Agones Dedicated Game Server (DGS) Kubernetes lifecycle manager.<br>
+          • Publisher vs. Game Hierarchical Namespaces (Shared identity across titles).<br>
+          • Monte Carlo AI Economy Balancing Simulator with automated inflation alerts.<br>
+          • Dedicated VPC Peering (AWS Direct Connect / GCP Partner Interconnect).<br>
+          • 99.99% Multi-AZ SLA with enterprise 24/7 dedicated support.
+        </td>
+        <td><span class="pill pill-amber">$50,000+ MRR</span><br>Tier-1 Publishers</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">
+    <span>4. Go-To-Market (GTM) & Developer Growth Engine</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3>🚀 Viral Developer Loop</h3>
+      <p>
+        <strong>Zero-Friction Funnel:</strong> Developers install via <code>npx daksh dev</code> with 0 signup. 
+        They build locally for free, share video clips of AI catalog generation, and upgrade to paid cloud when their game goes live.
+      </p>
+    </div>
+    <div class="card">
+      <h3>📦 Open Package Ecosystem</h3>
+      <p>
+        <strong>Storefront Distribution:</strong> Publish official packages on OpenUPM, Unity Asset Store, and Unreal Marketplace. 
+        Free SDKs act as zero-CAC customer acquisition vehicles.
+      </p>
+    </div>
+    <div class="card">
+      <h3>🎮 Game Jam & Studio Sponsorships</h3>
+      <p>
+        <strong>Grassroots Evangelism:</strong> Partner with India Game Developer Conference (IGDC), Global Game Jam, and Ludum Dare 
+        with pre-configured multiplayer templates.
+      </p>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>5. Master Target Metrics & Milestone Dashboard</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Performance Indicator</th>
+        <th class="center" style="width: 100px;">Day 10 (MVP)</th>
+        <th class="center" style="width: 100px;">Day 30 (Beta)</th>
+        <th class="center" style="width: 100px;">Day 90 (Cloud)</th>
+        <th class="center" style="width: 100px;">Year 1 (Scale)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Active Games in Development</strong></td>
+        <td class="center">25 titles</td>
+        <td class="center">150 titles</td>
+        <td class="center">750 titles</td>
+        <td class="center">3,000+ titles</td>
+      </tr>
+      <tr>
+        <td><strong>Monthly Recurring Revenue (MRR)</strong></td>
+        <td class="center">$0 (Local Free)</td>
+        <td class="center">$2,200</td>
+        <td class="center">$18,500</td>
+        <td class="center">$65,000+</td>
+      </tr>
+      <tr>
+        <td><strong>GitHub Stars</strong></td>
+        <td class="center">100+</td>
+        <td class="center">500+</td>
+        <td class="center">2,500+</td>
+        <td class="center">6,000+</td>
+      </tr>
+      <tr>
+        <td><strong>CLI 0-to-Play Developer Latency</strong></td>
+        <td class="center">&lt;3 minutes</td>
+        <td class="center">&lt;2 minutes</td>
+        <td class="center">&lt;90 seconds</td>
+        <td class="center">&lt;60 seconds</td>
+      </tr>
+      <tr>
+        <td><strong>Global Edge Ping (90th Percentile)</strong></td>
+        <td class="center">Local (0ms)</td>
+        <td class="center">Local (0ms)</td>
+        <td class="center">&lt;50ms (5 Regions)</td>
+        <td class="center">&lt;35ms (Anycast)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <span>Daksh Game BaaS Directorate • Confidential & Proprietary</span>
+    <span>Engineered with Antigravity • Claude 3.5 • Codex</span>
+  </div>
+
+</body>
+</html>

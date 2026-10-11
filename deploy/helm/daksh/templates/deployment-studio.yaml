@@ -1,0 +1,52 @@
+{{- if .Values.studio.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-studio
+  labels:
+    app.kubernetes.io/name: daksh
+    app.kubernetes.io/component: studio
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.studio.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: daksh
+      app.kubernetes.io/component: studio
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: daksh
+        app.kubernetes.io/component: studio
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: studio
+          image: "{{ .Values.studio.image.repository }}:{{ .Values.studio.image.tag }}"
+          imagePullPolicy: {{ .Values.studio.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.studio.service.port }}
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "{{ .Values.studio.env.NEXT_PUBLIC_API_URL }}"
+            - name: RAZORPAY_KEY_ID
+              value: "{{ .Values.studio.env.RAZORPAY_KEY_ID }}"
+            - name: PADDLE_API_KEY
+              value: "{{ .Values.studio.env.PADDLE_API_KEY }}"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.studio.service.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.studio.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.studio.resources | nindent 12 }}
+{{- end }}

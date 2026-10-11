@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daksh — Complete 15-Day Engineering & Testing Plan (Full Suite)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #3b82f6;
+      --success: #16a34a;
+      --tag-bg: #f1f5f9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #fafafa;
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14.5px;
+      padding: 36px 18px;
+    }
+
+    .document {
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 52px 60px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    h1 {
+      font-family: 'Newsreader', serif;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .note-box {
+      background: #f8fafc;
+      border-left: 3px solid #4f46e5;
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: #334155;
+      margin-bottom: 32px;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .note-box strong {
+      color: #0f172a;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill-item {
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 8px;
+      background: #eef2ff;
+      color: #4338ca;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0f172a;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h2 span.scope-tag {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .day-block {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .day-block:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+
+    .day-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .day-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #4f46e5;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .day-owner {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--tag-bg);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: #475569;
+    }
+
+    .day-desc {
+      font-size: 13.5px;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .day-test {
+      font-size: 12.5px;
+      color: #15803d;
+      background: #f0fdf4;
+      border-left: 2.5px solid #22c55e;
+      padding: 6px 12px;
+      border-radius: 0 4px 4px 0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 14px;
+      margin-bottom: 24px;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    footer {
+      margin-top: 44px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .document { border: none; box-shadow: none; padding: 15px; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="document">
+
+    <!-- HEADER -->
+    <header>
+      <div class="meta">
+        <span>Master Technical Plan</span>
+        <span>•</span>
+        <span>Duration: 15 Days Max</span>
+        <span>•</span>
+        <span>100% AI Authored & Automated</span>
+      </div>
+      <h1>Daksh — Complete 15-Day Engineering & Testing Plan</h1>
+      <p class="subtitle">
+        The entire Daksh BaaS suite—Multiplayer Netcode, Analytics Telemetry, Economy V2, AI Command Menu, Dual Payments, and Helm Architecture—delivered and verified with zero human coding or manual QA.
+      </p>
+
+      <div class="pill-row">
+        <span class="pill-item">Multiplayer Trifecta</span>
+        <span class="pill-item">ClickHouse Telemetry</span>
+        <span class="pill-item">PlayFab Economy V2</span>
+        <span class="pill-item">Razorpay + Paddle</span>
+        <span class="pill-item">Helm Only</span>
+        <span class="pill-item">AI Automated Tests</span>
+      </div>
+    </header>
+
+    <!-- EXECUTIVE NOTE -->
+    <div class="note-box">
+      <strong>Operating Model:</strong> We do not write code or test cases manually. Claude writes the backend netcode and distributed algorithms, Codex writes the Unity C# SDK and unit tests, and Antigravity orchestrates the local filesystem, compiles Next.js builds, and runs the automated test runners. Every single day ships both the production code and its automated test pass.
+    </div>
+
+    <!-- PHASE 1: DAYS 1 TO 5 -->
+    <h2>
+      Phase 1: Local Foundation, Identity & Economy
+      <span class="scope-tag">Days 1 to 5</span>
+    </h2>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 01</span>Containerized Foundation & <code>npx daksh dev</code> CLI</div>
+        <span class="day-owner">Claude + Codex + Antigravity</span>
+      </div>
+      <p class="day-desc">AI sets up the Docker Compose stack (Nakama 3.22, PostgreSQL 16, Redis 7) and writes the 1-command CLI that boots local containers and launches the studio in under 60 seconds.</p>
+      <div class="day-test">✓ Automated test: Vitest runs the CLI in a child process; verifies port 7350 and 3000 respond with HTTP 200 in &lt;15 seconds.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 02</span>Player Identity Federation & Device Auth</div>
+        <span class="day-owner">Claude + Codex</span>
+      </div>
+      <p class="day-desc">AI writes zero-friction device ID authentication and multi-provider identity linking (Steam, Google Play, Apple) with Ed25519 JWT session tokens.</p>
+      <div class="day-test">✓ Automated test: Generates 100 random player sessions; verifies signature validation, token expiry, and token refresh.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 03</span>PlayFab Economy V2 (Currencies & Catalogs)</div>
+        <span class="day-owner">Claude</span>
+      </div>
+      <p class="day-desc">AI writes the Nakama TypeScript V8 runtime extension for virtual currencies (Gold/Gems), item catalogs, item bundles, and player inventory balances.</p>
+      <div class="day-test">✓ Automated test: Runs concurrent buy operations with row-level database locks (<code>FOR UPDATE</code>) to assert zero wallet balance race conditions.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 04</span>Loot Drop Tables & Idempotency Engine</div>
+        <span class="day-owner">Claude + Codex</span>
+      </div>
+      <p class="day-desc">AI writes weighted random loot tables for mystery boxes and sets up the transaction deduplication engine to protect players on flaky mobile networks.</p>
+      <div class="day-test">✓ Automated test: Fires 50 parallel duplicate purchase requests; asserts 1 succeeds, 49 are safely ignored, and RNG seed distribution is uniform.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 05</span>AI Command Menu (<code>Cmd+K</code>) & MCP Server</div>
+        <span class="day-owner">Antigravity + Codex</span>
+      </div>
+      <p class="day-desc">AI builds the global command palette in the Next.js studio and open MCP server, letting designers create complete catalogs via natural language in seconds.</p>
+      <div class="day-test">✓ Automated test: Feeds 20 diverse prompts; asserts schema generator produces valid JSON and dispatches studio UI reloads in &lt;1.5 seconds.</div>
+    </div>
+
+    <!-- PHASE 2: DAYS 6 TO 10 -->
+    <h2>
+      Phase 2: Complete Multiplayer Netcode & Analytics
+      <span class="scope-tag">Days 6 to 10</span>
+    </h2>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 06</span>Turn-Based Multiplayer Engine (Async & Sync)</div>
+        <span class="day-owner">Claude</span>
+      </div>
+      <p class="day-desc">AI writes the turn-based room state handlers for board, puzzle, and card games (8-Ball Pool, Chess, Poker) running in Nakama memory with $0 compute overhead.</p>
+      <div class="day-test">✓ Automated test: Simulates a 2-player game loop: turn handoffs, turn timeouts, surrender events, and atomic commit of final match winnings to PostgreSQL.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 07</span>Real-Time Relay Netcode (UDP & WebSockets)</div>
+        <span class="day-owner">Claude</span>
+      </div>
+      <p class="day-desc">AI writes the client-authoritative packet relay engine for high-speed action and racing games, supporting up to 64 concurrent players per match room.</p>
+      <div class="day-test">✓ Automated test: Connects 32 mock WebSocket clients; broadcasts continuous position packets and verifies &lt;10ms server relay latency jitter.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 08</span>AccelByte-Grade Matchmaking & Dynamic Rule Flexing</div>
+        <span class="day-owner">Claude + Codex</span>
+      </div>
+      <p class="day-desc">AI implements customizable matchmaking rulesets: latency ping limits, rank skill delta (MMR), and automated rule relaxation if a player waits &gt;15 seconds.</p>
+      <div class="day-test">✓ Automated test: Simulates 100 queued players across 3 regions; confirms strict matching early, followed by verified rule flexing for long-waiting players.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 09</span>Matchmaking X-Ray Admin Portal & Leaderboards</div>
+        <span class="day-owner">Antigravity + Codex</span>
+      </div>
+      <p class="day-desc">AI builds the visual Matchmaking X-Ray dashboard tab to inspect live match queues and builds real-time Redis leaderboards with tiered seasonal resets.</p>
+      <div class="day-test">✓ Automated test: Injects 500 player scores; verifies sorted set order, tie-breaking logic, and live queue telemetry feed in the studio UI.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 10</span>High-Volume Event Telemetry & Analytics Pipeline</div>
+        <span class="day-owner">Claude + Antigravity</span>
+      </div>
+      <p class="day-desc">AI builds the game event ingestion endpoint (<code>/api/analytics/events</code>) buffering player kills, loot pickups, purchases, and session durations into ClickHouse/Postgres.</p>
+      <div class="day-test">✓ Automated test: Flushes a batch of 10,000 mock gameplay events; confirms zero data loss, batch buffer flush in &lt;100ms, and partitioned table indexing.</div>
+    </div>
+
+    <!-- PHASE 3: DAYS 11 TO 15 -->
+    <h2>
+      Phase 3: Real-Time KPIs, Payments, SDK & Launch
+      <span class="scope-tag">Days 11 to 15</span>
+    </h2>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 11</span>Real-Time Analytics Dashboards (DAU, Retention, ARPU)</div>
+        <span class="day-owner">Codex + Antigravity</span>
+      </div>
+      <p class="day-desc">AI builds the visual studio analytics view calculating Daily Active Users (DAU), Monthly Active Users (MAU), D1/D7/D30 Retention curves, and Average Revenue Per User.</p>
+      <div class="day-test">✓ Automated test: Runs analytical SQL aggregations over 100,000 historical events; verifies accuracy of calculated retention and churn curves.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 12</span>Dual Payment Engine (Razorpay India + Paddle Global MoR)</div>
+        <span class="day-owner">Claude + Antigravity</span>
+      </div>
+      <p class="day-desc">AI sets up the geo-routed checkout endpoint: Indian developers pay via Razorpay (UPI, RuPay in INR), while international developers pay via Paddle (USD cards with automated VAT remittance).</p>
+      <div class="day-test">✓ Automated test: Verifies HMAC-SHA256 signature verification for Razorpay and Paddle webhooks; confirms title entitlement flips to 'pro'.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 13</span>Unity C# SDK (UPM) & Offline Persistent Disk Queue</div>
+        <span class="day-owner">Codex</span>
+      </div>
+      <p class="day-desc">AI packages the official Unity client (<code>com.daksh.sdk</code>) with <code>DakshClient</code>, Auth, Economy, Netcode, and a local persistent SQLite/JSON retry queue for dropped connections.</p>
+      <div class="day-test">✓ Automated test: Runs 24 C# NUnit tests; simulates dropped Wi-Fi, queues 10 actions to disk, reconnects, and asserts zero lost transactions.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 14</span>Helm Chart Only & The Famous Eject Button</div>
+        <span class="day-owner">Claude + Antigravity</span>
+      </div>
+      <p class="day-desc">AI writes the production Helm chart in <code>deploy/helm/daksh</code> with 100% parameterized <code>values.yaml</code> and builds the 1-click self-hosting zip export containing the Helm chart and database dump.</p>
+      <div class="day-test">✓ Automated test: Runs Helm dry-run template linting and unpacks the exported zip on an isolated sandbox VM to confirm independent boot.</div>
+    </div>
+
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-title"><span class="day-num">Day 15</span>Air-Gapped Flight Mode Test & Public Release</div>
+        <span class="day-owner">All AI Agents</span>
+      </div>
+      <p class="day-desc">AI disables Wi-Fi completely on the host machine, executes the complete game loop offline, runs a 5,000 CCU localhost stress test, compiles all 22 Next.js routes, and creates Git tag <code>v1.0.0</code>.</p>
+      <div class="day-test">✓ Automated test: Master CI runner verifies 100% test pass with zero internet, sub-20ms latency under 5,000 CCU, and 0 TypeScript build errors.</div>
+    </div>
+
+    <!-- SUMMARY TABLE -->
+    <h2>Summary of the Full-Suite Deliverables</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>What AI Implements</th>
+          <th>Automated Test Strategy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Multiplayer Netcode</strong></td>
+          <td>Turn-Based (Pool/Chess), Real-Time Relay (WS/UDP), Matchmaking Rulesets, Matchmaking X-Ray.</td>
+          <td>32-client socket relay latency tests, turn-timeout win assertions, MMR flex tests.</td>
+        </tr>
+        <tr>
+          <td><strong>Analytics & Telemetry</strong></td>
+          <td>High-volume event ingestion, ClickHouse/Postgres OLAP, DAU/MAU, Retention D1-D30, ARPU curves.</td>
+          <td>10,000 events/sec batch ingestion test, analytical retention calculation checks.</td>
+        </tr>
+        <tr>
+          <td><strong>Economy & LiveOps</strong></td>
+          <td>Currencies (Gold/Gems), Catalogs, Stores, Drop Tables, AI Command Menu (<code>Cmd+K</code>).</td>
+          <td>Row-level lock concurrency tests (<code>FOR UPDATE</code>), 50 duplicate request deduplication.</td>
+        </tr>
+        <tr>
+          <td><strong>Dual Payments</strong></td>
+          <td>Razorpay (India UPI/RuPay in INR) + Paddle (Global MoR in USD with EU/UK VAT handling).</td>
+          <td>HMAC-SHA256 signature verification tests, country header geo-routing mocks.</td>
+        </tr>
+        <tr>
+          <td><strong>Client & Deploy</strong></td>
+          <td>Unity C# UPM SDK with offline retry queue; Helm Chart (<code>deploy/helm/daksh</code>); 1-Click Eject.</td>
+          <td>24 C# NUnit tests, Helm template dry-runs, 0-WiFi flight mode verification.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>
+      Daksh Game BaaS — Complete 15-Day Master Engineering Spec • 100% AI Authored & Verified
+    </footer>
+
+  </div>
+
+</body>
+</html>
