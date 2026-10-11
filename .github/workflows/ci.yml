@@ -1,0 +1,55 @@
+name: Daksh CI
+
+on:
+  push:
+    branches:
+      - develop
+      - 'release/**'
+  pull_request:
+    branches:
+      - develop
+      - 'release/**'
+
+jobs:
+  test-and-build:
+    name: Unit Tests & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: saas-dashboard/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd saas-dashboard
+          npm ci
+
+      - name: Run Vitest Suites
+        run: |
+          cd saas-dashboard
+          npm test
+
+      - name: Build Next.js Dashboard
+        run: |
+          cd saas-dashboard
+          npm run build
+
+      - name: Validate Master Stories Dataset
+        run: |
+          node scripts/sync_to_pm.js
+
+      - name: Helm Chart Dry-Run Lint
+        run: |
+          if command -v helm &> /dev/null; then
+            helm lint ./deploy/helm/daksh
+            helm template test-release ./deploy/helm/daksh --dry-run
+          else
+            echo "Helm not installed on runner, skipping helm lint"
+          fi

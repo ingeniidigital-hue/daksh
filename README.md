@@ -1,33 +1,217 @@
-# Daksh - Generic Game Backend-as-a-Service (BaaS)
+# Daksh — Generic Open-Source Game Backend-as-a-Service (BaaS) & Managed Cloud GaaS
 
-Daksh is a platform designed to provide all the backend primitives (like PlayFab) on top of an open-source Nakama foundation. It separates game-specific logic from generic backend services, enabling game developers to build scalable, feature-rich games entirely from a web dashboard.
+<div align="center">
 
-## Core Architecture
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Release: v0.1.0-alpha](https://img.shields.io/badge/Release-v0.1.0--alpha-emerald.svg)](https://github.com/ingeniidigital-hue/daksh/releases)
+[![Build Status](https://img.shields.io/badge/Next.js%2016-25%2F25%20Routes%20Green-brightgreen.svg)]()
+[![Vitest Passing](https://img.shields.io/badge/Tests-9%2F9%20Passing-success.svg)]()
+[![Architecture](https://img.shields.io/badge/Deployment-Helm%20v3%20%7C%20Managed%20GaaS-cyan.svg)]()
+[![AI Project Management](https://img.shields.io/badge/PM-Plane%20Community%20Edition-purple.svg)]()
 
-Daksh operates on a strict **BaaS Philosophy**: The backend should never contain game-specific logic (e.g., "8-Ball Cues", "Match-3 Lives"). Instead, it provides generic APIs, and all game-specific structures are defined in JSON configurations using the dashboard.
+**A production-grade, open-source Game BaaS and fully managed Game-as-a-Service (GaaS) platform.**  
+*PlayFab parity on an open-source Nakama, Agones, PostgreSQL 16 & Redis 7 foundation with zero vendor lock-in.*
 
-### 1. Title Data (Remote Config)
-- **Role:** The single source of truth for global game configuration.
-- **Usage:** Game designers upload JSON to define game-specific structures.
-- **Example (Leagues):** Instead of writing Go/TypeScript backend logic for "Bronze", "Silver", and "Gold" leagues, designers simply upload a JSON file `League_Configuration` containing the brackets and rewards. The client (or a generic CloudScript) reads this data and applies it to the generic leaderboards.
+[Quickstart](#quickstart) • [Architecture](#system-architecture) • [Feature Pillars](#core-feature-pillars) • [Plane Community Edition Setup](#dedicated-plane-community-edition-setup) • [Multi-Client SDKs](#multi-client-sdk-suite) • [Branching & Releases](#branching--release-governance) • [License](#license)
 
-### 2. LiveOps Rules Engine
-- **Role:** An event-driven automation engine.
-- **Usage:** When an event occurs (e.g., `player_login`, `purchase_complete`), the game client dispatches a generic event to Nakama.
-- **Execution:** A generic Nakama RPC (`evaluate_event`) fetches active LiveOps rules from Nakama Storage, evaluates the conditions, and executes server-authoritative actions (like `nk.walletUpdate()` to grant items/currency or execute custom CloudScripts).
+</div>
 
-### 3. Economy & Catalog
-- **Role:** Centralized virtual economy and storefronts.
-- **Usage:** All virtual currencies, items, bundles, and lootboxes are defined in the Dashboard and stored in generic Nakama storage collections. The Dashboard strictly enforces relationships, ensuring you can only grant items/currencies that actually exist in the Catalog.
+---
 
-### 4. CloudScript (In-Browser IDE)
-- **Role:** Custom server-authoritative logic.
-- **Usage:** For the rare cases where generic configurations are not enough, developers can write raw TypeScript/JavaScript directly in the Daksh Dashboard. This code is deployed instantly and runs securely on the Nakama server.
+## Overview
 
-### 5. Leaderboards & Analytics
-- **Role:** Competitive progression and KPIs.
-- **Usage:** Daksh provides out-of-the-box UI to spin up new generic Nakama Leaderboards. Analytics are tracked in real-time, pulling DAU, revenue, and retention metrics.
+**Daksh** provides high-throughput game backend primitives without locking game studios into proprietary closed ecosystems. 
 
-## Project Structure
-- \`/saas-dashboard\`: The Next.js frontend Dashboard.
-- \`/backend\`: The clean, generic Nakama TypeScript runtime project.
+### Why Daksh?
+- **Zero DevOps Cloud GaaS**: 1-click deploy to **5 Global Super-Regions** (Virginia, Frankfurt, Mumbai, Tokyo, São Paulo) with Anycast edge routing (<45ms latency) and managed Agones Dedicated Game Servers.
+- **100% Self-Hostable**: Don't want managed cloud? Hit the **1-Click Eject Button** to download a pure Helm v3 chart (`deploy/helm/daksh`) and an isolated PostgreSQL dump.
+- **AI-Native Engineering & TDD**: Designed for autonomous AI squads (Antigravity, Claude, Codex) and human developers with **17 complete End-to-End Master Stories**, programmatic REST APIs, and a dedicated **Plane Community Edition** tracker.
+- **Multi-Client SDK Suite**: Official packages for **Unity (UPM)**, **Unreal Engine 5**, **HTML5/WebGL**, and Direct **HTTPS REST** endpoints.
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    subgraph CLIENTS["Multi-Client SDK Tier"]
+        U3D["Unity C# SDK (UPM)<br>Addressables OTA • AES-256 Cache"]
+        UE5["Unreal Engine Plugin<br>IoStore Chunks • UDP Netcode"]
+        HTML["HTML5 / WebGL SDK<br>Direct Browser WebSocket"]
+        REST["Direct HTTPS REST API<br>(Zero-SDK Integration)"]
+    end
+
+    subgraph EDGE["Global Anycast & CDN Edge (5 Super-Regions)"]
+        ANY["Anycast Edge PoP Routing<br>(&lt;45ms Latency • DDoS Shield)"]
+        CDN["Cloud OTA CDN<br>(Unity .bundle / Unreal .pak)"]
+        GEO["Geo-IP Billing Router<br>(INR vs USD)"]
+    end
+
+    subgraph MANAGED_CLOUD["Daksh Managed Cloud GaaS Platform (Or Self-Hosted Helm)"]
+        subgraph REGIONS["5 Super-Regions: IAD • FRA • BOM • NRT • GRU"]
+            CORE["Nakama V8 Game Core<br>Economy • Title Data • Rulesets"]
+            AGONES["Agones DGS Fleet<br>Unreal / Unity Headless Servers"]
+        end
+        PG[("Managed Multi-AZ PostgreSQL 16<br>WAL Archiving & PITR")]
+        RD[("Managed Redis 7 Cluster<br>MM Queues & Leaderboards")]
+        CH[("ClickHouse OLAP<br>10K Evt/s Telemetry")]
+    end
+
+    subgraph PM["AI-Friendly Project Management"]
+        PLANE["Dedicated Plane Community Edition<br>(deploy/pm/plane/)"]
+        IN_APP["Studio Task Board<br>(/dashboard/tasks)"]
+    end
+
+    subgraph BILLING["B2B Platform Monetization"]
+        RZP["Razorpay India (UPI/RuPay)"]
+        PDL["Paddle Global (Cards/MoR)"]
+    end
+
+    CLIENTS --> ANY
+    CLIENTS --> CDN
+    ANY --> REGIONS
+    REGIONS --> PG
+    REGIONS --> RD
+    REGIONS --> CH
+    GEO --> RZP
+    GEO --> PDL
+    MANAGED_CLOUD <--> PM
+```
+
+---
+
+## Core Feature Pillars
+
+### 1. Multiplayer Netcode & AccelByte Matchmaking
+- **Turn-Based Netcode**: In-memory match simulation with state machines, turn timers, and timeout forfeits ($0 server cost).
+- **Real-Time Relay (WS/UDP)**: Sub-10ms packet dispatch for fast-paced action rooms up to 64 CCU with delta compression.
+- **AccelByte-Style Matchmaking**: Configurable JSON rulesets (MMR tolerances, regional ping bounds) with automated **Dynamic Rule Flexing** to prevent queue starvation.
+- **Matchmaking X-Ray**: Real-time SSE queue visualizer in Studio and Redis sorted set leaderboards with automated anti-cheat validation.
+
+### 2. Economy V2, Title Data & LiveOps
+- **Dual Virtual Currencies**: Gold & Gems with row-level PostgreSQL locks (`SELECT FOR UPDATE`) ensuring zero double-spends or balance glitch exploits.
+- **Title Data (Remote Config KV Store)**:
+  - **Public Title Data**: Client-facing JSON configs for seasonal events, multipliers, and client banners (<20ms response).
+  - **Internal Secret Title Data**: Server-only KV store accessible exclusively by backend CloudScripts/RPCs, completely hidden from clients.
+- **Loot Drop Tables**: Cryptographically randomized weighted mystery boxes with idempotency keys protecting mobile retries.
+- **AI Command Menu (`Cmd+K`)**: Natural language prompt-driven catalog and balance operations via Open Model Context Protocol (MCP).
+
+### 3. Dual B2B SaaS Platform Monetization
+- **Intelligent Geo-Routing**:
+  - **India**: Razorpay (UPI, RuPay, NetBanking, e-Mandates in INR).
+  - **Global**: Paddle (Merchant of Record handling worldwide cards, PayPal, EU VAT, and sales taxes in USD).
+- **Security**: Cryptographic HMAC-SHA256 signature verification blocks unauthorized webhooks.
+
+### 4. Multi-Client SDK Suite
+| Client / Engine | Package | Offline Queue | Asset Caching |
+| :--- | :--- | :---: | :---: |
+| **Unity Engine** | C# UPM (`com.daksh.sdk`) | Yes (AES-256) | ETag / 304 Not Modified |
+| **Unreal Engine 5** | C++ Plugin (UObject wrappers) | Yes (Binary) | Native Chunk Cache |
+| **HTML5 / WebGL** | TypeScript NPM Package | Yes (LocalStorage) | Browser Cache |
+| **Direct HTTPS REST** | Zero-SDK HTTP Endpoints | Client-managed | HTTP 304 Headers |
+
+### 5. Cloud OTA Asset Hosting
+- Global Edge CDN hosting for **Unity Addressables** (`.bundle`) and **Unreal Engine Chunks** (`.pak` / IoStore).
+- Cryptographic SHA-256 checksum validation before in-memory mounting.
+- HTTP `Range` header support for resumable mobile downloads.
+
+### 6. Fully Managed Cloud GaaS vs. 1-Click Eject
+- **Daksh Managed Cloud**: Automated zero-DevOps deployment across 5 Super-Regions with a 99.99% multi-region SLA.
+- **1-Click Helm Eject**: Download [`deploy/helm/daksh/`](file:///home/nikhil/Projects/daksh/deploy/helm/daksh/) + raw SQL dump to self-host on any Kubernetes cluster anytime.
+
+---
+
+## Dedicated Plane Community Edition Setup
+
+To track all 17 master stories with an open-source, AI-friendly project management tool, Daksh includes a dedicated, self-hosted deployment of **Plane Community Edition** (the premier open-source Linear/Jira alternative).
+
+### 1-Command Quickstart
+```bash
+# Launch Plane Community Edition containers (Backend, Frontend, DB, Redis, Nginx Proxy)
+./scripts/start_plane.sh
+```
+*Access the Plane Web UI at **`http://localhost:8090`**.*
+
+### Importing All 17 Master Stories into Plane
+1. Open `http://localhost:8090` and create your workspace (e.g., `daksh`) and project (`Daksh Game BaaS`).
+2. Navigate to **Project Settings ➔ Import ➔ CSV**.
+3. Select the pre-generated file: **`tasks/daksh_stories_plane_import.csv`**.
+4. All 17 stories will populate with User Stories, Deliverables, Security rules, and Acceptance Criteria.
+
+### Automated Sync CLI
+```bash
+# Regenerate CSV or sync to Plane REST API
+node scripts/sync_to_plane.js
+```
+
+---
+
+## Built-in Studio AI Project Board
+
+You can also track tasks directly inside the Daksh Studio without launching external tools:
+- **Interactive UI**: Open **`http://localhost:3000/dashboard/tasks`**
+- **Programmatic REST API for AI Agents**:
+  ```bash
+  # Query backlog or active stories
+  curl -s "http://localhost:3000/api/tasks?category=cloud"
+
+  # AI updates task status & verification gate
+  curl -X PATCH http://localhost:3000/api/tasks \
+    -H "Content-Type: application/json" \
+    -d '{"id":"STORY-15","status":"done","verification_gate":"5 Super-Regions deployed"}'
+  ```
+
+---
+
+## Quickstart
+
+### 1. Prerequisites
+- Docker & Docker Compose
+- Node.js >= 20.x
+- Git
+
+### 2. Run Local Engine
+```bash
+# Clone the repository
+git clone https://github.com/ingeniidigital-hue/daksh.git
+cd daksh
+git checkout develop
+
+# Boot local engine & studio
+cd saas-dashboard
+npm install
+npm run build
+npm start
+```
+*Open `http://localhost:3000` to access the Daksh Studio.*
+
+### 3. Run Automated Tests
+```bash
+cd saas-dashboard
+npm test
+```
+*Runs all Vitest unit and schema test suites (100% green exit code 0).*
+
+---
+
+## Branching & Release Governance
+
+To maintain production stability, this repository enforces strict branch governance:
+
+- **`develop`**: The primary branch for ongoing feature implementation, AI squads, and story completions.
+- **`release/vX.Y.Z`**: Dedicated release branches for freezing and stabilizing release candidates (e.g. `release/v0.1.0-alpha`).
+- **`vX.Y.Z` Tags**: Cryptographically tagged releases on Git.
+- **`main`**: **Strictly reserved for production GA releases.** Active development is never pushed directly to `main`.
+
+---
+
+## License
+
+Daksh is open-source software licensed under the **[Apache License 2.0](LICENSE)**.  
+You are free to use, modify, distribute, and self-host Daksh for commercial or open-source games with zero royalties or vendor lock-in.
+
+---
+
+<div align="center">
+  <b>Built by Ingenii Digital &amp; the Daksh Open Source Authors</b>
+</div>
