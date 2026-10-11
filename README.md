@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1_(Fair--Code)-blue.svg)](LICENSE)
 [![Release: v0.1.0-alpha](https://img.shields.io/badge/Release-v0.1.0--alpha-emerald.svg)](https://github.com/ingeniidigital-hue/daksh/releases)
 [![Build Status](https://img.shields.io/badge/Next.js%2016-26%2F26%20Routes%20Green-brightgreen.svg)]()
 [![Vitest Passing](https://img.shields.io/badge/Tests-34%2F34%20Passing-success.svg)]()
@@ -187,10 +187,14 @@ To maintain production stability, this repository enforces strict branch governa
 
 ---
 
-## License
+## License & Fair-Code Governance
 
-Daksh is open-source software licensed under the **[Apache License 2.0](LICENSE)**.  
-You are free to use, modify, distribute, and self-host Daksh for commercial or open-source games with zero royalties or vendor lock-in.
+Daksh is source-available software licensed under the **[Business Source License 1.1 (BSL 1.1)](LICENSE)**:
+
+- **Free for Game Developers & Studios**: You are 100% free to use, modify, self-host, and deploy Daksh on your own private cloud or on-premise infrastructure (AWS, GCP, Azure, bare-metal) to power your own video games, mobile apps, and interactive software with **zero royalties, zero revenue share, and zero license fees**.
+- **No Reselling as a Competing Cloud Service**: You may **not** repackage or provide Daksh to third parties as a hosted or managed Game Backend-as-a-Service (BaaS) cloud offering in competition with Daksh.
+- **Automatic Apache 2.0 Conversion**: Each release version automatically converts to the fully permissive **Apache License 2.0** two years after its initial release date.
+- **Client SDKs**: All client SDKs (Unity, Unreal Engine, WebGL, TypeScript) are licensed under **Apache 2.0 / MIT** and can be embedded freely into any commercial game client.
 
 ---
 
