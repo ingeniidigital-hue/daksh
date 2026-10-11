@@ -11,6 +11,18 @@ import { TitleDataService } from "../title-data/service";
 export class MCPService {
   private static readonly TOOLS: MCPTool[] = [
     {
+      name: "daksh_list_catalog_items",
+      description: "Lists all items and pricing from the PlayFab Economy V2 catalog.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" },
+          category: { type: "string", description: "Optional category filter" }
+        },
+        required: ["titleId"]
+      }
+    },
+    {
       name: "daksh_create_catalog_item",
       description: "Creates a new item in the game's PlayFab Economy V2 catalog.",
       inputSchema: {
@@ -45,6 +57,40 @@ export class MCPService {
           amount: { type: "number", description: "Integer amount of currency to grant" }
         },
         required: ["titleId", "playerId", "currencyCode", "amount"]
+      }
+    },
+    {
+      name: "daksh_inspect_player",
+      description: "Inspects a player's virtual currency wallet balances and inventory instances.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" },
+          playerId: { type: "string", description: "Unique player ID" }
+        },
+        required: ["titleId", "playerId"]
+      }
+    },
+    {
+      name: "daksh_get_title_data",
+      description: "Retrieves Key-Value Remote Configuration Title Data.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" },
+          keys: {
+            type: "array",
+            items: { type: "string" },
+            description: "Optional list of specific configuration keys"
+          },
+          scope: {
+            type: "string",
+            enum: ["public", "internal"],
+            description: "Scope: public (client safe) or internal (secret)"
+          },
+          secretKey: { type: "string", description: "Required if querying internal scope" }
+        },
+        required: ["titleId"]
       }
     },
     {
@@ -99,6 +145,22 @@ export class MCPService {
       const args = req.arguments || {};
 
       switch (req.name) {
+        case "daksh_list_catalog_items": {
+          let items = listCatalogItems(args.titleId);
+          if (args.category) {
+            items = items.filter(i => i.category.toLowerCase() === args.category.toLowerCase());
+          }
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({ total: items.length, items }, null, 2)
+              }
+            ]
+          };
+        }
+
         case "daksh_create_catalog_item": {
           const item = addCatalogItem(args.titleId, {
             id: args.id,
@@ -145,6 +207,48 @@ export class MCPService {
                   null,
                   2
                 )
+              }
+            ]
+          };
+        }
+
+        case "daksh_inspect_player": {
+          const wallets = EconomyService.getPlayerWallets(args.titleId, args.playerId);
+          const inventory = EconomyService.getPlayerInventory(args.titleId, args.playerId);
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    playerId: args.playerId,
+                    wallets,
+                    inventoryCount: inventory.length,
+                    inventory
+                  },
+                  null,
+                  2
+                )
+              }
+            ]
+          };
+        }
+
+        case "daksh_get_title_data": {
+          const result = await TitleDataService.getTitleData({
+            titleId: args.titleId,
+            keys: args.keys,
+            scope: args.scope || "public",
+            secretKey: args.secretKey
+          });
+
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(result, null, 2)
               }
             ]
           };
@@ -234,5 +338,65 @@ export class MCPService {
         ]
       };
     }
+  }
+
+  /**
+   * Processes a standard Model Context Protocol JSON-RPC 2.0 message
+   */
+  public static async handleJsonRpc(message: any): Promise<any> {
+    const { id, method, params } = message;
+
+    if (method === "initialize") {
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: {
+          protocolVersion: "2024-11-05",
+          capabilities: {
+            tools: {}
+          },
+          serverInfo: {
+            name: "daksh-mcp",
+            version: "0.1.0"
+          }
+        }
+      };
+    }
+
+    if (method === "ping") {
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: {}
+      };
+    }
+
+    if (method === "tools/list") {
+      const toolList = await this.listTools();
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: toolList
+      };
+    }
+
+    if (method === "tools/call") {
+      const { name, arguments: toolArgs } = params || {};
+      const callRes = await this.callTool({ name, arguments: toolArgs });
+      return {
+        jsonrpc: "2.0",
+        id,
+        result: callRes
+      };
+    }
+
+    return {
+      jsonrpc: "2.0",
+      id,
+      error: {
+        code: -32601,
+        message: `Method '${method}' not found`
+      }
+    };
   }
 }

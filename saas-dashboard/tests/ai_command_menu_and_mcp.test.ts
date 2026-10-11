@@ -132,4 +132,48 @@ describe("STORY-05 / TDD: AI Command Menu (Cmd+K) & Open MCP Server", () => {
       amount: 1000
     });
   });
+
+  it("TEST-05-E [MCP JSON-RPC 2.0 Conformance]: MCPService responds to initialize, ping, tools/list, and tools/call over JSON-RPC", async () => {
+    // 1. Initialize
+    const initRes = await MCPService.handleJsonRpc({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "initialize",
+      params: { clientInfo: { name: "test-client", version: "1.0" } }
+    });
+    expect(initRes.jsonrpc).toBe("2.0");
+    expect(initRes.id).toBe(1);
+    expect(initRes.result.protocolVersion).toBe("2024-11-05");
+    expect(initRes.result.serverInfo.name).toBe("daksh-mcp");
+
+    // 2. Ping
+    const pingRes = await MCPService.handleJsonRpc({
+      jsonrpc: "2.0",
+      id: 2,
+      method: "ping"
+    });
+    expect(pingRes.jsonrpc).toBe("2.0");
+    expect(pingRes.id).toBe(2);
+
+    // 3. Tools/List
+    const listRes = await MCPService.handleJsonRpc({
+      jsonrpc: "2.0",
+      id: 3,
+      method: "tools/list"
+    });
+    expect(listRes.result.tools.length).toBeGreaterThanOrEqual(8);
+
+    // 4. Tools/Call
+    const callRes = await MCPService.handleJsonRpc({
+      jsonrpc: "2.0",
+      id: 4,
+      method: "tools/call",
+      params: {
+        name: "daksh_get_system_health",
+        arguments: {}
+      }
+    });
+    expect(callRes.result.isError).toBe(false);
+    expect(callRes.result.content[0].type).toBe("text");
+  });
 });

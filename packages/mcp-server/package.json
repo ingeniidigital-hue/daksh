@@ -1,0 +1,19 @@
+{
+  "name": "@daksh/mcp-server",
+  "version": "0.1.0",
+  "description": "Official Model Context Protocol (MCP) Server for Daksh Game BaaS",
+  "main": "bin/daksh-mcp.js",
+  "bin": {
+    "daksh-mcp": "./bin/daksh-mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "game-baas",
+    "daksh",
+    "claude",
+    "ai-agents"
+  ],
+  "author": "Ingenii Digital & Daksh Authors",
+  "license": "Apache-2.0"
+}
