@@ -82,6 +82,19 @@ packages/sdk/unity/
 
 ---
 
+## Data Versioning, Caching & Sync Architecture
+
+Daksh employs a two-tiered synchronization architecture ensuring zero redundant bandwidth usage for static data and guaranteed idempotent replay for dynamic player data.
+
+| Data Type | Versioning Protocol | Cache / Sync Mechanism | Conflict Resolution |
+| :--- | :--- | :--- | :--- |
+| **Static / Title Data** (Catalogs, Remote Config) | Cryptographic SHA-256 ETags & Monotonic Revisions | HTTP 304 Conditional GET (`If-None-Match`). Serves local AES-256 cached data with **0 duplicate bytes**. | Server-Authoritative |
+| **Dynamic Player Data** (Inventory, Cloud Save, Mutations) | Optimistic Concurrency Control (OCC) + Revision Counters | Persistent disk FIFO action queue replaying sequentially on reconnect with unique idempotency keys (`tx_uuid`). | Server-Authoritative / LWW / Delta Accumulation |
+
+For a complete deep-dive with sequence diagrams and mathematical guarantees, see the [Data Versioning & Sync Guide](Documentation~/DataVersioningAndSync.md).
+
+---
+
 ## Installation
 
 ### Method A: Via Unity Package Manager (Git URL)

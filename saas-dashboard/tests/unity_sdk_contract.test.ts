@@ -151,4 +151,23 @@ describe("Unity SDK Modular Architecture & API Contract Verification", () => {
     expect(sdkCs).toContain("public static DakshClient Client");
     expect(sdkCs).toContain("public static DakshEconomy Economy");
   });
+
+  it("TEST-UNITY-09 [Data Versioning & Sync Documentation]: Verifies comprehensive architecture documentation for ETag diffing, OCC, and conflict resolution", () => {
+    const docPath = path.join(unitySdkPath, "Documentation~/DataVersioningAndSync.md");
+    expect(fs.existsSync(docPath)).toBe(true);
+
+    const docContent = fs.readFileSync(docPath, "utf-8");
+    expect(docContent).toContain("HTTP 304 Conditional Diffing");
+    expect(docContent).toContain("If-None-Match");
+    expect(docContent).toContain("OfflineActionQueue");
+    expect(docContent).toContain("Idempotency Keys");
+    expect(docContent).toContain("Optimistic Concurrency Control");
+    expect(docContent).toContain("Server-Authoritative");
+    expect(docContent).toContain("Last-Write-Wins");
+    expect(docContent).toContain("Delta Accumulation");
+
+    const readmeContent = fs.readFileSync(path.join(unitySdkPath, "README.md"), "utf-8");
+    expect(readmeContent).toContain("Data Versioning, Caching & Sync Architecture");
+    expect(readmeContent).toContain("Documentation~/DataVersioningAndSync.md");
+  });
 });
