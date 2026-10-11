@@ -44,3 +44,14 @@ __pycache__/
 .pytest_cache/
 .venv/
 env/
+
+# Roadmap, 15-day plans, presentations & internal brain files
+*15day*
+*roadmap*
+*rice*
+reports/
+*.pdf
+public/reports/
+*presentation*
+*human_plan*
+*visualizer*

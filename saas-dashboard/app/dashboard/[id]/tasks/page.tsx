@@ -162,13 +162,13 @@ ${task.acceptance_criteria.map(a => `- ${a}`).join("\n")}
           </button>
 
           <a
-            href="/reports/daksh_roadmap_presentation.html"
+            href="http://localhost:8090"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 flex items-center gap-1.5 shadow-sm transition"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            Pitch Deck Presentation
+            Open Plane CE (:8090)
           </a>
         </div>
       </div>
