@@ -93,15 +93,15 @@ async function main() {
     console.log(`   List created: "${name}" (ID ${listRes.item.id})`);
   }
 
-  // Done list ID
-  const doneListId = listIds['Done & Verified'];
+  // Target list for active work
+  const targetListId = listIds['To Do'];
 
   console.log(`🔄 Importing all ${STORIES.length} Master Stories into Planka...`);
   for (let i = 0; i < STORIES.length; i++) {
     const s = STORIES[i];
     const desc = `### User Story\n${s.user_story}\n\n### Deliverables\n${s.deliverables.map(d => `- ${d}`).join('\n')}\n\n### Security & Compliance\n${s.security_compliance.map(sc => `- ${sc}`).join('\n')}\n\n### Acceptance Criteria\n${s.acceptance_criteria.map(a => `- ${a}`).join('\n')}\n\n### Verification Gate\n\`${s.verification_gate}\``;
 
-    await apiRequest('POST', `/api/lists/${doneListId}/cards`, {
+    await apiRequest('POST', `/api/lists/${targetListId}/cards`, {
       type: 'story',
       name: `[${s.id}] ${s.title}`,
       description: desc,
