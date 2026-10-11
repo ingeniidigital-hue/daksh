@@ -26,6 +26,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: saas-dashboard/package-lock.json
 
+      - name: Ensure Docker Daemon Running
+        run: |
+          sudo systemctl start docker || true
+
       - name: Install Dependencies
         run: |
           cd saas-dashboard
