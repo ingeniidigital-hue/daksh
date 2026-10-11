@@ -4,8 +4,8 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Release: v0.1.0-alpha](https://img.shields.io/badge/Release-v0.1.0--alpha-emerald.svg)](https://github.com/ingeniidigital-hue/daksh/releases)
-[![Build Status](https://img.shields.io/badge/Next.js%2016-22%2F22%20Routes%20Green-brightgreen.svg)]()
-[![Vitest Passing](https://img.shields.io/badge/Tests-9%2F9%20Passing-success.svg)]()
+[![Build Status](https://img.shields.io/badge/Next.js%2016-26%2F26%20Routes%20Green-brightgreen.svg)]()
+[![Vitest Passing](https://img.shields.io/badge/Tests-34%2F34%20Passing-success.svg)]()
 [![Architecture](https://img.shields.io/badge/Deployment-Helm%20v3%20%7C%20Managed%20GaaS-cyan.svg)]()
 [![AI Project Management](https://img.shields.io/badge/PM-Planka%20Kanban-purple.svg)](http://localhost:1337)
 
@@ -62,9 +62,9 @@ flowchart TD
         IN_APP["Studio Task Board<br>(/dashboard/tasks)"]
     end
 
-    subgraph BILLING["B2B Platform Monetization"]
-        RZP["Razorpay India (UPI/RuPay)"]
-        PDL["Paddle Global (Cards/MoR)"]
+    subgraph BILLING["Daksh Cloud B2B SaaS Billing (Studio Cloud Subscriptions)"]
+        RZP["Razorpay India (UPI/RuPay/GST) - INR"]
+        PDL["Paddle Global (Cards/PayPal/MoR/VAT) - USD"]
     end
 
     CLIENTS --> ANY
@@ -96,11 +96,16 @@ flowchart TD
 - **Loot Drop Tables**: Cryptographically randomized weighted mystery boxes with idempotency keys protecting mobile retries.
 - **AI Command Menu (`Cmd+K`)**: Natural language prompt-driven catalog and balance operations via Open Model Context Protocol (MCP).
 
-### 3. Dual B2B SaaS Platform Monetization
-- **Intelligent Geo-Routing**:
-  - **India**: Razorpay (UPI, RuPay, NetBanking, e-Mandates in INR).
-  - **Global**: Paddle (Merchant of Record handling worldwide cards, PayPal, EU VAT, and sales taxes in USD).
-- **Security**: Cryptographic HMAC-SHA256 signature verification blocks unauthorized webhooks.
+### 3. Daksh Cloud B2B SaaS Subscription Billing (STORY-12)
+> [!IMPORTANT]
+> **Cloud Service Billing vs. In-Game Economy Distinction:**
+> - **Daksh Cloud B2B Subscription Billing (Razorpay + Paddle)**: Strictly for **game studios/companies** paying for their **Daksh Managed Cloud BaaS platform tiers** (Indie, Studio, Enterprise) and metered cloud compute/MAU resources. **Players never touch Razorpay or Paddle.**
+> - **In-Game Microtransactions (Economy V2)**: Players purchase in-game items (weapons, skins, loot boxes) using in-game virtual currencies (`GOLD`, `GEMS`) or standard native platform IAP (Google Play Billing, Apple StoreKit 2, Steam Microtransactions), processed server-side with atomic row-level locks.
+> 
+- **Intelligent Geo-Routing for Studio Cloud Subscriptions:**
+  - **India Game Studios**: **Razorpay** in INR (UPI, RuPay, Corporate NetBanking, recurring e-Mandates, and automated GST-compliant invoicing).
+  - **International Game Studios**: **Paddle** in USD (Merchant of Record managing worldwide cards, PayPal, EU VAT, and cross-border SaaS tax compliance).
+- **Security & Integrity**: Cryptographic HMAC-SHA256 signature verification blocks unauthorized billing webhooks. Available directly in Daksh Studio at `/dashboard/[id]/billing`.
 
 ### 4. Multi-Client SDK Suite
 | Client / Engine | Package | Offline Queue | Asset Caching |
