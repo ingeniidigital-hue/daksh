@@ -11,13 +11,13 @@ interface OperatingModeContextType {
 }
 
 const OperatingModeContext = createContext<OperatingModeContextType>({
-  mode: "manual",
+  mode: "ai",
   setMode: () => {},
   toggleMode: () => {},
 });
 
 export function OperatingModeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<OperatingMode>("manual");
+  const [mode, setModeState] = useState<OperatingMode>("ai");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

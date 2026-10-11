@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, ChevronRight, Cloud, Server, Activity, CheckCircle2, AlertCircle, Database, Zap } from "lucide-react";
+import { Plus, ChevronRight, Cloud, Server, Activity, CheckCircle2, AlertCircle, Database, Zap, Sliders } from "lucide-react";
 import ModeSwitcher from "../../components/ModeSwitcher";
 import AIOrchestratorConsole from "../../components/AIOrchestratorConsole";
 import { useOperatingMode } from "../../context/OperatingModeContext";
@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [newTitleName, setNewTitleName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [showManualInspector, setShowManualInspector] = useState(false);
   const { mode } = useOperatingMode();
 
   useEffect(() => {
@@ -134,7 +135,7 @@ export default function Dashboard() {
   if (!isClient) return null;
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9] text-gray-800 font-sans pb-20">
+    <div className={`min-h-screen font-sans ${mode === "ai" ? "bg-[#0b1329] text-slate-200" : "bg-[#f4f6f9] text-gray-800 pb-20"}`}>
       {/* AdminLTE Top Navbar */}
       <nav className="bg-[#1f2937] text-white border-b border-gray-700 sticky top-0 z-40 h-12 flex items-center px-4 justify-between">
         <div className="flex items-center space-x-3">
@@ -154,6 +155,22 @@ export default function Dashboard() {
           {/* Mode Switcher: Manual vs AI Mode */}
           <ModeSwitcher />
 
+          {/* Optional Manual Inspector Toggle in AI Mode */}
+          {mode === "ai" && (
+            <button
+              onClick={() => setShowManualInspector(!showManualInspector)}
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs border transition-colors ${
+                showManualInspector
+                  ? "bg-indigo-600 text-white border-indigo-500 font-medium"
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700"
+              }`}
+              title="Toggle manual raw tables inspector"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">{showManualInspector ? "Hide Inspector" : "Manual Inspector"}</span>
+            </button>
+          )}
+
           <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="text-[11px] font-mono">Core: {systemHealth?.status === "healthy" ? "Online" : "Connecting"}</span>
@@ -171,31 +188,49 @@ export default function Dashboard() {
       {/* AI Orchestrator Console (Visible only in AI Mode) */}
       {mode === "ai" && (
         <AIOrchestratorConsole
+          isProjectSelector={true}
           titleId={titles[0]?.id || "YCSLW"}
           titleName={titles[0]?.name || "Main Game Title"}
+          onOpenCreateTitle={handleCreateTitle}
+          showInspectorToggle={true}
+          onToggleInspector={() => setShowManualInspector(prev => !prev)}
+          isInspectorOpen={showManualInspector}
         />
       )}
 
-      {/* AdminLTE Content Header with Breadcrumb */}
-      <div className="max-w-6xl mx-auto px-6 pt-6 pb-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800 tracking-tight">Game Titles Management</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Deploy, monitor, and manage your game's backend microservices.</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="text-xs text-gray-500">
-            <span className="hover:text-gray-700 cursor-pointer">Home</span> / <span className="font-semibold text-gray-700">Titles</span>
-          </div>
-          <button 
-            onClick={handleCreateTitle}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center transition-colors shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" /> New Title
-          </button>
-        </div>
-      </div>
+      {/* Manual Inspector / Manual Mode View */}
+      {(mode === "manual" || showManualInspector) && (
+        <div className={mode === "ai" ? "border-t-4 border-indigo-900/80 bg-[#f4f6f9] p-6 animate-in fade-in duration-200" : ""}>
+          {mode === "ai" && (
+            <div className="max-w-6xl mx-auto flex items-center justify-between pb-3 mb-4 border-b border-gray-300">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <span className="font-bold text-xs uppercase tracking-wider text-gray-700">Raw Multi-Tenant Titles Directory</span>
+              </div>
+              <button onClick={() => setShowManualInspector(false)} className="text-xs text-gray-500 hover:text-gray-900 font-medium">✕ Hide Inspector</button>
+            </div>
+          )}
 
-      <main className="max-w-6xl mx-auto px-6 pt-6 space-y-6">
+          {/* AdminLTE Content Header with Breadcrumb */}
+          <div className="max-w-6xl mx-auto px-6 pt-6 pb-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="text-xl font-bold text-gray-800 tracking-tight">Game Titles Management</h1>
+              <p className="text-xs text-gray-500 mt-0.5">Deploy, monitor, and manage your game's backend microservices.</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="text-xs text-gray-500">
+                <span className="hover:text-gray-700 cursor-pointer">Home</span> / <span className="font-semibold text-gray-700">Titles</span>
+              </div>
+              <button 
+                onClick={handleCreateTitle}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" /> New Title
+              </button>
+            </div>
+          </div>
+
+          <main className="max-w-6xl mx-auto px-6 pt-6 space-y-6">
         {/* AdminLTE 4 Info-Boxes / Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white border border-gray-200 rounded p-4 shadow-xs flex items-center justify-between">
@@ -315,6 +350,8 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+    </div>
+  )}
 
       {/* AdminLTE Create Title Modal */}
       {isModalOpen && (
