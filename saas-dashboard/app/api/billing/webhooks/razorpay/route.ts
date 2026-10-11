@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+const processedRazorpayEvents = new Set<string>();
+
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
@@ -20,6 +22,13 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody || "{}");
     const eventType = payload.event;
+    const eventId = payload.payload?.payment?.entity?.id || payload.payload?.subscription?.entity?.id || rawBody;
+
+    // Idempotency Deduplication Guard
+    if (processedRazorpayEvents.has(eventId)) {
+      return NextResponse.json({ received: true, deduplicated: true, gateway: "razorpay" });
+    }
+    processedRazorpayEvents.add(eventId);
 
     // Handle payment & subscription events
     if (

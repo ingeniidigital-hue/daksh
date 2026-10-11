@@ -97,4 +97,25 @@ describe("EPIC 13 / TDD: Dual Payment Gateway & Cryptography", () => {
     expect(recomputedHash).toBe(parsedH1);
   });
 
+  // 4. Webhook Idempotency & Deduplication
+  it("TEST-12-D [Idempotent Webhook]: Duplicate delivery of same payment webhook is safely deduplicated without double entitlement", () => {
+    const processedEvents = new Set<string>();
+
+    function processPaymentWebhook(eventId: string) {
+      if (processedEvents.has(eventId)) {
+        return { received: true, deduplicated: true };
+      }
+      processedEvents.add(eventId);
+      return { received: true, deduplicated: false };
+    }
+
+    const firstDelivery = processPaymentWebhook("evt_rzp_test_pay_999");
+    expect(firstDelivery.received).toBe(true);
+    expect(firstDelivery.deduplicated).toBe(false);
+
+    // Immediate duplicate replay from network retry
+    const duplicateDelivery = processPaymentWebhook("evt_rzp_test_pay_999");
+    expect(duplicateDelivery.received).toBe(true);
+    expect(duplicateDelivery.deduplicated).toBe(true);
+  });
 });

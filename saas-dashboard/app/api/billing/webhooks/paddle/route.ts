@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+const processedPaddleEvents = new Set<string>();
+
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
@@ -30,6 +32,13 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody || "{}");
     const eventType = payload.event_type;
+    const eventId = payload.event_id || payload.data?.id || rawBody;
+
+    // Idempotency Deduplication Guard
+    if (processedPaddleEvents.has(eventId)) {
+      return NextResponse.json({ received: true, deduplicated: true, gateway: "paddle" });
+    }
+    processedPaddleEvents.add(eventId);
 
     if (
       eventType === "transaction.completed" || 
