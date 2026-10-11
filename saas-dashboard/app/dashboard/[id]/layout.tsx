@@ -10,7 +10,7 @@ import {
   Swords, Server, Target, 
   UsersRound, Trophy, 
   Save, BarChart3, LineChart, Network, TrendingUp, Package,
-  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard, Download
+  LayoutDashboard, Bell, Search, Sparkles, Cpu, CreditCard, Download, Activity
 } from "lucide-react";
 import AICommandMenu from "../../../components/AICommandMenu";
 import EjectModal from "../../../components/EjectModal";
@@ -231,6 +231,7 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
 
             <SidebarSection title="Cloud & Monetization">
               <SidebarLink href={`/dashboard/${id}/billing`} icon={CreditCard} label="Cloud Tiers & Billing" />
+              <SidebarLink href={`/dashboard/${id}/stress`} icon={Activity} label="5k CCU Stress & Gate" />
             </SidebarSection>
 
           </div>
