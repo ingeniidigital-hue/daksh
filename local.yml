@@ -16,8 +16,16 @@ socket:
   server_key: "defaultkey"
   port: 7350
   max_message_size_bytes: 4096
+  ping_period_ms: 15000
+  pong_wait_ms: 25000
+
+console:
+  port: 7351
+  username: "admin"
+  password: "password"
 
 runtime:
   env:
     - "DAKSH_ENVIRONMENT=development"
     - "AIR_GAPPED=true"
+  js_entrypoint: "modules/main.js"
