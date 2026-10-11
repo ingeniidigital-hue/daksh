@@ -37,7 +37,7 @@ Acceptance Criteria:
 - When 2 concurrent purchase requests arrive simultaneously
 - Then exactly 1 purchase succeeds (balance becomes 0) and the second fails with INSUFFICIENT_FUNDS
 
-Verification: Zero race-condition double-spends on wallets",todo,critical,economy
+Verification: Zero race-condition double-spends on wallets",done,critical,economy
 STORY-04,"Title Data (Remote Config KV Store), Internal Title Data & Loot Drop Tables","User Story: As a live game director, I want a centralized Title Data (Key-Value Remote Config) and Internal Title Data store, so that our studio can update game constants, seasonal events, maintenance flags, and loot drop tables on the fly without releasing a new client binary.
 
 Deliverables:

@@ -75,7 +75,7 @@
     "id": "STORY-03",
     "title": "PlayFab Economy V2 & Atomic Wallet Concurrency",
     "category": "economy",
-    "status": "todo",
+    "status": "done",
     "priority": "critical",
     "user_story": "As a game designer, I want to create dual currencies (Gold and Gems), item catalogs, and stores where purchases deduct balances atomically, so that players can buy in-game items without wallet balance glitches or race condition exploits.",
     "deliverables": [

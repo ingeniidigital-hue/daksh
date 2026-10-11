@@ -110,3 +110,21 @@ export async function POST(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: titleId } = await params;
+  const { listCatalogItems, listCurrencies } = await import('@/lib/economy');
+  const items = listCatalogItems(titleId);
+  const currencies = listCurrencies(titleId);
+
+  return NextResponse.json({
+    titleId,
+    totalItems: items.length,
+    items,
+    currencies
+  });
+}
+
