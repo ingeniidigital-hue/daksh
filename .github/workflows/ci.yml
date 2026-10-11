@@ -22,19 +22,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: saas-dashboard/package-lock.json
 
       - name: Install Dependencies
         run: |
           cd saas-dashboard
-          npm ci
+          npm ci --legacy-peer-deps
 
       - name: Run Vitest Suites
         run: |
           cd saas-dashboard
           npm test
+          ./node_modules/.bin/vitest run --dir .. ../packages/cli/tests/cli.test.ts
 
       - name: Build Next.js Dashboard
         run: |
