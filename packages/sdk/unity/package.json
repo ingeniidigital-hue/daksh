@@ -1,0 +1,33 @@
+{
+  "name": "com.daksh.sdk",
+  "version": "1.0.0",
+  "displayName": "Daksh Game BaaS SDK",
+  "description": "Production Unity SDK for Daksh Game BaaS. Provides offline AES-256 caching, HTTP 304 ETag diffing, persistent offline action replay queue, PlayFab Economy V2 virtual currencies & catalogs, Leaderboards, Matchmaking, HTTP 206 resumable OTA AssetBundle downloaders, and Nakama-compatible real-time relay netcode.",
+  "unity": "2021.3",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://daksh.io/docs/sdk/unity",
+  "changelogUrl": "https://daksh.io/docs/sdk/unity/changelog",
+  "licensesUrl": "https://daksh.io/license",
+  "license": "Apache-2.0",
+  "keywords": [
+    "daksh",
+    "baas",
+    "backend",
+    "cache",
+    "etag",
+    "offline",
+    "economy",
+    "playfab",
+    "nakama",
+    "leaderboard",
+    "matchmaking",
+    "netcode",
+    "ota"
+  ],
+  "author": {
+    "name": "Daksh BaaS Authors",
+    "email": "engineering@daksh.io",
+    "url": "https://daksh.io"
+  },
+  "dependencies": {}
+}

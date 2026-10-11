@@ -1,0 +1,18 @@
+{
+  "name": "com.daksh.sdk.editor",
+  "rootNamespace": "Daksh.SDK.Editor",
+  "references": [
+    "com.daksh.sdk"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
