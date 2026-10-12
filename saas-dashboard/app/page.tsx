@@ -18,7 +18,7 @@ export default function Home() {
             <Link href="/docs" className="hover:text-blue-600 transition-colors">Security</Link>
           </div>
           <div>
-            <Link href="/auth" className="bg-black text-white px-4 py-1.5 rounded-full hover:bg-gray-800 transition-colors">
+            <Link href="/dashboard" className="bg-black text-white px-4 py-1.5 rounded-full hover:bg-gray-800 transition-colors">
               Developer Portal
             </Link>
           </div>
@@ -37,7 +37,7 @@ export default function Home() {
 
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <Link 
-            href="/auth"
+            href="/dashboard"
             className="bg-blue-600 hover:bg-blue-700 text-white text-[1.1rem] px-8 py-3.5 rounded-full font-medium transition-colors"
           >
             Start Building

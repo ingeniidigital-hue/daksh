@@ -214,7 +214,7 @@ export default function AIOrchestratorConsole({
 
   // Reset entire environment to replay journey from the start
   const handleStartFresh = async () => {
-    if (typeof window !== "undefined" && !window.confirm("Reset all test data and restart the journey fresh? The Kubernetes engine will stay running.")) {
+    if (typeof window !== "undefined" && !window.confirm("Reset all user accounts and data to start fresh? The Kubernetes engine will stay running.")) {
       return;
     }
     setIsResetting(true);
@@ -223,13 +223,8 @@ export default function AIOrchestratorConsole({
     } catch (e) {}
 
     try {
-      localStorage.removeItem("daksh_titles");
-      const keys = Object.keys(localStorage);
-      for (const k of keys) {
-        if (k.startsWith("catalog_items_") || k.startsWith("daksh_bans_") || k.startsWith("daksh_milestones_")) {
-          localStorage.removeItem(k);
-        }
-      }
+      localStorage.clear();
+      sessionStorage.clear();
     } catch (e) {}
 
     setIsResetting(false);
@@ -244,7 +239,7 @@ export default function AIOrchestratorConsole({
           id: "msg_select_project",
           sender: "orchestrator",
           timestamp: "Just now",
-          text: `👋 **Welcome to Daksh LiveOps!**\n\nYour **Kubernetes engine** (\`k3d-daksh-cluster\`) is online and operational. Select your game below or start fresh:`,
+          text: `👋 **Welcome to Daksh LiveOps!**\n\nYour **Kubernetes engine** (\`k3d-daksh-cluster\`) is online and operational. What is the name of your game project?`,
           isProjectSelectCard: true,
           simulationResult: {
             status: "ready",
@@ -261,6 +256,30 @@ export default function AIOrchestratorConsole({
   const handleSendMessage = async (textToSend?: string) => {
     const query = (textToSend || inputPrompt).trim();
     if (!query || isProcessing) return;
+
+    // IF THERE ARE NO PROJECTS YET: The user is answering what their game name is!
+    if (availableTitles.length === 0) {
+      const userMsg: ChatMessage = {
+        id: `usr_${Date.now()}`,
+        sender: "user",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: query
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInputPrompt("");
+      setIsProcessing(true);
+
+      const aiMsg: ChatMessage = {
+        id: `ai_${Date.now()}`,
+        sender: "orchestrator",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: `🚀 **Creating project "${query}"...**\n\nProvisioning isolated **PostgreSQL** and **Nakama** game server pods on Kubernetes (\`k3d-daksh-cluster\`)...`
+      };
+      setMessages(prev => [...prev, aiMsg]);
+
+      await handleQuickProvision(query);
+      return;
+    }
 
     // Check if user is asking to select project via chat
     if (query.toLowerCase().includes("select project") || query.toLowerCase().includes("open project")) {
@@ -458,31 +477,26 @@ export default function AIOrchestratorConsole({
           /* Project Selector View */
           <div className="max-w-2xl mx-auto w-full my-auto py-8 space-y-6">
             {availableTitles.length === 0 ? (
-              /* Fresh Onboarding Hero Card */
-              <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/30 border-2 border-dashed border-blue-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900 tracking-tight">
-                        Start Your LiveOps Journey
-                      </h2>
-                      <p className="text-xs text-gray-500">
-                        Launch your first game title on Kubernetes
-                      </p>
-                    </div>
-                  </div>
+              /* Conversational AI First Interaction */
+              <div className="space-y-6 text-center max-w-xl mx-auto py-6">
+                <div className="w-14 h-14 rounded-2xl bg-gray-900 text-white flex items-center justify-center font-bold mx-auto shadow-sm">
+                  <Sparkles className="w-7 h-7 text-emerald-400" />
+                </div>
 
-                  <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-emerald-800 text-xs font-medium self-start sm:self-auto">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-emerald-800 text-xs font-medium">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Kubernetes Engine Online (<code className="font-mono text-[11px]">k3d-daksh-cluster</code>)</span>
                   </div>
-                </div>
-
-                <div className="text-sm text-gray-600 leading-relaxed">
-                  Enter your game title below. Daksh will automatically generate a secure title ID, secret API key, and provision isolated <strong>PostgreSQL</strong> and <strong>Nakama</strong> game server pods on your Kubernetes cluster.
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                    Welcome to Daksh LiveOps!
+                  </h1>
+                  <p className="text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
+                    I am your AI LiveOps co-pilot. We don't have any game projects set up yet.
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900 pt-1">
+                    👉 What is the name of your game project?
+                  </p>
                 </div>
 
                 {/* Direct Title Creation Input */}
@@ -493,43 +507,44 @@ export default function AIOrchestratorConsole({
                       handleQuickProvision(quickTitleName);
                     }
                   }}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mx-auto"
                 >
                   <input
                     type="text"
                     value={quickTitleName}
                     onChange={(e) => setQuickTitleName(e.target.value)}
                     disabled={isProvisioning}
-                    placeholder="Enter game name (e.g. Sky8Ball, CyberRaiders)..."
-                    className="flex-1 bg-white border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none shadow-xs"
+                    placeholder="Enter game name (e.g. Sky8Ball)..."
+                    className="flex-1 bg-white border border-gray-300 focus:border-gray-900 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none shadow-xs"
+                    autoFocus
                   />
                   <button
                     type="submit"
                     disabled={isProvisioning || !quickTitleName.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                    className="bg-gray-900 hover:bg-black disabled:bg-gray-200 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                   >
                     {isProvisioning ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Deploying to K8s...</span>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Deploying...</span>
                       </>
                     ) : (
                       <>
-                        <span>Launch Project & Deploy K8s</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <span>Create Project</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </>
                     )}
                   </button>
                 </form>
 
-                {/* Quick 1-Click Starter Presets */}
+                {/* 1-Click Starter Suggestions */}
                 <div className="pt-2">
-                  <span className="text-xs text-gray-400 font-medium">Or 1-click launch with a template:</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-2">
+                  <span className="text-xs text-gray-400 font-medium">Or pick a starter template:</span>
+                  <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
                     {[
-                      { name: "Sky8Ball", genre: "Multiplayer Sports", icon: "🎱" },
-                      { name: "DragonQuest", genre: "RPG & Economy", icon: "🐉" },
-                      { name: "CyberArena", genre: "Action PvP Arena", icon: "⚡" }
+                      { name: "Sky8Ball", icon: "🎱" },
+                      { name: "DragonQuest", icon: "🐉" },
+                      { name: "CyberArena", icon: "⚡" }
                     ].map((preset, pIdx) => (
                       <button
                         key={pIdx}
@@ -539,17 +554,10 @@ export default function AIOrchestratorConsole({
                           handleQuickProvision(preset.name);
                         }}
                         disabled={isProvisioning}
-                        className="text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-xl p-3 transition-all shadow-2xs hover:shadow-xs group cursor-pointer"
+                        className="bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 text-gray-800 text-xs px-3.5 py-1.5 rounded-full transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer font-medium"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">{preset.icon}</span>
-                          <span className="font-semibold text-gray-900 text-xs group-hover:text-blue-600 transition-colors">
-                            {preset.name}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-gray-500 mt-1 pl-6">
-                          {preset.genre}
-                        </div>
+                        <span>{preset.icon}</span>
+                        <span>{preset.name}</span>
                       </button>
                     ))}
                   </div>
@@ -838,7 +846,7 @@ export default function AIOrchestratorConsole({
               disabled={isProcessing}
               placeholder={
                 isProjectSelector 
-                  ? "Select a project above or enter a new game name..." 
+                  ? (availableTitles.length === 0 ? "Type your game name (e.g. 'Sky8Ball') to create project..." : "Select a project above or type a new game name...") 
                   : `Message Daksh in plain English (e.g. "Add a dragon sword for 500 gold")...`
               }
               className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"

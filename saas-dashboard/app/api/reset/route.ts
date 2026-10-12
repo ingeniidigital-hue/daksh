@@ -1,20 +1,36 @@
 import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import util from "util";
-import { resetWalletsStorage } from "@/lib/economy/wallet";
-import { resetCatalogStorage } from "@/lib/economy/catalog";
+import { resetEconomyStorage } from "@/lib/economy";
 import { resetTitleDataStorage } from "@/lib/title-data/store";
-import { resetServiceStorage } from "@/lib/economy/service";
+import { resetTelemetryStorage } from "@/lib/telemetry/service";
+import { resetOtaStorage } from "@/lib/ota/service";
+import { resetActionReportStore } from "@/lib/actions/service";
+import { resetLeaderboardStorage } from "@/lib/leaderboards/service";
+import { resetTurnBasedStorage } from "@/lib/multiplayer/turn-based/store";
+import { resetXRayStorage } from "@/lib/multiplayer/xray/service";
+import { resetRelayStorage } from "@/lib/multiplayer/relay/service";
+import { resetMatchmakingStorage } from "@/lib/multiplayer/matchmaking/service";
+import { resetCloudStorage } from "@/lib/cloud/service";
+import { resetAnalyticsStorage } from "@/lib/analytics/service";
 
 const execAsync = util.promisify(exec);
 
 export async function POST() {
   try {
-    // 1. Reset in-memory economy, title data, wallets, and inventories
-    resetWalletsStorage();
-    resetCatalogStorage();
+    // 1. Reset all in-memory subsystems
+    resetEconomyStorage();
     resetTitleDataStorage();
-    resetServiceStorage();
+    resetTelemetryStorage();
+    resetOtaStorage();
+    resetActionReportStore();
+    resetLeaderboardStorage();
+    resetTurnBasedStorage();
+    resetXRayStorage();
+    resetRelayStorage();
+    resetMatchmakingStorage();
+    resetCloudStorage();
+    resetAnalyticsStorage();
 
     // 2. Clean up any dynamically provisioned Kubernetes deployments in default namespace
     let k8sCleanupOutput = "";
