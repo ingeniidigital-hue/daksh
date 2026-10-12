@@ -23,6 +23,14 @@ export function OperatingModeProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     setMounted(true);
     try {
+      const STORAGE_VERSION = "daksh_v3_fresh_start";
+      if (typeof window !== "undefined" && localStorage.getItem("daksh_version") !== STORAGE_VERSION) {
+        localStorage.clear();
+        sessionStorage.clear();
+        localStorage.setItem("daksh_version", STORAGE_VERSION);
+      }
+    } catch (e) {}
+    try {
       const urlParams = new URLSearchParams(window.location.search);
       const urlMode = urlParams.get("mode") as OperatingMode;
       if (urlMode === "ai" || urlMode === "manual") {

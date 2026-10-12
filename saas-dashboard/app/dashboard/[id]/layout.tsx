@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { 
   Users, UserX, Shield, 
   Settings, Database, CloudLightning, 
@@ -20,6 +20,7 @@ import AIOrchestratorConsole from "../../../components/AIOrchestratorConsole";
 import { useOperatingMode } from "../../../context/OperatingModeContext";
 
 function TitleLayoutContent({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
   const id = params?.id as string;
@@ -54,18 +55,31 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!id) return;
+    if (id === "YCSLW" || id === "test1" || id === "TITLE_CYBERPUNK" || id === "TITLE_MYTHIC") {
+      router.replace("/dashboard");
+      return;
+    }
     const saved = localStorage.getItem("daksh_titles");
     if (saved) {
-      const titles = JSON.parse(saved);
-      const found = titles.find((t: any) => t.id === id);
-      if (found) {
-        setTitleName(found.name);
+      try {
+        const titles = JSON.parse(saved);
+        const found = titles.find((t: any) => t.id === id);
+        if (found) {
+          setTitleName(found.name);
+          return;
+        } else {
+          router.replace("/dashboard");
+          return;
+        }
+      } catch (e) {
+        router.replace("/dashboard");
         return;
       }
+    } else {
+      router.replace("/dashboard");
+      return;
     }
-    const formatted = id.replace(/TITLE_/g, "").replace(/_/g, " ");
-    setTitleName(formatted ? formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase() : `Title ${id}`);
-  }, [id]);
+  }, [id, router]);
 
   const SidebarLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
     const isActive = pathname === href || pathname?.startsWith(href + "/");
