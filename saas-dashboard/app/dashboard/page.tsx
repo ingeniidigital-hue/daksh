@@ -33,25 +33,13 @@ export default function Dashboard() {
         const parsed = JSON.parse(saved);
         // Purge dummy mock titles if any exist
         const cleaned = parsed.filter((t: any) => t.id !== "TITLE_CYBERPUNK" && t.id !== "TITLE_MYTHIC");
-        if (cleaned.length > 0) {
-          setTitles(cleaned);
-          localStorage.setItem("daksh_titles", JSON.stringify(cleaned));
-        } else {
-          const defaultTitle = [
-            { id: "YCSLW", name: "Main Game Title", status: "Healthy", players: "0 CCU", secretKey: "sk_live_YCSLW_prod_90218374", tsVersion: "v1.0.0" }
-          ];
-          localStorage.setItem("daksh_titles", JSON.stringify(defaultTitle));
-          setTitles(defaultTitle);
-        }
+        setTitles(cleaned);
+        localStorage.setItem("daksh_titles", JSON.stringify(cleaned));
       } catch (e) {
         setTitles([]);
       }
     } else {
-      const defaultTitle = [
-        { id: "YCSLW", name: "Main Game Title", status: "Healthy", players: "0 CCU", secretKey: "sk_live_YCSLW_prod_90218374", tsVersion: "v1.0.0" }
-      ];
-      localStorage.setItem("daksh_titles", JSON.stringify(defaultTitle));
-      setTitles(defaultTitle);
+      setTitles([]);
     }
 
     const user = localStorage.getItem("daksh_user");
@@ -175,8 +163,8 @@ export default function Dashboard() {
       {mode === "ai" && (
         <AIOrchestratorConsole
           isProjectSelector={true}
-          titleId={titles[0]?.id || "YCSLW"}
-          titleName={titles[0]?.name || "Main Game Title"}
+          titleId={titles[0]?.id || ""}
+          titleName={titles[0]?.name || "Select Project"}
           onOpenCreateTitle={handleCreateTitle}
           showInspectorToggle={true}
           onToggleInspector={() => setShowManualInspector(prev => !prev)}

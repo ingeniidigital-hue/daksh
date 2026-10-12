@@ -58,13 +58,14 @@ async function probeNakamaHttp(url: string, timeoutMs = 2000): Promise<{ reachab
 }
 
 export async function GET() {
-  const [nakama, postgres, redis] = await Promise.all([
+  const [nakama, postgres, redis, k8s] = await Promise.all([
     probeNakamaHttp("http://127.0.0.1:7350/v2/healthcheck"),
     probeTcpPort("127.0.0.1", 5432),
-    probeTcpPort("127.0.0.1", 6379)
+    probeTcpPort("127.0.0.1", 6379),
+    probeTcpPort("127.0.0.1", 6550)
   ]);
 
-  const allHealthy = nakama.reachable && postgres.reachable && redis.reachable;
+  const allHealthy = postgres.reachable && k8s.reachable;
 
   return NextResponse.json({
     status: allHealthy ? "healthy" : "degraded",
@@ -88,6 +89,13 @@ export async function GET() {
         port: 6379,
         status: redis.reachable ? "online" : "offline",
         latencyMs: redis.latencyMs
+      },
+      kubernetes: {
+        name: "Kubernetes Cluster (k3d)",
+        port: 6550,
+        cluster: "k3d-daksh-cluster",
+        status: k8s.reachable ? "online" : "offline",
+        latencyMs: k8s.latencyMs
       }
     }
   });

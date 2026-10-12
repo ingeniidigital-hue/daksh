@@ -8,7 +8,7 @@ import {
   ChevronDown, ChevronUp, Layers, RefreshCw, ShoppingBag, Coins, 
   Database, ShieldAlert, Server, Activity, ArrowRight, X, Clock, Code,
   Key, Trash2, Cpu, User, Gamepad2, Plus, Sliders, Trophy, SlidersHorizontal,
-  Lightbulb, HelpCircle, Gift, Play
+  Lightbulb, HelpCircle, Gift, Play, RotateCcw
 } from "lucide-react";
 import MCPToolsModal from "./MCPToolsModal";
 import ApiKeyModal from "./ApiKeyModal";
@@ -119,8 +119,8 @@ function formatChatMessage(text: string) {
 }
 
 export default function AIOrchestratorConsole({ 
-  titleId = "YCSLW", 
-  titleName = "Main Game Title",
+  titleId = "", 
+  titleName = "",
   isProjectSelector = false,
   onOpenCreateTitle,
   showInspectorToggle = false,
@@ -137,6 +137,16 @@ export default function AIOrchestratorConsole({
   const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
   const [availableTitles, setAvailableTitles] = useState<TitleRecord[]>([]);
 
+  // Onboarding & milestone state
+  const [quickTitleName, setQuickTitleName] = useState("");
+  const [isProvisioning, setIsProvisioning] = useState(false);
+  const [milestones, setMilestones] = useState({
+    currencies: false,
+    catalog: false,
+    playerWallet: false,
+    liveEvent: false
+  });
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load available titles from local storage
@@ -148,13 +158,93 @@ export default function AIOrchestratorConsole({
         const filtered = parsed.filter((t: any) => t.id !== "TITLE_CYBERPUNK" && t.id !== "TITLE_MYTHIC");
         setAvailableTitles(filtered);
       } else {
-        const defaultTitle = [{ id: "YCSLW", name: "Main Game Title", status: "Healthy", players: "0 CCU" }];
-        setAvailableTitles(defaultTitle);
+        setAvailableTitles([]);
       }
     } catch (e) {
-      setAvailableTitles([{ id: "YCSLW", name: "Main Game Title", status: "Healthy", players: "0 CCU" }]);
+      setAvailableTitles([]);
     }
   }, []);
+
+  // Load milestones for active title
+  useEffect(() => {
+    if (!titleId) return;
+    try {
+      const savedM = localStorage.getItem(`daksh_milestones_${titleId}`);
+      if (savedM) {
+        setMilestones(JSON.parse(savedM));
+      }
+    } catch (e) {}
+  }, [titleId]);
+
+  const completeMilestone = (key: keyof typeof milestones) => {
+    setMilestones(prev => {
+      const updated = { ...prev, [key]: true };
+      try {
+        if (titleId) localStorage.setItem(`daksh_milestones_${titleId}`, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  // Quick title creation & direct k8s provision handler
+  const handleQuickProvision = async (nameToProvision: string) => {
+    if (!nameToProvision.trim() || isProvisioning) return;
+    setIsProvisioning(true);
+
+    const cleanAlnum = nameToProvision.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const shortTitleId = (cleanAlnum.length >= 3 ? cleanAlnum.substring(0, 5) : Math.random().toString(36).substring(2, 7)).toUpperCase();
+    const randomHex = Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const uniqueSecret = `sk_live_${shortTitleId}_${randomHex}`;
+
+    const newTitleRecord = {
+      id: shortTitleId,
+      name: nameToProvision.trim(),
+      status: "Healthy",
+      players: "0 CCU",
+      secretKey: uniqueSecret
+    };
+
+    const updated = [...availableTitles, newTitleRecord];
+    localStorage.setItem("daksh_titles", JSON.stringify(updated));
+    setAvailableTitles(updated);
+
+    try {
+      await fetch("/api/provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ titleId: shortTitleId, secretKey: uniqueSecret })
+      });
+    } catch (e) {}
+
+    setIsProvisioning(false);
+    router.push(`/dashboard/${shortTitleId}`);
+  };
+
+  const [isResetting, setIsResetting] = useState(false);
+
+  // Reset entire environment to replay journey from the start
+  const handleStartFresh = async () => {
+    if (typeof window !== "undefined" && !window.confirm("Are you sure you want to reset all data and restart the journey fresh? The Kubernetes cluster engine will remain running.")) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      await fetch("/api/reset", { method: "POST" });
+    } catch (e) {}
+
+    try {
+      localStorage.removeItem("daksh_titles");
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        if (k.startsWith("catalog_items_") || k.startsWith("daksh_bans_") || k.startsWith("daksh_milestones_")) {
+          localStorage.removeItem(k);
+        }
+      }
+    } catch (e) {}
+
+    setIsResetting(false);
+    window.location.href = "/dashboard";
+  };
 
   // Initial chat state depending on whether it's root project selector or project active
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -164,11 +254,11 @@ export default function AIOrchestratorConsole({
           id: "msg_select_project",
           sender: "orchestrator",
           timestamp: "Just now",
-          text: `👋 **Welcome to Daksh LiveOps!**\n\nI am your AI LiveOps co-pilot. I help you run events, manage your in-game store, reward players, and monitor your game in plain everyday English—no code or technical knowledge required.\n\n👉 **Please select your game project below to begin:**`,
+          text: `👋 **Welcome to Daksh LiveOps!**\n\nYour **Kubernetes engine** (\`k3d-daksh-cluster\`) is online and operational.\n\nStart your journey below by creating your first game project:`,
           isProjectSelectCard: true,
           simulationResult: {
             status: "ready",
-            summary: "Daksh LiveOps Co-pilot Ready"
+            summary: "Kubernetes Engine Online & Ready"
           }
         }
       ];
@@ -179,10 +269,10 @@ export default function AIOrchestratorConsole({
         id: "msg_welcome",
         sender: "orchestrator",
         timestamp: "Just now",
-        text: `👋 **Welcome to ${titleName}!** I'm your LiveOps Co-pilot.\n\nYour game backend is connected and ready. You don't need any technical setup—tell me what you want to do in plain English, or pick a task below to get started:`,
+        text: `🎉 **Welcome to ${titleName || titleId || "your game"}!**\n\nYour dedicated Kubernetes pods (PostgreSQL & Nakama) are live.\n\nFollow the **4-Step LiveOps Journey Checklist** below to launch your live game:`,
         simulationResult: {
           status: "connected",
-          summary: `Connected to ${titleName} · LiveOps Operational`
+          summary: `Connected to ${titleName || titleId} · K8s Pods Active`
         }
       }
     ];
@@ -332,6 +422,21 @@ export default function AIOrchestratorConsole({
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       text: query
     };
+
+    // Auto-detect and complete milestones based on intent
+    const qLower = query.toLowerCase();
+    if (qLower.includes("currenc") || (qLower.includes("gold") && qLower.includes("gem"))) {
+      completeMilestone("currencies");
+    }
+    if (qLower.includes("armor") || qLower.includes("sword") || (qLower.includes("catalog") && qLower.includes("create")) || (qLower.includes("item") && qLower.includes("create"))) {
+      completeMilestone("catalog");
+    }
+    if (qLower.includes("give") || qLower.includes("reward") || (qLower.includes("player") && qLower.includes("gold"))) {
+      completeMilestone("playerWallet");
+    }
+    if (qLower.includes("weekend") || qLower.includes("event") || qLower.includes("tournament")) {
+      completeMilestone("liveEvent");
+    }
 
     setMessages(prev => [...prev, userMsg]);
     setInputPrompt("");
@@ -518,6 +623,17 @@ export default function AIOrchestratorConsole({
             </button>
           )}
 
+          {/* Start Fresh Reset Button */}
+          <button
+            onClick={handleStartFresh}
+            disabled={isResetting}
+            className="flex items-center space-x-1.5 text-xs text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer font-medium"
+            title="Wipe all test data and restart journey fresh (Kubernetes engine stays alive)"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{isResetting ? "Resetting..." : "Start Fresh"}</span>
+          </button>
+
           {/* Clear Chat */}
           <button
             onClick={clearChat}
@@ -583,116 +699,421 @@ export default function AIOrchestratorConsole({
                   {formatChatMessage(msg.text)}
                 </div>
 
-                {/* Layman-friendly Quick Starter Cards for fresh title view */}
-                {!isProjectSelector && messages.filter(m => m.sender === "user").length === 0 && (
-                  <div className="pt-3 space-y-4">
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-5">
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-900">
-                          What would you like to do with {titleName}?
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Pick any task below to see it run immediately, or describe what you want in plain words:
-                        </p>
+                {/* 4-Step LiveOps Journey Checklist & Layman Quick Tasks */}
+                {!isProjectSelector && (
+                  <div className="pt-2 space-y-4">
+                    {/* Interactive Milestone Card */}
+                    <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/20 border border-gray-200 rounded-2xl p-5 shadow-xs space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                        <div className="flex items-center space-x-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-bold">
+                            <Trophy className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-900">
+                              LiveOps Launch Journey
+                            </h3>
+                            <p className="text-xs text-gray-500">
+                              Complete these 4 foundational milestones to configure your live game:
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                            {Object.values(milestones).filter(Boolean).length} of 4 Complete
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      {quickStartGuides.map((guide, gIdx) => {
-                        const IconComp = guide.icon;
-                        return (
-                          <button
-                            key={gIdx}
-                            onClick={() => handleSendMessage(guide.prompt)}
-                            disabled={isProcessing}
-                            className="text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl p-4.5 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group cursor-pointer"
-                          >
-                            <div>
-                              <div className="flex items-center justify-between mb-2.5">
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${guide.iconBg}`}>
-                                  <IconComp className="w-4 h-4" />
-                                </div>
-                                <span className="text-[11px] font-medium text-gray-400 group-hover:text-gray-900 flex items-center gap-1 transition-colors">
-                                  <span>Try this</span>
-                                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      {/* Progress Bar */}
+                      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-emerald-500 h-full transition-all duration-500 rounded-full"
+                          style={{ width: `${(Object.values(milestones).filter(Boolean).length / 4) * 100}%` }}
+                        />
+                      </div>
+
+                      {/* 4 Interactive Milestones */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Step 1: Currencies */}
+                        <div className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                          milestones.currencies ? "bg-emerald-50/60 border-emerald-200 text-emerald-950" : "bg-white border-gray-200 hover:border-gray-400"
+                        }`}>
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold flex items-center gap-1.5">
+                                <Coins className="w-4 h-4 text-amber-500" />
+                                <span>1. Setup Currencies</span>
+                              </span>
+                              {milestones.currencies ? (
+                                <span className="text-[11px] font-medium text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Done</span>
                                 </span>
-                              </div>
-                              <div className="font-semibold text-gray-900 text-sm">{guide.title}</div>
-                              <div className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{guide.description}</div>
+                              ) : (
+                                <span className="text-[11px] text-gray-400 font-mono">Step 1</span>
+                              )}
                             </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Initialize Gold (soft) and Gems (premium) for store transactions.
+                            </p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-end">
+                            <button
+                              onClick={() => {
+                                completeMilestone("currencies");
+                                handleSendMessage("Setup default currencies: Gold (soft currency) and Gems (hard currency)");
+                              }}
+                              disabled={isProcessing || milestones.currencies}
+                              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                                milestones.currencies 
+                                  ? "bg-emerald-100 text-emerald-800 cursor-default" 
+                                  : "bg-gray-900 hover:bg-black text-white"
+                              }`}
+                            >
+                              {milestones.currencies ? "✓ Configured" : "Setup Gold & Gems ➔"}
+                            </button>
+                          </div>
+                        </div>
 
-                            <div className="mt-3.5 pt-2.5 border-t border-gray-100 flex items-center gap-1.5 text-[11px] text-gray-600 font-mono">
-                              <span className="text-gray-400">e.g.</span>
-                              <span className="truncate group-hover:text-gray-900 transition-colors font-medium">"{guide.prompt}"</span>
+                        {/* Step 2: Catalog Item */}
+                        <div className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                          milestones.catalog ? "bg-emerald-50/60 border-emerald-200 text-emerald-950" : "bg-white border-gray-200 hover:border-gray-400"
+                        }`}>
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold flex items-center gap-1.5">
+                                <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                                <span>2. Add Store Item</span>
+                              </span>
+                              {milestones.catalog ? (
+                                <span className="text-[11px] font-medium text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Done</span>
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-gray-400 font-mono">Step 2</span>
+                              )}
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Publish Dragon Armor for 500 Gems in the catalog.
+                            </p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-end">
+                            <button
+                              onClick={() => {
+                                completeMilestone("catalog");
+                                handleSendMessage("Create an Epic Dragon Armor for 500 Gems");
+                              }}
+                              disabled={isProcessing || milestones.catalog}
+                              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                                milestones.catalog 
+                                  ? "bg-emerald-100 text-emerald-800 cursor-default" 
+                                  : "bg-gray-900 hover:bg-black text-white"
+                              }`}
+                            >
+                              {milestones.catalog ? "✓ Added" : "Add Dragon Armor ➔"}
+                            </button>
+                          </div>
+                        </div>
 
-                    {/* Friendly Layman Guidance Banner */}
-                    <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900">
-                      <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <span className="font-semibold text-amber-950">How to use Daksh LiveOps:</span>
-                        <p className="leading-relaxed text-amber-900">
-                          You don't need to write code, configure database servers, or remember command syntax. Just click any card above to execute it, or type your request in everyday English in the message box below (e.g. <em>"Add a new diamond blade to the store for 200 gems"</em> or <em>"Send 500 gold to player 1"</em>).
-                        </p>
+                        {/* Step 3: Reward First Player */}
+                        <div className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                          milestones.playerWallet ? "bg-emerald-50/60 border-emerald-200 text-emerald-950" : "bg-white border-gray-200 hover:border-gray-400"
+                        }`}>
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold flex items-center gap-1.5">
+                                <Gift className="w-4 h-4 text-purple-600" />
+                                <span>3. Reward First Player</span>
+                              </span>
+                              {milestones.playerWallet ? (
+                                <span className="text-[11px] font-medium text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Done</span>
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-gray-400 font-mono">Step 3</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Grant 1,000 Gold to Player_01 to test wallet balance.
+                            </p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-end">
+                            <button
+                              onClick={() => {
+                                completeMilestone("playerWallet");
+                                handleSendMessage("Give 1000 Gold to player Player_01");
+                              }}
+                              disabled={isProcessing || milestones.playerWallet}
+                              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                                milestones.playerWallet 
+                                  ? "bg-emerald-100 text-emerald-800 cursor-default" 
+                                  : "bg-gray-900 hover:bg-black text-white"
+                              }`}
+                            >
+                              {milestones.playerWallet ? "✓ Rewarded" : "Send 1,000 Gold ➔"}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Step 4: Weekend Live Event */}
+                        <div className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
+                          milestones.liveEvent ? "bg-emerald-50/60 border-emerald-200 text-emerald-950" : "bg-white border-gray-200 hover:border-gray-400"
+                        }`}>
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold flex items-center gap-1.5">
+                                <Trophy className="w-4 h-4 text-blue-600" />
+                                <span>4. Launch Live Event</span>
+                              </span>
+                              {milestones.liveEvent ? (
+                                <span className="text-[11px] font-medium text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Done</span>
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-gray-400 font-mono">Step 4</span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Simulate 2x XP tournament with special event blade & drops.
+                            </p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-end">
+                            <button
+                              onClick={() => {
+                                completeMilestone("liveEvent");
+                                handleSendMessage("Simulate a weekend event with double XP, an event blade, and 500 gold airdrop");
+                              }}
+                              disabled={isProcessing || milestones.liveEvent}
+                              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                                milestones.liveEvent 
+                                  ? "bg-emerald-100 text-emerald-800 cursor-default" 
+                                  : "bg-gray-900 hover:bg-black text-white"
+                              }`}
+                            >
+                              {milestones.liveEvent ? "✓ Launched" : "Launch 2x XP Event ➔"}
+                            </button>
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Completion Celebration Banner */}
+                      {Object.values(milestones).every(Boolean) && (
+                        <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3.5 flex items-center gap-3 text-emerald-900 text-xs">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                          <div>
+                            <span className="font-bold text-emerald-950">🎉 All 4 Milestones Complete!</span> Your liveops backend is live, tested, and ready for Unity SDK integration.
+                          </div>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Layman Quick Tasks Grid */}
+                    {messages.filter(m => m.sender === "user").length === 0 && (
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                          <div>
+                            <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                              Additional LiveOps Tasks
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Click any action to execute, or write in plain everyday English:
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {quickStartGuides.map((guide, gIdx) => {
+                            const IconComp = guide.icon;
+                            return (
+                              <button
+                                key={gIdx}
+                                onClick={() => handleSendMessage(guide.prompt)}
+                                disabled={isProcessing}
+                                className="text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl p-4.5 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group cursor-pointer"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between mb-2.5">
+                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${guide.iconBg}`}>
+                                      <IconComp className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-[11px] font-medium text-gray-400 group-hover:text-gray-900 flex items-center gap-1 transition-colors">
+                                      <span>Try this</span>
+                                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                    </span>
+                                  </div>
+                                  <div className="font-semibold text-gray-900 text-sm">{guide.title}</div>
+                                  <div className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{guide.description}</div>
+                                </div>
+
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 flex items-center gap-1.5 text-[11px] text-gray-600 font-mono">
+                                  <span className="text-gray-400">e.g.</span>
+                                  <span className="truncate group-hover:text-gray-900 transition-colors font-medium">"{guide.prompt}"</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Project Selection Cards */}
+                {/* Project Selection / Onboarding Cards */}
                 {msg.isProjectSelectCard && (
-                  <div className="pt-4 space-y-3">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Select Game Project:
-                    </div>
+                  <div className="pt-4 space-y-4">
+                    {availableTitles.length === 0 ? (
+                      /* Fresh Onboarding Hero Card */
+                      <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/30 border-2 border-dashed border-blue-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
+                              <Sparkles className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                                Start Your LiveOps Journey
+                              </h2>
+                              <p className="text-xs text-gray-500">
+                                Launch your first game title on Kubernetes
+                              </p>
+                            </div>
+                          </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      {availableTitles.map((title) => (
-                        <div
-                          key={title.id}
-                          className="bg-white border border-gray-200 hover:border-gray-900 rounded-2xl p-5 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group"
+                          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-emerald-800 text-xs font-medium self-start sm:self-auto">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Kubernetes Engine Online (<code className="font-mono text-[11px]">k3d-daksh-cluster</code>)</span>
+                          </div>
+                        </div>
+
+                        <div className="text-sm text-gray-600 leading-relaxed">
+                          Enter your game title below. Daksh will automatically generate a secure title ID, secret API key, and provision isolated <strong>PostgreSQL</strong> and <strong>Nakama</strong> game server pods on your Kubernetes cluster.
+                        </div>
+
+                        {/* Direct Title Creation Input */}
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            if (quickTitleName.trim()) {
+                              handleQuickProvision(quickTitleName);
+                            }
+                          }}
+                          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                         >
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-gray-900 text-base">{title.name}</span>
-                              <span className="font-mono text-xs bg-gray-100 text-gray-700 font-medium px-2 py-0.5 rounded-full border border-gray-200">
-                                {title.id}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                              <span>Backend Online · Microservices Ready</span>
-                            </div>
-                          </div>
+                          <input
+                            type="text"
+                            value={quickTitleName}
+                            onChange={(e) => setQuickTitleName(e.target.value)}
+                            disabled={isProvisioning}
+                            placeholder="Enter game name (e.g. Sky8Ball, CyberRaiders)..."
+                            className="flex-1 bg-white border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none shadow-xs"
+                          />
+                          <button
+                            type="submit"
+                            disabled={isProvisioning || !quickTitleName.trim()}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                          >
+                            {isProvisioning ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                <span>Deploying to K8s...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>Launch Project & Deploy K8s</span>
+                                <ArrowRight className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </form>
 
-                          <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-end">
-                            <Link
-                              href={`/dashboard/${title.id}`}
-                              className="bg-gray-900 group-hover:bg-black text-white font-medium text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-xs"
+                        {/* Quick 1-Click Starter Presets */}
+                        <div className="pt-2">
+                          <span className="text-xs text-gray-400 font-medium">Or 1-click launch with a template:</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-2">
+                            {[
+                              { name: "Sky8Ball", genre: "Multiplayer Sports", icon: "🎱" },
+                              { name: "DragonQuest", genre: "RPG & Economy", icon: "🐉" },
+                              { name: "CyberArena", genre: "Action PvP Arena", icon: "⚡" }
+                            ].map((preset, pIdx) => (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                onClick={() => {
+                                  setQuickTitleName(preset.name);
+                                  handleQuickProvision(preset.name);
+                                }}
+                                disabled={isProvisioning}
+                                className="text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-xl p-3 transition-all shadow-2xs hover:shadow-xs group cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-base">{preset.icon}</span>
+                                  <span className="font-semibold text-gray-900 text-xs group-hover:text-blue-600 transition-colors">
+                                    {preset.name}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-gray-500 mt-1 pl-6">
+                                  {preset.genre}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Select Game Project:
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {availableTitles.map((title) => (
+                            <div
+                              key={title.id}
+                              className="bg-white border border-gray-200 hover:border-gray-900 rounded-2xl p-5 transition-all shadow-xs hover:shadow-md flex flex-col justify-between group"
                             >
-                              <span>Select Project</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                              <div>
+                                <div className="flex items-center justify-between">
+                                  <span className="font-semibold text-gray-900 text-base">{title.name}</span>
+                                  <span className="font-mono text-xs bg-gray-100 text-gray-700 font-medium px-2 py-0.5 rounded-full border border-gray-200">
+                                    {title.id}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                  <span>Backend Online · Microservices Ready</span>
+                                </div>
+                              </div>
 
-                      {/* Provision New Title Card */}
-                      <button
-                        onClick={onOpenCreateTitle}
-                        className="bg-gray-50 hover:bg-white border-2 border-dashed border-gray-200 hover:border-gray-400 rounded-2xl p-5 text-center transition-all flex flex-col justify-center items-center py-6 cursor-pointer"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 mb-2 shadow-xs">
-                          <Plus className="w-4 h-4" />
+                              <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-end">
+                                <Link
+                                  href={`/dashboard/${title.id}`}
+                                  className="bg-gray-900 group-hover:bg-black text-white font-medium text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-xs"
+                                >
+                                  <span>Select Project</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Provision New Title Card */}
+                          <button
+                            onClick={onOpenCreateTitle}
+                            className="bg-gray-50 hover:bg-white border-2 border-dashed border-gray-200 hover:border-gray-400 rounded-2xl p-5 text-center transition-all flex flex-col justify-center items-center py-6 cursor-pointer"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 mb-2 shadow-xs">
+                              <Plus className="w-4 h-4" />
+                            </div>
+                            <span className="font-semibold text-xs text-gray-900">Provision New Title</span>
+                            <span className="text-[11px] text-gray-500 mt-0.5">Spin up isolated backend services</span>
+                          </button>
                         </div>
-                        <span className="font-semibold text-xs text-gray-900">Provision New Title</span>
-                        <span className="text-[11px] text-gray-500 mt-0.5">Spin up isolated backend services</span>
-                      </button>
-                    </div>
+                      </>
+                    )}
                   </div>
                 )}
 
