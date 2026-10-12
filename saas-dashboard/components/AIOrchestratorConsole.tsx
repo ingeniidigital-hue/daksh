@@ -36,12 +36,18 @@ interface ToolExecutionInfo {
   latencyMs: number;
 }
 
+interface LeaderboardRankPreview {
+  rank: number;
+  player: string;
+  score: string;
+}
+
 interface InteractiveCard {
   id: string;
   title: string;
   badge?: string;
   description: string;
-  example?: string;
+  previewRanks?: LeaderboardRankPreview[];
   icon?: string;
   prompt: string;
 }
@@ -694,12 +700,21 @@ export default function AIOrchestratorConsole({
                             <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                               {card.description}
                             </p>
-                            {card.example && (
-                              <div className="mt-3 bg-gray-50 border border-gray-200/80 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-mono text-gray-700 overflow-x-auto whitespace-nowrap">
-                                <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-gray-500 bg-white px-1.5 py-0.5 rounded border border-gray-200 shrink-0">
-                                  Top 3
-                                </span>
-                                <span className="text-gray-900 font-medium">{card.example}</span>
+                            {card.previewRanks && card.previewRanks.length > 0 && (
+                              <div className="mt-3.5 pt-2.5 border-t border-gray-100 space-y-1.5">
+                                {card.previewRanks.map((r) => (
+                                  <div key={r.rank} className="flex items-center justify-between text-xs py-0.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-4 text-center font-bold text-xs">
+                                        {r.rank === 1 ? "🥇" : r.rank === 2 ? "🥈" : "🥉"}
+                                      </span>
+                                      <span className="font-semibold text-gray-800">{r.player}</span>
+                                    </div>
+                                    <span className="font-mono text-xs text-gray-500 font-medium">
+                                      {r.score}
+                                    </span>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
@@ -712,8 +727,8 @@ export default function AIOrchestratorConsole({
                     </div>
                   )}
 
-                  {/* Suggested Follow-up Actions */}
-                  {msg.sender === "orchestrator" && (
+                  {/* Suggested Follow-up Actions (hidden when interactive cards are present) */}
+                  {msg.sender === "orchestrator" && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
                     <div className="pt-2 flex flex-wrap items-center gap-1.5">
                       {msg.suggestedActions && msg.suggestedActions.length > 0 ? (
                         msg.suggestedActions.map((act, actIdx) => (

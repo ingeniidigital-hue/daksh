@@ -363,9 +363,13 @@ export async function POST(request: NextRequest) {
           {
             id: "card_ranked",
             title: "Ranked Competitive",
-            badge: "Monthly",
+            badge: "Monthly Reset",
             description: "Skill-based MMR rating ladder (1000–3000).",
-            example: "🥇 Ace: 2850 · 🥈 Nova: 2720 · 🥉 Rex: 2610",
+            previewRanks: [
+              { rank: 1, player: "Ace", score: "2,850 MMR" },
+              { rank: 2, player: "Nova", score: "2,720 MMR" },
+              { rank: 3, player: "Rex", score: "2,610 MMR" }
+            ],
             icon: "🏆",
             prompt: "Deploy Template 1"
           },
@@ -374,7 +378,11 @@ export async function POST(request: NextRequest) {
             title: "Weekly Tournament",
             badge: "Sunday Reset",
             description: "Total points accumulated each match across the week.",
-            example: "🥇 Shadow: 15.4k · 🥈 Blitz: 14.2k · 🥉 Kai: 12.8k",
+            previewRanks: [
+              { rank: 1, player: "Shadow", score: "15,400 pts" },
+              { rank: 2, player: "Blitz", score: "14,200 pts" },
+              { rank: 3, player: "Kai", score: "12,850 pts" }
+            ],
             icon: "📅",
             prompt: "Deploy Template 2"
           },
@@ -383,7 +391,11 @@ export async function POST(request: NextRequest) {
             title: "Speedrun Time Trial",
             badge: "All-Time",
             description: "Fastest run wins. Lowest time ranks #1.",
-            example: "🥇 Sonic: 01:14.2 · 🥈 Dash: 01:15.0 · 🥉 Max: 01:16.4",
+            previewRanks: [
+              { rank: 1, player: "Sonic", score: "01:14.22" },
+              { rank: 2, player: "Dash", score: "01:15.08" },
+              { rank: 3, player: "Max", score: "01:16.45" }
+            ],
             icon: "⏱️",
             prompt: "Deploy Template 3"
           },
@@ -392,7 +404,11 @@ export async function POST(request: NextRequest) {
             title: "Custom Event Season",
             badge: "30-Day Cup",
             description: "Holiday season medals with fixed start & end dates.",
-            example: "🥇 Frost: 4,200 · 🥈 Luna: 3,900 · 🥉 Jack: 3,450",
+            previewRanks: [
+              { rank: 1, player: "Frost", score: "4,200 Medals" },
+              { rank: 2, player: "Luna", score: "3,900 Medals" },
+              { rank: 3, player: "Jack", score: "3,450 Medals" }
+            ],
             icon: "⏳",
             prompt: "Deploy Template 4"
           }
