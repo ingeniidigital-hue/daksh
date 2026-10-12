@@ -54,19 +54,19 @@ export default function AICommandMenu({ isOpen, onClose, titleId, titleName }: A
   // Quick Action Recipes for instant inspiration
   const quickRecipes = [
     {
-      label: "⚔️ Epic Dragon Armor",
+      label: "Epic Dragon Armor",
       prompt: "Create an Epic Dragon Armor for 500 Gems"
     },
     {
-      label: "🗡️ Rare Mithril Sword",
+      label: "Rare Mithril Sword",
       prompt: "Create a Rare Mithril Sword for 350 Gold"
     },
     {
-      label: "💰 Credit Player Currency",
+      label: "Credit Player Currency",
       prompt: "Give 1000 Gold to player hero_99"
     },
     {
-      label: "⚡ Remote Title Data Config",
+      label: "Remote Title Data Config",
       prompt: "Set config XP_Multiplier to 2.5"
     }
   ];

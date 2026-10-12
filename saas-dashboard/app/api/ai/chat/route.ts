@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         latencyMs: 7
       });
 
-      conversationalReply = `🎉 **LiveOps Weekend Event Simulation Complete!**\n\nI have configured your live game environment across 3 microservices:\n- **Remote Config**: Set \`XP_Multiplier\` to **2.0** for all connecting Unity clients.\n- **Catalog**: Deployed **Solar Flare Blade** (Epic) to the store for **350 Gems**.\n- **Economy Airdrop**: Credited **500 Gold** to active player \`Player_01\` as a festival kickoff gift.\n\nAll changes have been committed to backend storage via MCP JSON-RPC.`;
+      conversationalReply = `**LiveOps Weekend Event Simulation Complete!**\n\nI have configured your live game environment across 3 microservices:\n- **Remote Config**: Set \`XP_Multiplier\` to **2.0** for all connecting Unity clients.\n- **Catalog**: Deployed **Solar Flare Blade** (Epic) to the store for **350 Gems**.\n- **Economy Airdrop**: Credited **500 Gold** to active player \`Player_01\` as a festival kickoff gift.\n\nAll changes have been committed to backend storage via MCP JSON-RPC.`;
       simulationSummary = `Simulated 3 microservice mutations. Estimated player retention uplift: +18.4%.`;
 
     } else if (lower.includes("loot") && (lower.includes("simulate") || lower.includes("roll") || lower.includes("drop"))) {
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       const rareCount = drops.filter(d => d.rarity === "RARE").length;
       const legCount = drops.filter(d => d.rarity === "LEGENDARY").length;
 
-      conversationalReply = `🎲 **Cryptographic Loot Roll Simulation Results (${rollsToRun} Rolls)**:\n\n- ⚪ **Common Drops**: ${commonCount} (${((commonCount/rollsToRun)*100).toFixed(1)}%)\n- 🔵 **Rare Drops**: ${rareCount} (${((rareCount/rollsToRun)*100).toFixed(1)}%)\n- 🟡 **Legendary Drops**: ${legCount} (${((legCount/rollsToRun)*100).toFixed(1)}%)\n\n*Pity Threshold System*: Active (${pityTriggerCount} drops guaranteed by pity curve).\nAll drops evaluated with cryptographically secure random distribution.`;
+      conversationalReply = `**Cryptographic Loot Roll Simulation Results (${rollsToRun} Rolls)**:\n\n- **Common Drops**: ${commonCount} (${((commonCount/rollsToRun)*100).toFixed(1)}%)\n- **Rare Drops**: ${rareCount} (${((rareCount/rollsToRun)*100).toFixed(1)}%)\n- **Legendary Drops**: ${legCount} (${((legCount/rollsToRun)*100).toFixed(1)}%)\n\n*Pity Threshold System*: Active (${pityTriggerCount} drops guaranteed by pity curve).\nAll drops evaluated with cryptographically secure random distribution.`;
       simulationSummary = `Monte Carlo evaluation across ${rollsToRun} rolls passed target variance gates.`;
 
     } else if (lower.includes("ban") || lower.includes("quarantine") || lower.includes("cheater")) {
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
         latencyMs: 9
       });
 
-      conversationalReply = `🛡️ **Anti-Cheat Enforcement Executed**:\n\n- **Target Quarantined**: \`${target}\`\n- **Status**: Active Ban (Duration: 30 Days)\n- **Reason**: ${parsed.reason}\n- **Enforcement**: Ingress packets dropped at edge reverse-proxy; Nakama session tokens revoked immediately.`;
+      conversationalReply = `**Anti-Cheat Enforcement Executed**:\n\n- **Target Quarantined**: \`${target}\`\n- **Status**: Active Ban (Duration: 30 Days)\n- **Reason**: ${parsed.reason}\n- **Enforcement**: Ingress packets dropped at edge reverse-proxy; Nakama session tokens revoked immediately.`;
       simulationSummary = `Quarantine active. Client session disconnected from cluster.`;
 
     } else if (lower.includes("scale") || lower.includes("fleet") || lower.includes("stress") || lower.includes("5000") || lower.includes("5,000")) {
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
         latencyMs: 6
       });
 
-      conversationalReply = `🚀 **Fleet Auto-Scaling Simulation Passed**:\n\n- **Agones Cluster**: \`agones-us-east-1-prod\` scaled to **10 dedicated server pods**.\n- **Health Status**: Nakama (:7350), PostgreSQL (:5432), and Redis (:6379) report **Healthy**.\n- **Simulated Headroom**: Sustains up to **5,000 CCU** with expected p99 latency <35ms.`;
+      conversationalReply = `**Fleet Auto-Scaling Simulation Passed**:\n\n- **Agones Cluster**: \`agones-us-east-1-prod\` scaled to **10 dedicated server pods**.\n- **Health Status**: Nakama (:7350), PostgreSQL (:5432), and Redis (:6379) report **Healthy**.\n- **Simulated Headroom**: Sustains up to **5,000 CCU** with expected p99 latency <35ms.`;
       simulationSummary = `Cluster scale simulation successful. 10 pods ready for traffic.`;
 
     } else if (
@@ -256,22 +256,44 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        conversationalReply = `## 🎮 Unity (C#) SDK Integration\n\n` +
-          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) inside your Unity project:\n\n` +
+        conversationalReply = `## Unity (C#) Setup & Integration\n\n` +
+          `Follow these steps to get **${activeLb.name}** (\`${activeLb.leaderboardId}\`) running inside your Unity project:\n\n` +
+          `### 1. Install SDK in Unity\n` +
+          `In Unity, open **Window > Package Manager**, click **+ > Add package from git URL...**, and paste:\n` +
+          `\`\`\`bash\n` +
+          `https://github.com/ingeniidigital-hue/daksh.git?path=packages/sdk/unity\n` +
+          `\`\`\`\n\n` +
+          `### 2. Initialize in Game (Bootstrap)\n` +
+          `\`\`\`csharp\n` +
+          `using UnityEngine;\n` +
+          `using Daksh.SDK;\n\n` +
+          `public class GameBootstrap : MonoBehaviour\n` +
+          `{\n` +
+          `    private void Awake()\n` +
+          `    {\n` +
+          `        // Initialize Daksh BaaS client with your title credentials\n` +
+          `        DakshClient.Initialize(new DakshConfig\n` +
+          `        {\n` +
+          `            titleId = "${titleId}",\n` +
+          `            serverUrl = "http://localhost:3000" // or your deployed cloud domain\n` +
+          `        });\n` +
+          `    }\n` +
+          `}\n` +
+          `\`\`\`\n\n` +
+          `### 3. Submit Score & Fetch Rankings\n` +
           `\`\`\`csharp\n` +
           `using UnityEngine;\n` +
           `using System.Threading.Tasks;\n` +
           `using Daksh.SDK;\n\n` +
-          `public class LeaderboardDemo : MonoBehaviour\n` +
+          `public class LeaderboardController : MonoBehaviour\n` +
           `{\n` +
-          `    private async void Start()\n` +
+          `    public async Task RecordMatchScore(double playerRating)\n` +
           `    {\n` +
           `        var client = DakshClient.Instance;\n\n` +
-          `        // 1. Submit Player Match Score\n` +
-          `        double playerRating = 2850;\n` +
+          `        // 1. Submit player score\n` +
           `        var result = await client.Leaderboards.SubmitScoreAsync("${activeLb.leaderboardId}", playerRating);\n` +
           `        Debug.Log($"Score submitted! Current Rank: #{result.rank} of {result.totalPlayers}");\n\n` +
-          `        // 2. Fetch Top 10 Standings\n` +
+          `        // 2. Fetch Top 10 standings\n` +
           `        var topScores = await client.Leaderboards.GetTopScoresAsync("${activeLb.leaderboardId}", 10);\n` +
           `        foreach (var entry in topScores)\n` +
           `        {\n` +
@@ -280,13 +302,13 @@ export async function POST(request: NextRequest) {
           `    }\n` +
           `}\n` +
           `\`\`\`\n\n` +
-          `💡 *Saved **Unity (C#)** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+          `*Saved **Unity (C#)** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
 
         suggestedActions = [
-          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
-          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
-          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
-          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+          { label: "Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
         ];
 
       } else if (isUnreal) {
@@ -301,27 +323,36 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        conversationalReply = `## ⚡ Unreal Engine (C++ & Blueprints)\n\n` +
-          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) inside Unreal Engine 5:\n\n` +
+        conversationalReply = `## Unreal Engine 5 Setup & Integration\n\n` +
+          `Follow these steps to get **${activeLb.name}** (\`${activeLb.leaderboardId}\`) running inside Unreal Engine:\n\n` +
+          `### 1. Install Plugin\n` +
+          `1. Copy the \`packages/sdk/unreal\` folder into your project's \`Plugins/Daksh\` directory.\n` +
+          `2. In your \`YourGame.Build.cs\`, add \`"DakshSDK"\` to \`PublicDependencyModuleNames\`:\n` +
+          `\`\`\`csharp\n` +
+          `PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "DakshSDK" });\n` +
+          `\`\`\`\n\n` +
+          `### 2. Submit Score & Fetch Rankings (C++ or Blueprints)\n` +
           `\`\`\`cpp\n` +
           `#include "DakshClient.h"\n\n` +
           `void AMyGameMode::SubmitPlayerScore(float FinalScore)\n` +
           `{\n` +
+          `    // Access the Daksh Subsystem\n` +
           `    UDakshClient* Daksh = GetGameInstance()->GetSubsystem<UDakshClient>();\n\n` +
           `    if (Daksh)\n` +
           `    {\n` +
-          `        // Submit score to live Redis leaderboard (C++ or Blueprint Callable)\n` +
+          `        // Submit score to live Redis leaderboard (Blueprint Callable or C++)\n` +
           `        Daksh->SubmitScore(TEXT("${titleId}"), TEXT("${activeLb.leaderboardId}"), TEXT("Player_Ace"), FinalScore);\n` +
           `    }\n` +
           `}\n` +
           `\`\`\`\n\n` +
-          `💡 *Saved **Unreal Engine** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+          `*Note: All \`UDakshClient\` methods are \`BlueprintCallable\`, so you can also connect nodes in your Blueprint Event Graph directly without writing C++ code!*\n\n` +
+          `*Saved **Unreal Engine** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
 
         suggestedActions = [
-          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
-          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
-          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
-          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+          { label: "Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
         ];
 
       } else if (isWeb) {
@@ -336,25 +367,34 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        conversationalReply = `## 🌐 HTML5 / Web JavaScript SDK\n\n` +
-          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) in browser games with \`@daksh/sdk\`:\n\n` +
+        conversationalReply = `## HTML5 / Web JavaScript SDK Setup & Integration\n\n` +
+          `Follow these steps to get **${activeLb.name}** (\`${activeLb.leaderboardId}\`) running in browser games:\n\n` +
+          `### 1. Install via npm\n` +
+          `\`\`\`bash\n` +
+          `npm install @daksh/sdk\n` +
+          `\`\`\`\n\n` +
+          `### 2. Submit Score & Fetch Rankings\n` +
           `\`\`\`typescript\n` +
           `import { DakshLeaderboardClient } from "@daksh/sdk";\n\n` +
+          `// Initialize client\n` +
           `const daksh = new DakshLeaderboardClient("http://localhost:3000");\n\n` +
-          `// 1. Submit Player Match Score\n` +
-          `const res = await daksh.submitScore("${titleId}", "${activeLb.leaderboardId}", "Player_Ace", 2850);\n` +
-          `console.log(\`Rank: #\${res.rank} of \${res.totalPlayers}\`);\n\n` +
-          `// 2. Fetch Top 10 Standings\n` +
-          `const topScores = await daksh.getTopScores("${titleId}", "${activeLb.leaderboardId}", 10);\n` +
-          `console.table(topScores);\n` +
+          `async function syncPlayerStats() {\n` +
+          `  // 1. Submit Player Match Score\n` +
+          `  const res = await daksh.submitScore("${titleId}", "${activeLb.leaderboardId}", "Player_Ace", 2850);\n` +
+          `  console.log(\`Rank: #\${res.rank} of \${res.totalPlayers}\`);\n\n` +
+          `  // 2. Fetch Top 10 Standings\n` +
+          `  const topScores = await daksh.getTopScores("${titleId}", "${activeLb.leaderboardId}", 10);\n` +
+          `  console.table(topScores);\n` +
+          `}\n\n` +
+          `syncPlayerStats();\n` +
           `\`\`\`\n\n` +
-          `💡 *Saved **HTML5 / Web** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+          `*Saved **HTML5 / Web** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
 
         suggestedActions = [
-          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
-          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
-          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
-          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+          { label: "Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
         ];
 
       } else if (isRest) {
@@ -369,23 +409,25 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        conversationalReply = `## 🔌 HTTPS / Raw REST API\n\n` +
-          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) using direct HTTP REST endpoints:\n\n` +
+        conversationalReply = `## HTTPS / Raw REST API Integration\n\n` +
+          `You can call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) from any custom game engine, backend server, or cURL script:\n\n` +
+          `### 1. Submit Player Match Score (POST)\n` +
           `\`\`\`bash\n` +
-          `# 1. Submit Player Match Score (POST)\n` +
           `curl -X POST http://localhost:3000/api/titles/${titleId}/leaderboards/${activeLb.leaderboardId}/scores \\\n` +
           `  -H "Content-Type: application/json" \\\n` +
-          `  -d '{"playerId": "Player_Ace", "score": 2850}'\n\n` +
-          `# 2. Query Top 10 Standings (GET)\n` +
+          `  -d '{"playerId": "Player_Ace", "score": 2850}'\n` +
+          `\`\`\`\n\n` +
+          `### 2. Query Top 10 Standings (GET)\n` +
+          `\`\`\`bash\n` +
           `curl -X GET "http://localhost:3000/api/titles/${titleId}/leaderboards/${activeLb.leaderboardId}/scores?limit=10"\n` +
           `\`\`\`\n\n` +
-          `💡 *Saved **HTTPS / REST** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+          `*Saved **HTTPS / REST** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
 
         suggestedActions = [
-          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
-          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
-          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
-          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+          { label: "Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
         ];
 
       } else {
@@ -398,7 +440,7 @@ export async function POST(request: NextRequest) {
             title: "Unity (C#)",
             badge: "Official SDK",
             description: "Modular C# client with DakshLeaderboards and offline queueing.",
-            icon: "🎮",
+            icon: "",
             prompt: `Show Unity C# code for ${activeLb.leaderboardId}`
           },
           {
@@ -406,7 +448,7 @@ export async function POST(request: NextRequest) {
             title: "Unreal Engine",
             badge: "C++ & Blueprints",
             description: "UDakshClient subsystem integration for Unreal Engine 5.",
-            icon: "⚡",
+            icon: "",
             prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}`
           },
           {
@@ -414,7 +456,7 @@ export async function POST(request: NextRequest) {
             title: "HTML5 / Web",
             badge: "npm @daksh/sdk",
             description: "Modern JavaScript & TypeScript SDK for browser games.",
-            icon: "🌐",
+            icon: "",
             prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}`
           },
           {
@@ -422,7 +464,7 @@ export async function POST(request: NextRequest) {
             title: "HTTPS / REST",
             badge: "Raw API",
             description: "Standard HTTP endpoints for cURL, custom engines, or servers.",
-            icon: "🔌",
+            icon: "",
             prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}`
           }
         ];
@@ -442,7 +484,7 @@ export async function POST(request: NextRequest) {
         score: scoreVal
       });
 
-      conversationalReply = `🎯 **Score Submitted Successfully to Live Cluster!**\n\n` +
+      conversationalReply = `**Score Submitted Successfully to Live Cluster!**\n\n` +
         `- **Player**: \`Player_Ace\`\n` +
         `- **Leaderboard**: \`${targetLb}\`\n` +
         `- **Score Submitted**: **${scoreVal}**\n` +
@@ -450,10 +492,10 @@ export async function POST(request: NextRequest) {
         `Redis ZSET updated with cryptographic anti-cheat validation.`;
 
       suggestedActions = [
-        { label: "🎮 Show Unity Code", prompt: `Show Unity C# code for ${targetLb}` },
-        { label: "⚡ Show Unreal Code", prompt: `Show Unreal Engine code for ${targetLb}` },
-        { label: "🌐 Show Web Code", prompt: `Show Web JavaScript code for ${targetLb}` },
-        { label: "🔌 Show REST API", prompt: `Show HTTPS REST code for ${targetLb}` }
+        { label: "Show Unity Code", prompt: `Show Unity C# code for ${targetLb}` },
+        { label: "Show Unreal Code", prompt: `Show Unreal Engine code for ${targetLb}` },
+        { label: "Show Web Code", prompt: `Show Web JavaScript code for ${targetLb}` },
+        { label: "Show REST API", prompt: `Show HTTPS REST code for ${targetLb}` }
       ];
 
       simulationSummary = `Score ${scoreVal} recorded for Player_Ace at rank #${subRes.rank}.`;
@@ -586,7 +628,7 @@ export async function POST(request: NextRequest) {
         // Formulate existing + new summary
         const updatedList = [...existingList.filter((l: any) => l.leaderboardId !== lbId), parsed.leaderboard || { name: lbName, leaderboardId: lbId, resetFrequency, sortOrder, metricName }];
 
-        conversationalReply = `## 🏆 ${lbName} is now live!\n\n` +
+        conversationalReply = `## ${lbName} is now live!\n\n` +
           `- **Reset Cadence**: ${resetFrequency}\n` +
           `- **Scoring Metric**: ${metricName} (${sortOrder === "DESCENDING" ? "High-to-Low" : "Low-to-High"})\n` +
           `- **Leaderboard ID**: \`${lbId}\`\n\n` +
@@ -599,7 +641,7 @@ export async function POST(request: NextRequest) {
             title: "Unity (C#)",
             badge: "Official SDK",
             description: "Modular C# client with DakshLeaderboards and offline queueing.",
-            icon: "🎮",
+            icon: "",
             prompt: `Show Unity C# code for ${lbId}`
           },
           {
@@ -607,7 +649,7 @@ export async function POST(request: NextRequest) {
             title: "Unreal Engine",
             badge: "C++ & Blueprints",
             description: "UDakshClient subsystem integration for Unreal Engine 5.",
-            icon: "⚡",
+            icon: "",
             prompt: `Show Unreal Engine code for ${lbId}`
           },
           {
@@ -615,7 +657,7 @@ export async function POST(request: NextRequest) {
             title: "HTML5 / Web",
             badge: "npm @daksh/sdk",
             description: "Modern JavaScript & TypeScript SDK for browser games.",
-            icon: "🌐",
+            icon: "",
             prompt: `Show Web JavaScript code for ${lbId}`
           },
           {
@@ -623,16 +665,16 @@ export async function POST(request: NextRequest) {
             title: "HTTPS / REST",
             badge: "Raw API",
             description: "Standard HTTP endpoints for cURL, custom engines, or servers.",
-            icon: "🔌",
+            icon: "",
             prompt: `Show HTTPS REST code for ${lbId}`
           }
         ];
 
         suggestedActions = [
-          { label: "🎮 Unity C#", prompt: `Show Unity C# code for ${lbId}` },
-          { label: "⚡ Unreal Engine", prompt: `Show Unreal Engine code for ${lbId}` },
-          { label: "🌐 HTML5 / Web", prompt: `Show Web JavaScript code for ${lbId}` },
-          { label: "🔌 HTTPS REST", prompt: `Show HTTPS REST code for ${lbId}` }
+          { label: "Unity C#", prompt: `Show Unity C# code for ${lbId}` },
+          { label: "Unreal Engine", prompt: `Show Unreal Engine code for ${lbId}` },
+          { label: "HTML5 / Web", prompt: `Show Web JavaScript code for ${lbId}` },
+          { label: "HTTPS REST", prompt: `Show HTTPS REST code for ${lbId}` }
         ];
 
         simulationSummary = `Leaderboard "${lbName}" registered with ${resetFrequency} reset and ${metricName} metric.`;
@@ -657,7 +699,7 @@ export async function POST(request: NextRequest) {
               { rank: 2, player: "Nova", score: "2,720 MMR" },
               { rank: 3, player: "Rex", score: "2,610 MMR" }
             ],
-            icon: "🏆",
+            icon: "",
             prompt: "Deploy Template 1"
           },
           {
@@ -670,7 +712,7 @@ export async function POST(request: NextRequest) {
               { rank: 2, player: "Blitz", score: "14,200 pts" },
               { rank: 3, player: "Kai", score: "12,850 pts" }
             ],
-            icon: "📅",
+            icon: "",
             prompt: "Deploy Template 2"
           },
           {
@@ -683,7 +725,7 @@ export async function POST(request: NextRequest) {
               { rank: 2, player: "Dash", score: "01:15.08" },
               { rank: 3, player: "Max", score: "01:16.45" }
             ],
-            icon: "⏱️",
+            icon: "",
             prompt: "Deploy Template 3"
           },
           {
@@ -696,16 +738,16 @@ export async function POST(request: NextRequest) {
               { rank: 2, player: "Luna", score: "3,900 Medals" },
               { rank: 3, player: "Jack", score: "3,450 Medals" }
             ],
-            icon: "⏳",
+            icon: "",
             prompt: "Deploy Template 4"
           }
         ];
 
         suggestedActions = [
-          { label: "🏆 Monthly Ranked", prompt: "Deploy Template 1" },
-          { label: "📅 Weekly Tournament", prompt: "Deploy Template 2" },
-          { label: "⏱️ Speedrun Trial", prompt: "Deploy Template 3" },
-          { label: "⏳ Seasonal Event", prompt: "Deploy Template 4" }
+          { label: "Monthly Ranked", prompt: "Deploy Template 1" },
+          { label: "Weekly Tournament", prompt: "Deploy Template 2" },
+          { label: "Speedrun Trial", prompt: "Deploy Template 3" },
+          { label: "Seasonal Event", prompt: "Deploy Template 4" }
         ];
 
         simulationSummary = count > 0 
@@ -739,7 +781,7 @@ export async function POST(request: NextRequest) {
         latencyMs: 11
       });
 
-      conversationalReply = `🎮 **Multiplayer Matchmaking Spawned Successfully!**\n\n- **Queue Ruleset**: **${queueName}** (\`${rulesetId}\`)\n- **Game Mode**: **${mode}**\n- **Latency Tolerance**: <80ms with dynamic flexing\n- **Status**: Open & Ready for player tickets\n\nPlayers can now join the queue or you can simulate player ticket matchmaking directly!`;
+      conversationalReply = `**Multiplayer Matchmaking Spawned Successfully!**\n\n- **Queue Ruleset**: **${queueName}** (\`${rulesetId}\`)\n- **Game Mode**: **${mode}**\n- **Latency Tolerance**: <80ms with dynamic flexing\n- **Status**: Open & Ready for player tickets\n\nPlayers can now join the queue or you can simulate player ticket matchmaking directly!`;
       simulationSummary = `Matchmaking queue "${queueName}" created and active.`;
 
     } else {
@@ -763,7 +805,7 @@ export async function POST(request: NextRequest) {
           isError: res.isError,
           latencyMs: 10
         });
-        conversationalReply = `⚔️ Successfully created catalog item **${parsedIntent.payload.name}** (\`${parsedIntent.payload.id}\`) in category **${parsedIntent.payload.category}** priced at **${Object.entries(parsedIntent.payload.prices).map(([c, a]) => `${a} ${c}`).join(", ")}**. The item is now live in Economy V2.`;
+        conversationalReply = `Successfully created catalog item **${parsedIntent.payload.name}** (\`${parsedIntent.payload.id}\`) in category **${parsedIntent.payload.category}** priced at **${Object.entries(parsedIntent.payload.prices).map(([c, a]) => `${a} ${c}`).join(", ")}**. The item is now live in Economy V2.`;
         simulationSummary = `Created item in database. Synchronized with Unity SDK cache.`;
 
       } else if (parsedIntent.action === "ADJUST_WALLET") {
@@ -783,7 +825,7 @@ export async function POST(request: NextRequest) {
           isError: res.isError,
           latencyMs: 8
         });
-        conversationalReply = `💰 Successfully credited **${parsedIntent.payload.amount} ${parsedIntent.payload.currencyCode}** to player **${parsedIntent.payload.playerId}**. New balance: **${parsed.newBalance} ${parsedIntent.payload.currencyCode}**.`;
+        conversationalReply = `Successfully credited **${parsedIntent.payload.amount} ${parsedIntent.payload.currencyCode}** to player **${parsedIntent.payload.playerId}**. New balance: **${parsed.newBalance} ${parsedIntent.payload.currencyCode}**.`;
         simulationSummary = `Player wallet updated with server-authoritative balance guarantee.`;
 
       } else if (parsedIntent.action === "SET_TITLE_DATA") {
@@ -803,7 +845,7 @@ export async function POST(request: NextRequest) {
           isError: res.isError,
           latencyMs: 9
         });
-        conversationalReply = `⚡ Updated Title Data configuration key **${parsedIntent.payload.key}** with revision **${parsed.revision}**. Connected Unity & Unreal clients will receive this config on their next cache refresh cycle.`;
+        conversationalReply = `Updated Title Data configuration key **${parsedIntent.payload.key}** with revision **${parsed.revision}**. Connected Unity & Unreal clients will receive this config on their next cache refresh cycle.`;
         simulationSummary = `Remote configuration committed.`;
 
       } else if (
@@ -848,7 +890,7 @@ export async function POST(request: NextRequest) {
         const goldCount = (wallets.GOLD ?? 1000).toLocaleString();
         const gemsCount = (wallets.GEMS ?? 250).toLocaleString();
 
-        conversationalReply = `🪙 **Currencies for ${titleId}:**\n\nYour game has two active virtual currencies:\n- 🟡 **GOLD**: Primary soft currency earned through gameplay and match wins.\n- 💎 **GEMS**: Premium hard currency for exclusive equipment and bundles.\n\n**Current Balances for \`${targetPlayerId}\`:**\n- **Gold**: **${goldCount} GOLD**\n- **Gems**: **${gemsCount} GEMS**\n\n*Tip*: Want to add more? Say: *"Give 500 Gold to ${targetPlayerId}"* or *"Give 250 Gems to ${targetPlayerId}"*.`;
+        conversationalReply = `**Currencies for ${titleId}:**\n\nYour game has two active virtual currencies:\n- **GOLD**: Primary soft currency earned through gameplay and match wins.\n- **GEMS**: Premium hard currency for exclusive equipment and bundles.\n\n**Current Balances for \`${targetPlayerId}\`:**\n- **Gold**: **${goldCount} GOLD**\n- **Gems**: **${gemsCount} GEMS**\n\n*Tip*: Want to add more? Say: *"Give 500 Gold to ${targetPlayerId}"* or *"Give 250 Gems to ${targetPlayerId}"*.`;
         simulationSummary = `Retrieved wallet balances for ${targetPlayerId}.`;
 
       } else if (
@@ -879,7 +921,7 @@ export async function POST(request: NextRequest) {
             }).join("\n")
           : "- No items currently registered in store.";
 
-        conversationalReply = `🛒 **In-Game Store Catalog for ${titleId} (${catData.total} Items Active):**\n\n${itemsListText}\n\n*Tip*: To add a new item, ask: *"Add an Epic Frost Blade to the store for 450 Gems"*!`;
+        conversationalReply = `**In-Game Store Catalog for ${titleId} (${catData.total} Items Active):**\n\n${itemsListText}\n\n*Tip*: To add a new item, ask: *"Add an Epic Frost Blade to the store for 450 Gems"*!`;
         simulationSummary = `Catalog retrieved with ${catData.total} active items.`;
 
       } else if (
@@ -893,7 +935,7 @@ export async function POST(request: NextRequest) {
         lower.includes("hi")
       ) {
         thoughtProcess = `User is requesting liveops guidance. Formulating friendly plain-English assistance for ${titleId}...`;
-        conversationalReply = `👋 **AI Orchestrator Ready for ${titleId}**\n\nYou can set up and manage any part of your game using everyday English. Here are the top things you can configure:\n\n1. 🏆 **Leaderboards** — *"Spawn a leaderboard"* or *"Submit score 1000 for Player_01"*\n2. 🪙 **Virtual Currencies** — *"What coins do I have?"* or *"Set up coins and gems"*\n3. 🛒 **Store & Catalog** — *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n4. 🎁 **Player Wallets & Gifts** — *"Give 1,000 Gold to player Player_01"*\n5. 🚀 **Live Events** — *"Start a weekend event with double XP and bonus rewards"*\n\nType what you'd like to set up in the box below!`;
+        conversationalReply = `**AI Orchestrator Ready for ${titleId}**\n\nYou can set up and manage any part of your game using everyday English. Here are the top things you can configure:\n\n1. **Leaderboards** — *"Spawn a leaderboard"* or *"Submit score 1000 for Player_01"*\n2. **Virtual Currencies** — *"What coins do I have?"* or *"Set up coins and gems"*\n3. **Store & Catalog** — *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n4. **Player Wallets & Gifts** — *"Give 1,000 Gold to player Player_01"*\n5. **Live Events** — *"Start a weekend event with double XP and bonus rewards"*\n\nType what you'd like to set up in the box below!`;
         simulationSummary = `Interactive guide provided. Ready for commands.`;
       } else {
         // Fallback: Query local AI agent proxy (Ollama) or provide smart guidance
@@ -926,7 +968,7 @@ export async function POST(request: NextRequest) {
           conversationalReply = localAiResponse;
           simulationSummary = `Local AI agent processed query.`;
         } else {
-          conversationalReply = `✨ **Setting up for ${titleId}**\n\nI can configure any live system for your game. Here are the most common setups:\n\n- 🏆 **Leaderboards**: *"Spawn a Global High Scores leaderboard"*\n- 🎮 **Matchmaking**: *"Setup 1v1 matchmaking queue"*\n- 🪙 **Currencies**: *"What coins do I have?"* or *"Set up default currencies"*\n- 🛒 **Store Catalog**: *"Add a new sword for 300 Gems"*\n- 🎁 **Player Rewards**: *"Give 500 Gold to player Player_01"*\n- 🚀 **Live Events**: *"Start a weekend double XP event"*\n\nTell me what you'd like to create!`;
+          conversationalReply = `**Setting up for ${titleId}**\n\nI can configure any live system for your game. Here are the most common setups:\n\n- **Leaderboards**: *"Spawn a Global High Scores leaderboard"*\n- **Matchmaking**: *"Setup 1v1 matchmaking queue"*\n- **Currencies**: *"What coins do I have?"* or *"Set up default currencies"*\n- **Store Catalog**: *"Add a new sword for 300 Gems"*\n- **Player Rewards**: *"Give 500 Gold to player Player_01"*\n- **Live Events**: *"Start a weekend double XP event"*\n\nTell me what you'd like to create!`;
           simulationSummary = `Ready for commands.`;
         }
       }

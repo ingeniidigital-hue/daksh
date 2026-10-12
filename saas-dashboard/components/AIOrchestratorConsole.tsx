@@ -246,10 +246,10 @@ export default function AIOrchestratorConsole({
     } catch (e) {}
   }, []);
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat to start of new AI responses, or bottom for user
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
-    if (lastMsg?.interactiveCards && lastMsg.interactiveCards.length > 0) {
+    if (lastMsg?.sender === "orchestrator") {
       const el = document.getElementById(`msg-${lastMsg.id}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -333,7 +333,7 @@ export default function AIOrchestratorConsole({
         id: `ai_${Date.now()}`,
         sender: "orchestrator",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: `🚀 **Creating project "${query}"...**\n\nProvisioning isolated database and game server microservices...`
+        text: `**Creating project "${query}"...**\n\nProvisioning isolated database and game server microservices...`
       };
       setMessages(prev => [...prev, aiMsg]);
 
@@ -384,7 +384,7 @@ export default function AIOrchestratorConsole({
         id: `ai_${Date.now()}`,
         sender: "orchestrator",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: `📊 **Exporting CSV Data**: Initiated telemetry and economy dataset download in standard RFC 4180 CSV format.`,
+        text: `**Exporting CSV Data**: Initiated telemetry and economy dataset download in standard RFC 4180 CSV format.`,
         simulationResult: {
           status: "ready",
           summary: "CSV export stream initiated successfully"
@@ -468,7 +468,7 @@ export default function AIOrchestratorConsole({
         id: `err_${Date.now()}`,
         sender: "orchestrator",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: `⚠️ **Simulation Error**: ${err.message}`,
+        text: `**Simulation Error**: ${err.message}`,
         simulationResult: {
           status: "error",
           summary: "Execution halted. No state changed."
@@ -603,7 +603,7 @@ export default function AIOrchestratorConsole({
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-end text-xs font-semibold text-blue-600 group-hover:translate-x-1 transition-transform">
-                        <span>Open LiveOps ➔</span>
+                        <span>Open LiveOps</span>
                       </div>
                     </Link>
                   ))}
@@ -656,12 +656,6 @@ export default function AIOrchestratorConsole({
                 id={`msg-${msg.id}`}
                 className={`flex gap-3.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
-                {msg.sender === "orchestrator" && (
-                  <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-2xs">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                  </div>
-                )}
-
                 <div className={`space-y-2.5 ${
                   msg.sender === "user"
                     ? "bg-[#f4f4f4] text-gray-900 rounded-3xl px-5 py-2.5 max-w-[80%] text-sm leading-relaxed"
@@ -685,7 +679,6 @@ export default function AIOrchestratorConsole({
                           <div>
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-bold text-gray-900 text-lg sm:text-xl flex items-center gap-2.5 group-hover:text-blue-600 transition-colors">
-                                <span className="text-2xl">{card.icon}</span>
                                 <span>{card.title}</span>
                               </span>
                               {card.badge && (
@@ -705,8 +698,8 @@ export default function AIOrchestratorConsole({
                                 {card.previewRanks.map((r) => (
                                   <div key={r.rank} className="flex items-center justify-between text-xs py-0.5 px-0.5">
                                     <div className="flex items-center gap-2">
-                                      <span className="w-4 text-center font-bold text-xs">
-                                        {r.rank === 1 ? "🥇" : r.rank === 2 ? "🥈" : "🥉"}
+                                      <span className="w-5 text-left font-bold text-xs text-gray-400">
+                                        #{r.rank}
                                       </span>
                                       <span className="font-medium text-gray-800">{r.player}</span>
                                     </div>
@@ -721,7 +714,7 @@ export default function AIOrchestratorConsole({
                           <div className="mt-5 pt-3.5 border-t border-gray-100 flex items-center justify-between">
                             <span className="text-xs text-gray-500 font-medium">1-Click deploy</span>
                             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 group-hover:bg-blue-700 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors">
-                              Select & Deploy ➔
+                              Select & Deploy
                             </span>
                           </div>
                         </button>
@@ -750,21 +743,21 @@ export default function AIOrchestratorConsole({
                             disabled={isProcessing}
                             className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
                           >
-                            <span>🛒 View Store Items</span>
+                            <span>View Store Items</span>
                           </button>
                           <button
                             onClick={() => handleSendMessage("Give 1000 Gold to player Player_01")}
                             disabled={isProcessing}
                             className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
                           >
-                            <span>🎁 Reward Player</span>
+                            <span>Reward Player</span>
                           </button>
                           <button
                             onClick={() => handleSendMessage("Help - what else can I do?")}
                             disabled={isProcessing}
                             className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
                           >
-                            <span>💡 What else can you do?</span>
+                            <span>What else can you do?</span>
                           </button>
                         </>
                       )}
