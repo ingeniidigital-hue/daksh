@@ -196,15 +196,35 @@ export class MCPService {
     },
     {
       name: "daksh_create_leaderboard",
-      description: "Spawns a new competitive leaderboard with Redis ZSET sorting and anti-cheat protection.",
+      description: "Spawns a new competitive leaderboard with Redis ZSET sorting, customizable reset cadence (Daily/Weekly/Monthly/Yearly/All-Time/Custom Season), score metrics (Points, MMR, Time), and anti-cheat protection.",
       inputSchema: {
         type: "object",
         properties: {
           titleId: { type: "string", description: "The ID of the game title" },
-          leaderboardId: { type: "string", description: "Unique identifier (e.g. global_high_scores)" },
+          leaderboardId: { type: "string", description: "Unique identifier (e.g. lb_weekly_pvp)" },
           name: { type: "string", description: "Human-readable leaderboard name" },
-          resetFrequency: { type: "string", enum: ["DAILY", "WEEKLY", "MONTHLY", "ALL_TIME"], description: "Reset schedule" },
-          sortOrder: { type: "string", enum: ["ASCENDING", "DESCENDING"], description: "Score ranking order" }
+          resetFrequency: { 
+            type: "string", 
+            enum: ["DAILY", "WEEKLY", "MONTHLY", "YEARLY", "ALL_TIME", "CUSTOM_SEASON"], 
+            description: "Reset cadence schedule" 
+          },
+          sortOrder: { 
+            type: "string", 
+            enum: ["ASCENDING", "DESCENDING"], 
+            description: "Score ranking order (DESCENDING for points/rating, ASCENDING for speedrun/race times)" 
+          },
+          metricName: {
+            type: "string",
+            description: "Data metric tracked (e.g. 'Points', 'MMR Rating', 'Trophies', 'Lap Time (ms)', 'Stars')"
+          },
+          updateStrategy: {
+            type: "string",
+            enum: ["BEST", "SUM", "LATEST"],
+            description: "Score update policy: BEST (peak record), SUM (cumulative), or LATEST"
+          },
+          seasonStart: { type: "string", description: "ISO start date/time for CUSTOM_SEASON" },
+          seasonEnd: { type: "string", description: "ISO end date/time for CUSTOM_SEASON" },
+          maxScoreDelta: { type: "number", description: "Maximum valid score jump per submission for anti-cheat verification" }
         },
         required: ["titleId", "leaderboardId", "name"]
       }
@@ -548,6 +568,10 @@ export class MCPService {
             name: lbName,
             resetFrequency: args.resetFrequency || "ALL_TIME",
             sortOrder: args.sortOrder || "DESCENDING",
+            metricName: args.metricName || "Points",
+            updateStrategy: args.updateStrategy || "BEST",
+            seasonStart: args.seasonStart,
+            seasonEnd: args.seasonEnd,
             maxScoreDelta: args.maxScoreDelta ? Number(args.maxScoreDelta) : 10000
           });
           return {

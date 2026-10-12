@@ -1,5 +1,6 @@
-export type ResetFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "ALL_TIME";
+export type ResetFrequency = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | "ALL_TIME" | "CUSTOM_SEASON";
 export type SortOrder = "ASCENDING" | "DESCENDING";
+export type UpdateStrategy = "BEST" | "SUM" | "LATEST";
 
 export interface LeaderboardDefinition {
   titleId: string;
@@ -7,6 +8,10 @@ export interface LeaderboardDefinition {
   name: string;
   resetFrequency: ResetFrequency;
   sortOrder: SortOrder;
+  metricName?: string;
+  updateStrategy?: UpdateStrategy;
+  seasonStart?: string;
+  seasonEnd?: string;
   maxScoreDelta?: number;
   createdAt?: string;
 }

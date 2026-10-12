@@ -206,35 +206,197 @@ export async function POST(request: NextRequest) {
       conversationalReply = `🚀 **Fleet Auto-Scaling Simulation Passed**:\n\n- **Agones Cluster**: \`agones-us-east-1-prod\` scaled to **10 dedicated server pods**.\n- **Health Status**: Nakama (:7350), PostgreSQL (:5432), and Redis (:6379) report **Healthy**.\n- **Simulated Headroom**: Sustains up to **5,000 CCU** with expected p99 latency <35ms.`;
       simulationSummary = `Cluster scale simulation successful. 10 pods ready for traffic.`;
 
-    } else if (lower.includes("leaderboard") || lower.includes("rank") || lower.includes("high score") || lower.includes("scores")) {
-      thoughtProcess = `User requested leaderboard setup. Calling MCP tool daksh_create_leaderboard for title ${titleId}...`;
-      
-      const nameMatch = prompt.match(/(?:named|called|for|title)\s+["']?([^"']+)["']?/i);
-      const lbName = nameMatch ? nameMatch[1].trim() : "Global High Scores";
-      const lbId = `lb_${lbName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+    } else if (
+      lower.includes("leaderboard") || 
+      lower.includes("rank") || 
+      lower.includes("high score") || 
+      lower.includes("template 1") || 
+      lower.includes("template 2") || 
+      lower.includes("template 3") || 
+      lower.includes("template 4")
+    ) {
+      // 1. Fetch existing leaderboards for this title
+      const existingRes = await MCPService.callTool({
+        name: "daksh_list_leaderboards",
+        arguments: { titleId }
+      });
+      const existingData = JSON.parse(existingRes.content[0].text);
+      const existingList: any[] = existingData.leaderboards || [];
 
-      const res = await MCPService.callTool({
-        name: "daksh_create_leaderboard",
-        arguments: {
-          titleId,
-          leaderboardId: lbId,
-          name: lbName,
-          resetFrequency: "ALL_TIME",
-          sortOrder: "DESCENDING"
+      // Check if user is specifying concrete leaderboard parameters or picking a template
+      const isTemplatePick = /template\s*[1-4]/i.test(lower);
+      const hasSpecificCadence = lower.includes("daily") || lower.includes("weekly") || lower.includes("monthly") || lower.includes("yearly") || lower.includes("season");
+      const hasSpecificMetric = lower.includes("speedrun") || lower.includes("time trial") || lower.includes("lap time") || lower.includes("mmr") || lower.includes("troph") || lower.includes("coins") || lower.includes("stars") || lower.includes("points");
+      const isDirectCreate = lower.includes("create") && (hasSpecificCadence || hasSpecificMetric);
+
+      if (isTemplatePick || isDirectCreate || (hasSpecificCadence && hasSpecificMetric)) {
+        // Deploy specified or templatized leaderboard
+        thoughtProcess = `Architecting and creating requested leaderboard specification for title ${titleId}...`;
+
+        let lbName = "Competitive Leaderboard";
+        let lbId = `lb_${Date.now().toString().slice(-4)}`;
+        let resetFrequency = "ALL_TIME";
+        let sortOrder = "DESCENDING";
+        let metricName = "Points";
+        let updateStrategy = "BEST";
+        let seasonStart: string | undefined = undefined;
+        let seasonEnd: string | undefined = undefined;
+
+        if (lower.includes("template 1") || lower.includes("ranked")) {
+          lbName = "Ranked Competitive League";
+          lbId = "lb_ranked_competitive";
+          resetFrequency = "MONTHLY";
+          sortOrder = "DESCENDING";
+          metricName = "MMR Rating";
+          updateStrategy = "BEST";
+        } else if (lower.includes("template 2") || (lower.includes("weekly") && !lower.includes("speedrun"))) {
+          lbName = "Weekly Tournament Cup";
+          lbId = "lb_weekly_tournament";
+          resetFrequency = "WEEKLY";
+          sortOrder = "DESCENDING";
+          metricName = "Points";
+          updateStrategy = "SUM";
+        } else if (lower.includes("template 3") || lower.includes("speedrun") || lower.includes("time trial") || lower.includes("fastest") || lower.includes("lap")) {
+          lbName = "Speedrun Time Trial";
+          lbId = "lb_speedrun_time_trial";
+          resetFrequency = "ALL_TIME";
+          sortOrder = "ASCENDING";
+          metricName = "Lap Time (ms)";
+          updateStrategy = "BEST";
+        } else if (lower.includes("template 4") || lower.includes("season")) {
+          lbName = "Holiday Championship Season";
+          lbId = "lb_seasonal_event";
+          resetFrequency = "CUSTOM_SEASON";
+          sortOrder = "DESCENDING";
+          metricName = "Event Medals";
+          updateStrategy = "SUM";
+          seasonStart = new Date().toISOString();
+          seasonEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        } else {
+          // Parse natural language specifics
+          if (lower.includes("daily")) resetFrequency = "DAILY";
+          else if (lower.includes("weekly")) resetFrequency = "WEEKLY";
+          else if (lower.includes("monthly")) resetFrequency = "MONTHLY";
+          else if (lower.includes("yearly")) resetFrequency = "YEARLY";
+          else if (lower.includes("season")) resetFrequency = "CUSTOM_SEASON";
+
+          if (lower.includes("ascending") || lower.includes("lowest") || lower.includes("time") || lower.includes("fastest")) {
+            sortOrder = "ASCENDING";
+          }
+
+          if (lower.includes("mmr") || lower.includes("rating")) metricName = "MMR Rating";
+          else if (lower.includes("troph")) metricName = "Trophies";
+          else if (lower.includes("time")) metricName = "Time (ms)";
+          else if (lower.includes("star")) metricName = "Stars";
+          else if (lower.includes("coin")) metricName = "Coins";
+          else metricName = "Points";
+
+          const nameMatch = prompt.match(/(?:named|called|for|title)\s+["']?([^"',.]+)["']?/i);
+          if (nameMatch) {
+            lbName = nameMatch[1].trim();
+            lbId = `lb_${lbName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+          } else {
+            lbName = `${resetFrequency.charAt(0) + resetFrequency.slice(1).toLowerCase()} ${metricName} Board`;
+            lbId = `lb_${resetFrequency.toLowerCase()}_${metricName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+          }
         }
-      });
 
-      const parsed = JSON.parse(res.content[0].text);
-      executedToolCalls.push({
-        toolName: "daksh_create_leaderboard",
-        args: { titleId, leaderboardId: lbId, name: lbName },
-        result: parsed,
-        isError: res.isError,
-        latencyMs: 8
-      });
+        const explicitNameMatch = prompt.match(/(?:named|called)\s+["']?([^"',.]+)["']?/i);
+        if (explicitNameMatch) {
+          lbName = explicitNameMatch[1].trim();
+          lbId = `lb_${lbName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+        }
 
-      conversationalReply = `🏆 **Leaderboard Spawned Successfully!**\n\n- **Leaderboard**: **${lbName}** (\`${lbId}\`)\n- **Sort Order**: High-to-Low (Descending)\n- **Reset Schedule**: All-Time\n- **Status**: Live & Ready for score submissions\n\nYour leaderboard is live. You can now submit scores or ask: *"Submit score 1500 for Player_01"* or *"Show leaderboard"*!`;
-      simulationSummary = `Leaderboard "${lbName}" created in database with active ranking set.`;
+        const res = await MCPService.callTool({
+          name: "daksh_create_leaderboard",
+          arguments: {
+            titleId,
+            leaderboardId: lbId,
+            name: lbName,
+            resetFrequency,
+            sortOrder,
+            metricName,
+            updateStrategy,
+            seasonStart,
+            seasonEnd
+          }
+        });
+
+        const parsed = JSON.parse(res.content[0].text);
+        executedToolCalls.push({
+          toolName: "daksh_create_leaderboard",
+          args: { titleId, leaderboardId: lbId, name: lbName, resetFrequency, sortOrder, metricName },
+          result: parsed,
+          isError: res.isError,
+          latencyMs: 8
+        });
+
+        // Formulate existing + new summary
+        const updatedList = [...existingList.filter((l: any) => l.leaderboardId !== lbId), parsed.leaderboard || { name: lbName, leaderboardId: lbId, resetFrequency, sortOrder, metricName }];
+
+        conversationalReply = `🏆 **Leaderboard Spawned Successfully!**\n\n` +
+          `### 📋 Newly Deployed Configuration:\n` +
+          `- **Leaderboard Name**: **${lbName}** (\`${lbId}\`)\n` +
+          `- **Cadence / Reset**: **${resetFrequency}**${seasonStart ? ` (Active: ${seasonStart.slice(0, 10)} → ${seasonEnd?.slice(0, 10)})` : ""}\n` +
+          `- **Metric Data Tracked**: **${metricName}**\n` +
+          `- **Sort Order**: **${sortOrder === "DESCENDING" ? "High-to-Low (Descending ⬇️)" : "Low-to-High (Ascending ⬆️ - Fastest/Lowest wins)"}**\n` +
+          `- **Update Strategy**: **${updateStrategy === "BEST" ? "Best Personal Record" : "Cumulative Sum"}**\n` +
+          `- **Status**: 🟢 **Live in Redis ZSET Engine**\n\n` +
+          `---\n\n` +
+          `📊 **All Active Leaderboards for ${titleId} (${updatedList.length} Total):**\n` +
+          updatedList.map((lb: any, idx: number) => 
+            `${idx + 1}. **${lb.name}** (\`${lb.leaderboardId}\`) — Cadence: \`${lb.resetFrequency || "ALL_TIME"}\` | Metric: \`${lb.metricName || "Points"}\` | Sort: \`${lb.sortOrder || "DESCENDING"}\``
+          ).join("\n") +
+          `\n\n*Next Steps*: Submit a score with *"Submit score 1250 for Player_01 on ${lbId}"* or ask to deploy another customized leaderboard!`;
+
+        simulationSummary = `Leaderboard "${lbName}" registered with ${resetFrequency} reset and ${metricName} metric.`;
+
+      } else {
+        // Broad request: Converse as Principal Game Backend Architect / System Designer
+        thoughtProcess = `Engaging developer in game backend system design consultation regarding leaderboard architecture for title ${titleId}...`;
+
+        const existingSection = existingList.length > 0
+          ? `📊 **Currently Active Leaderboards for \`${titleId}\` (${existingList.length} Registered):**\n` +
+            existingList.map((lb: any, idx: number) => 
+              `${idx + 1}. **${lb.name}** (\`${lb.leaderboardId}\`)\n   - Cadence: \`${lb.resetFrequency || "ALL_TIME"}\` | Metric: \`${lb.metricName || "Points"}\` | Sort: \`${lb.sortOrder || "DESCENDING"}\``
+            ).join("\n")
+          : `📊 **Currently Active Leaderboards for \`${titleId}\`:**\n- *No leaderboards registered yet.*`;
+
+        conversationalReply = `${existingSection}\n\n` +
+          `---\n\n` +
+          `🎯 **Game Backend System Design: Architecting Your Leaderboard**\n\n` +
+          `As your backend system designer, a leaderboard isn't just a list—it's a retention engine that drives player competition. Let's design the exact parameters for your game:\n\n` +
+          `### 🛠️ Key Architectural Decisions (Questions for You):\n\n` +
+          `1. **Reset Cadence & Lifecycle**:\n` +
+          `   - ⚡ **Daily** — Resets at 00:00 UTC (ideal for daily challenges, dungeon runs, or puzzle streaks)\n` +
+          `   - 📅 **Weekly** — Resets Sunday midnight (ideal for weekend warrior leagues & tournaments)\n` +
+          `   - 🗓️ **Monthly** — Resets 1st of month (ideal for competitive ranked tiers)\n` +
+          `   - 🎆 **Yearly** — Resets annually (Hall of Fame & seasonal championships)\n` +
+          `   - ⏳ **Custom Season** — Fixed event window with explicit start and end dates (e.g. Halloween Oct 15 → Nov 15)\n` +
+          `   - ♾️ **All-Time** — Lifetime persistent high scores that never reset\n\n` +
+          `2. **Metric / Score Data Type**:\n` +
+          `   - What should player scores be called?\n` +
+          `   - Options: **Points**, **MMR Rating** (e.g. 1000–3000), **Trophies**, **Lap Time (ms)**, **Coins**, or **Cleared Waves**?\n\n` +
+          `3. **Sort Order & Win Condition**:\n` +
+          `   - ⬇️ **High-to-Low (Descending)**: Higher score wins (Points, MMR, Kills)\n` +
+          `   - ⬆️ **Low-to-High (Ascending)**: Lower score wins (Speedruns, Race Lap Times, Fewest Deaths)\n\n` +
+          `4. **Score Update Strategy**:\n` +
+          `   - 🔝 **Best Record**: Keep the player's peak score\n` +
+          `   - ➕ **Cumulative Sum**: Add every match/level to an ongoing total (event grinding)\n\n` +
+          `---\n\n` +
+          `### 🚀 Or Pick a Ready-To-Deploy Template:\n\n` +
+          `- 🏆 **Template 1: Ranked Competitive** — *Monthly Reset · MMR Rating · High-to-Low · Best Score*\n` +
+          `  *(Reply: **"Deploy Template 1"**)*\n\n` +
+          `- ⚔️ **Template 2: Weekly Tournament Cup** — *Weekly Reset · Points · High-to-Low · Cumulative Sum*\n` +
+          `  *(Reply: **"Deploy Template 2"**)*\n\n` +
+          `- ⏱️ **Template 3: Speedrun Time Trial** — *All-Time · Lap Time (ms) · Low-to-High (Fastest Wins) · Best Time*\n` +
+          `  *(Reply: **"Deploy Template 3"**)*\n\n` +
+          `- 🎃 **Template 4: Custom Event Season** — *Custom Start/End Dates · Event Medals · High-to-Low*\n` +
+          `  *(Reply: **"Deploy Template 4"** or specify start/end dates)*\n\n` +
+          `💬 **Which template would you like, or how should we configure your custom leaderboard?**`;
+
+        simulationSummary = `Leaderboard system designer consultation presented.`;
+      }
 
     } else if (lower.includes("matchmaking") || lower.includes("multiplayer") || lower.includes("queue") || lower.includes("pvp") || lower.includes("1v1") || lower.includes("2v2") || lower.includes("battle royale")) {
       thoughtProcess = `User requested multiplayer matchmaking setup. Calling MCP tool daksh_create_matchmaking_ruleset for title ${titleId}...`;
