@@ -745,59 +745,61 @@ export default function AIOrchestratorConsole({
         )}
       </div>
 
-      {/* Signature ChatGPT Bottom Floating Input Area */}
-      <div className="shrink-0 bg-white/95 backdrop-blur-md pt-3 pb-5 px-4 border-t border-gray-100">
-        <div className="max-w-2xl mx-auto w-full space-y-2">
-          {/* Input Pill */}
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="flex items-center bg-white border border-gray-300 focus-within:border-gray-900 focus-within:shadow-md rounded-3xl p-1.5 pl-4 transition-all shadow-xs"
-          >
-            <input
-              type="text"
-              value={inputPrompt}
-              onChange={(e) => setInputPrompt(e.target.value)}
-              disabled={isProcessing}
-              placeholder={
-                isProjectSelector 
-                  ? (availableTitles.length === 0 ? "Type your project name..." : "Select a project above or enter a new project name...") 
-                  : `Message in plain English (e.g. "Add a dragon sword for 500 gold")...`
-              }
-              className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"
-            />
-            {inputPrompt && (
-              <button
-                type="button"
-                onClick={() => setInputPrompt("")}
-                className="text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer"
-                title="Clear input"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={isProcessing || !inputPrompt.trim()}
-              className="w-8 h-8 rounded-full bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-300 text-white flex items-center justify-center transition-colors shrink-0 shadow-xs cursor-pointer"
-              title="Send message (Enter)"
+      {/* Signature ChatGPT Bottom Floating Input Area - Hidden while asking for project name */}
+      {!(isProjectSelector && availableTitles.length === 0) && (
+        <div className="shrink-0 bg-white/95 backdrop-blur-md pt-3 pb-5 px-4 border-t border-gray-100">
+          <div className="max-w-2xl mx-auto w-full space-y-2">
+            {/* Input Pill */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex items-center bg-white border border-gray-300 focus-within:border-gray-900 focus-within:shadow-md rounded-3xl p-1.5 pl-4 transition-all shadow-xs"
             >
-              {isProcessing ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Send className="w-3.5 h-3.5" />
+              <input
+                type="text"
+                value={inputPrompt}
+                onChange={(e) => setInputPrompt(e.target.value)}
+                disabled={isProcessing}
+                placeholder={
+                  isProjectSelector 
+                    ? "Select a project above or enter a new project name..."
+                    : `Message in plain English (e.g. "Add a dragon sword for 500 gold")...`
+                }
+                className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"
+              />
+              {inputPrompt && (
+                <button
+                  type="button"
+                  onClick={() => setInputPrompt("")}
+                  className="text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer"
+                  title="Clear input"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isProcessing || !inputPrompt.trim()}
+                className="w-8 h-8 rounded-full bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-300 text-white flex items-center justify-center transition-colors shrink-0 shadow-xs cursor-pointer"
+                title="Send message (Enter)"
+              >
+                {isProcessing ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </form>
 
-          <div className="flex items-center justify-between text-[11px] text-gray-400 font-sans px-1">
-            <span>Connected to {displayTitleName} · Kubernetes backend active</span>
-            <span className="hidden sm:inline">Press Enter ↵ to send</span>
+            <div className="flex items-center justify-between text-[11px] text-gray-400 font-sans px-1">
+              <span>Connected to {displayTitleName} · Kubernetes backend active</span>
+              <span className="hidden sm:inline">Press Enter ↵ to send</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* MCP Tools Specification Modal */}
       <MCPToolsModal
