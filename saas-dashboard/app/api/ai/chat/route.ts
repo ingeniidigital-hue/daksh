@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MCPService } from "@/lib/mcp";
 import { AIIntentParser } from "@/lib/ai-menu";
 import { EconomyService } from "@/lib/economy/service";
+import { LeaderboardService } from "@/lib/leaderboards/service";
 
 interface ChatRequestMessage {
   role: "user" | "assistant" | "system";
@@ -209,6 +210,255 @@ export async function POST(request: NextRequest) {
       simulationSummary = `Cluster scale simulation successful. 10 pods ready for traffic.`;
 
     } else if (
+      lower.includes("sdk") || 
+      lower.includes("unity") || 
+      lower.includes("unreal") || 
+      lower.includes("web") || 
+      lower.includes("html") || 
+      lower.includes("platform") || 
+      lower.includes("engine") || 
+      lower.includes("how to call") || 
+      lower.includes("inside the game") || 
+      lower.includes("rest") || 
+      lower.includes("curl") || 
+      lower.includes("c#") || 
+      lower.includes("c++")
+    ) {
+      thoughtProcess = `Analyzing game engine integration and SDK calling syntax for title ${titleId}...`;
+
+      // Fetch active leaderboard
+      const existingRes = await MCPService.callTool({
+        name: "daksh_list_leaderboards",
+        arguments: { titleId }
+      });
+      const existingData = JSON.parse(existingRes.content[0].text);
+      const existingList: any[] = existingData.leaderboards || [];
+      const activeLb = existingList[existingList.length - 1] || {
+        leaderboardId: "lb_ranked_competitive",
+        name: "Ranked Competitive League",
+        metricName: "MMR Rating"
+      };
+
+      const isUnity = lower.includes("unity") || lower.includes("c#");
+      const isUnreal = lower.includes("unreal") || lower.includes("c++") || lower.includes("blueprint");
+      const isWeb = lower.includes("web") || lower.includes("html") || lower.includes("javascript") || lower.includes("typescript") || lower.includes("npm");
+      const isRest = lower.includes("rest") || lower.includes("http") || lower.includes("curl") || lower.includes("endpoint");
+
+      if (isUnity) {
+        await MCPService.callTool({
+          name: "daksh_set_title_data",
+          arguments: {
+            titleId,
+            key: "preferred_platform",
+            value: "unity",
+            scope: "public",
+            description: "Default game engine SDK"
+          }
+        });
+
+        conversationalReply = `## 🎮 Unity (C#) SDK Integration\n\n` +
+          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) inside your Unity project:\n\n` +
+          `\`\`\`csharp\n` +
+          `using UnityEngine;\n` +
+          `using System.Threading.Tasks;\n` +
+          `using Daksh.SDK;\n\n` +
+          `public class LeaderboardDemo : MonoBehaviour\n` +
+          `{\n` +
+          `    private async void Start()\n` +
+          `    {\n` +
+          `        var client = DakshClient.Instance;\n\n` +
+          `        // 1. Submit Player Match Score\n` +
+          `        double playerRating = 2850;\n` +
+          `        var result = await client.Leaderboards.SubmitScoreAsync("${activeLb.leaderboardId}", playerRating);\n` +
+          `        Debug.Log($"Score submitted! Current Rank: #{result.rank} of {result.totalPlayers}");\n\n` +
+          `        // 2. Fetch Top 10 Standings\n` +
+          `        var topScores = await client.Leaderboards.GetTopScoresAsync("${activeLb.leaderboardId}", 10);\n` +
+          `        foreach (var entry in topScores)\n` +
+          `        {\n` +
+          `            Debug.Log($"#{entry.rank} - {entry.playerId}: {entry.score} MMR");\n` +
+          `        }\n` +
+          `    }\n` +
+          `}\n` +
+          `\`\`\`\n\n` +
+          `💡 *Saved **Unity (C#)** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+
+        suggestedActions = [
+          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+        ];
+
+      } else if (isUnreal) {
+        await MCPService.callTool({
+          name: "daksh_set_title_data",
+          arguments: {
+            titleId,
+            key: "preferred_platform",
+            value: "unreal",
+            scope: "public",
+            description: "Default game engine SDK"
+          }
+        });
+
+        conversationalReply = `## ⚡ Unreal Engine (C++ & Blueprints)\n\n` +
+          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) inside Unreal Engine 5:\n\n` +
+          `\`\`\`cpp\n` +
+          `#include "DakshClient.h"\n\n` +
+          `void AMyGameMode::SubmitPlayerScore(float FinalScore)\n` +
+          `{\n` +
+          `    UDakshClient* Daksh = GetGameInstance()->GetSubsystem<UDakshClient>();\n\n` +
+          `    if (Daksh)\n` +
+          `    {\n` +
+          `        // Submit score to live Redis leaderboard (C++ or Blueprint Callable)\n` +
+          `        Daksh->SubmitScore(TEXT("${titleId}"), TEXT("${activeLb.leaderboardId}"), TEXT("Player_Ace"), FinalScore);\n` +
+          `    }\n` +
+          `}\n` +
+          `\`\`\`\n\n` +
+          `💡 *Saved **Unreal Engine** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+
+        suggestedActions = [
+          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+        ];
+
+      } else if (isWeb) {
+        await MCPService.callTool({
+          name: "daksh_set_title_data",
+          arguments: {
+            titleId,
+            key: "preferred_platform",
+            value: "web",
+            scope: "public",
+            description: "Default game engine SDK"
+          }
+        });
+
+        conversationalReply = `## 🌐 HTML5 / Web JavaScript SDK\n\n` +
+          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) in browser games with \`@daksh/sdk\`:\n\n` +
+          `\`\`\`typescript\n` +
+          `import { DakshLeaderboardClient } from "@daksh/sdk";\n\n` +
+          `const daksh = new DakshLeaderboardClient("http://localhost:3000");\n\n` +
+          `// 1. Submit Player Match Score\n` +
+          `const res = await daksh.submitScore("${titleId}", "${activeLb.leaderboardId}", "Player_Ace", 2850);\n` +
+          `console.log(\`Rank: #\${res.rank} of \${res.totalPlayers}\`);\n\n` +
+          `// 2. Fetch Top 10 Standings\n` +
+          `const topScores = await daksh.getTopScores("${titleId}", "${activeLb.leaderboardId}", 10);\n` +
+          `console.table(topScores);\n` +
+          `\`\`\`\n\n` +
+          `💡 *Saved **HTML5 / Web** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+
+        suggestedActions = [
+          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "🔌 Switch to REST API", prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}` },
+          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+        ];
+
+      } else if (isRest) {
+        await MCPService.callTool({
+          name: "daksh_set_title_data",
+          arguments: {
+            titleId,
+            key: "preferred_platform",
+            value: "rest",
+            scope: "public",
+            description: "Default game engine SDK"
+          }
+        });
+
+        conversationalReply = `## 🔌 HTTPS / Raw REST API\n\n` +
+          `Here is how to call **${activeLb.name}** (\`${activeLb.leaderboardId}\`) using direct HTTP REST endpoints:\n\n` +
+          `\`\`\`bash\n` +
+          `# 1. Submit Player Match Score (POST)\n` +
+          `curl -X POST http://localhost:3000/api/titles/${titleId}/leaderboards/${activeLb.leaderboardId}/scores \\\n` +
+          `  -H "Content-Type: application/json" \\\n` +
+          `  -d '{"playerId": "Player_Ace", "score": 2850}'\n\n` +
+          `# 2. Query Top 10 Standings (GET)\n` +
+          `curl -X GET "http://localhost:3000/api/titles/${titleId}/leaderboards/${activeLb.leaderboardId}/scores?limit=10"\n` +
+          `\`\`\`\n\n` +
+          `💡 *Saved **HTTPS / REST** as your default platform. You can change this anytime by clicking another engine below or asking me.*`;
+
+        suggestedActions = [
+          { label: "🎮 Switch to Unity", prompt: `Show Unity C# code for ${activeLb.leaderboardId}` },
+          { label: "⚡ Switch to Unreal", prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}` },
+          { label: "🌐 Switch to Web JS", prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}` },
+          { label: "🎯 Submit Test Score", prompt: `Submit score 2850 for Player_Ace on ${activeLb.leaderboardId}` }
+        ];
+
+      } else {
+        conversationalReply = `## What platform or engine are you making your game in?\n` +
+          `Select your platform below to get the instant copy-paste integration code for your project:`;
+
+        interactiveCards = [
+          {
+            id: "platform_unity",
+            title: "Unity (C#)",
+            badge: "Official SDK",
+            description: "Modular C# client with DakshLeaderboards and offline queueing.",
+            icon: "🎮",
+            prompt: `Show Unity C# code for ${activeLb.leaderboardId}`
+          },
+          {
+            id: "platform_unreal",
+            title: "Unreal Engine",
+            badge: "C++ & Blueprints",
+            description: "UDakshClient subsystem integration for Unreal Engine 5.",
+            icon: "⚡",
+            prompt: `Show Unreal Engine code for ${activeLb.leaderboardId}`
+          },
+          {
+            id: "platform_web",
+            title: "HTML5 / Web",
+            badge: "npm @daksh/sdk",
+            description: "Modern JavaScript & TypeScript SDK for browser games.",
+            icon: "🌐",
+            prompt: `Show Web JavaScript code for ${activeLb.leaderboardId}`
+          },
+          {
+            id: "platform_rest",
+            title: "HTTPS / REST",
+            badge: "Raw API",
+            description: "Standard HTTP endpoints for cURL, custom engines, or servers.",
+            icon: "🔌",
+            prompt: `Show HTTPS REST code for ${activeLb.leaderboardId}`
+          }
+        ];
+      }
+
+      simulationSummary = `SDK and engine contract evaluated for ${titleId}.`;
+
+    } else if (lower.includes("submit score") || lower.includes("submit a score") || lower.includes("test score")) {
+      const matchScore = prompt.match(/\b(\d+)\b/);
+      const scoreVal = matchScore ? parseInt(matchScore[1]) : 2850;
+      const targetLb = prompt.match(/lb_[a-zA-Z0-9_\-]+/)?.[0] || "lb_ranked_competitive";
+
+      const subRes = await LeaderboardService.submitScore({
+        titleId,
+        leaderboardId: targetLb,
+        playerId: "Player_Ace",
+        score: scoreVal
+      });
+
+      conversationalReply = `🎯 **Score Submitted Successfully to Live Cluster!**\n\n` +
+        `- **Player**: \`Player_Ace\`\n` +
+        `- **Leaderboard**: \`${targetLb}\`\n` +
+        `- **Score Submitted**: **${scoreVal}**\n` +
+        `- **Calculated Rank**: **#${subRes.rank}** (Total Players: ${subRes.totalPlayers})\n\n` +
+        `Redis ZSET updated with cryptographic anti-cheat validation.`;
+
+      suggestedActions = [
+        { label: "🎮 Show Unity Code", prompt: `Show Unity C# code for ${targetLb}` },
+        { label: "⚡ Show Unreal Code", prompt: `Show Unreal Engine code for ${targetLb}` },
+        { label: "🌐 Show Web Code", prompt: `Show Web JavaScript code for ${targetLb}` },
+        { label: "🔌 Show REST API", prompt: `Show HTTPS REST code for ${targetLb}` }
+      ];
+
+      simulationSummary = `Score ${scoreVal} recorded for Player_Ace at rank #${subRes.rank}.`;
+
+    } else if (
       lower.includes("leaderboard") || 
       lower.includes("rank") || 
       lower.includes("high score") || 
@@ -336,16 +586,53 @@ export async function POST(request: NextRequest) {
         // Formulate existing + new summary
         const updatedList = [...existingList.filter((l: any) => l.leaderboardId !== lbId), parsed.leaderboard || { name: lbName, leaderboardId: lbId, resetFrequency, sortOrder, metricName }];
 
-        conversationalReply = `🏆 **${lbName}** is now live!\n\n` +
-          `- **Cadence**: ${resetFrequency}\n` +
-          `- **Metric**: ${metricName}\n` +
-          `- **Sort**: ${sortOrder === "DESCENDING" ? "High-to-Low" : "Low-to-High (Fastest wins)"}\n\n` +
-          `Active boards: **${updatedList.map((l: any) => l.name).join(", ")}**`;
+        conversationalReply = `## 🏆 ${lbName} is now live!\n\n` +
+          `- **Reset Cadence**: ${resetFrequency}\n` +
+          `- **Scoring Metric**: ${metricName} (${sortOrder === "DESCENDING" ? "High-to-Low" : "Low-to-High"})\n` +
+          `- **Leaderboard ID**: \`${lbId}\`\n\n` +
+          `### What game engine or platform are you making your game in?\n` +
+          `Select your engine below to see the exact code to call this leaderboard from inside your game:`;
+
+        interactiveCards = [
+          {
+            id: "platform_unity",
+            title: "Unity (C#)",
+            badge: "Official SDK",
+            description: "Modular C# client with DakshLeaderboards and offline queueing.",
+            icon: "🎮",
+            prompt: `Show Unity C# code for ${lbId}`
+          },
+          {
+            id: "platform_unreal",
+            title: "Unreal Engine",
+            badge: "C++ & Blueprints",
+            description: "UDakshClient subsystem integration for Unreal Engine 5.",
+            icon: "⚡",
+            prompt: `Show Unreal Engine code for ${lbId}`
+          },
+          {
+            id: "platform_web",
+            title: "HTML5 / Web",
+            badge: "npm @daksh/sdk",
+            description: "Modern JavaScript & TypeScript SDK for browser games.",
+            icon: "🌐",
+            prompt: `Show Web JavaScript code for ${lbId}`
+          },
+          {
+            id: "platform_rest",
+            title: "HTTPS / REST",
+            badge: "Raw API",
+            description: "Standard HTTP endpoints for cURL, custom engines, or servers.",
+            icon: "🔌",
+            prompt: `Show HTTPS REST code for ${lbId}`
+          }
+        ];
 
         suggestedActions = [
-          { label: "🎯 Submit Score", prompt: `Submit score 1250 for Player_01 on ${lbId}` },
-          { label: "➕ Another Board", prompt: "I want another leaderboard" },
-          { label: "🎮 Setup Matchmaking", prompt: "Setup 1v1 multiplayer matchmaking" }
+          { label: "🎮 Unity C#", prompt: `Show Unity C# code for ${lbId}` },
+          { label: "⚡ Unreal Engine", prompt: `Show Unreal Engine code for ${lbId}` },
+          { label: "🌐 HTML5 / Web", prompt: `Show Web JavaScript code for ${lbId}` },
+          { label: "🔌 HTTPS REST", prompt: `Show HTTPS REST code for ${lbId}` }
         ];
 
         simulationSummary = `Leaderboard "${lbName}" registered with ${resetFrequency} reset and ${metricName} metric.`;

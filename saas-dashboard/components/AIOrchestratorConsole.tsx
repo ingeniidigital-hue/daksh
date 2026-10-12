@@ -75,79 +75,109 @@ interface ChatMessage {
 }
 
 function formatChatMessage(text: string) {
-  const lines = text.split("\n");
-  return lines.map((rawLine, lineIdx) => {
-    let line = rawLine;
+  // First split out ``` code blocks
+  const chunks = text.split(/(```[\s\S]*?```)/g);
 
-    // Markdown Headings
-    if (line.trim().startsWith("### ")) {
-      return (
-        <h3 key={lineIdx} className="text-lg font-bold text-gray-900 tracking-tight mt-2 mb-1">
-          {line.trim().slice(4)}
-        </h3>
-      );
-    }
-    if (line.trim().startsWith("## ")) {
-      return (
-        <h2 key={lineIdx} className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mt-2 mb-1">
-          {line.trim().slice(3)}
-        </h2>
-      );
-    }
-    if (line.trim().startsWith("# ")) {
-      return (
-        <h1 key={lineIdx} className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-2 mb-1">
-          {line.trim().slice(2)}
-        </h1>
-      );
-    }
+  return chunks.map((chunk, chunkIdx) => {
+    if (chunk.startsWith("```") && chunk.endsWith("```")) {
+      const firstLineBreak = chunk.indexOf("\n");
+      const lang = firstLineBreak !== -1 ? chunk.slice(3, firstLineBreak).trim() : "";
+      const code = firstLineBreak !== -1 ? chunk.slice(firstLineBreak + 1, -3) : chunk.slice(3, -3);
 
-    // Bold formatting: **text**
-    const parts = line.split(/(\*\*.*?\*\*)/g);
-    const formattedParts = parts.map((part, partIdx) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={partIdx} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
-      }
-      // Inline code formatting: `code`
-      const subParts = part.split(/(`.*?`)/g);
-      return subParts.map((subPart, subIdx) => {
-        if (subPart.startsWith("`") && subPart.endsWith("`")) {
-          return (
-            <code key={`${partIdx}-${subIdx}`} className="bg-gray-100 text-gray-800 text-[12px] px-1.5 py-0.5 rounded font-mono border border-gray-200">
-              {subPart.slice(1, -1)}
-            </code>
-          );
-        }
-        return subPart;
-      });
-    });
-
-    // Bullet points
-    if (line.trim().startsWith("- ") || line.trim().startsWith("• ")) {
       return (
-        <div key={lineIdx} className="flex items-start space-x-2 my-1 pl-1">
-          <span className="text-gray-400 mt-1 select-none">•</span>
-          <span className="flex-1">{formattedParts}</span>
+        <div key={chunkIdx} className="my-3 rounded-2xl overflow-hidden border border-gray-800 bg-[#0d1117] shadow-sm text-left">
+          <div className="bg-[#161b22] px-4 py-2 text-[11px] font-mono font-semibold text-gray-300 uppercase tracking-wider flex items-center justify-between border-b border-gray-800">
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+              <span>{lang || "code"}</span>
+            </span>
+            <span className="text-[10px] text-gray-500 font-sans normal-case">copy & paste into project</span>
+          </div>
+          <pre className="p-4 text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed select-all">
+            <code>{code.trim()}</code>
+          </pre>
         </div>
       );
     }
 
-    // Numbered lists
-    const numMatch = line.trim().match(/^(\d+)\.\s+/);
-    if (numMatch) {
-      return (
-        <div key={lineIdx} className="flex items-start space-x-2 my-1 pl-1">
-          <span className="text-blue-600 font-semibold text-xs mt-0.5 select-none">{numMatch[1]}.</span>
-          <span className="flex-1">{formattedParts}</span>
-        </div>
-      );
-    }
+    const lines = chunk.split("\n");
+    return (
+      <div key={chunkIdx} className="space-y-1">
+        {lines.map((rawLine, lineIdx) => {
+          let line = rawLine;
 
-    if (line.trim() === "") {
-      return <div key={lineIdx} className="h-2"></div>;
-    }
+          // Markdown Headings
+          if (line.trim().startsWith("### ")) {
+            return (
+              <h3 key={lineIdx} className="text-lg font-bold text-gray-900 tracking-tight mt-3 mb-1">
+                {line.trim().slice(4)}
+              </h3>
+            );
+          }
+          if (line.trim().startsWith("## ")) {
+            return (
+              <h2 key={lineIdx} className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mt-3 mb-1">
+                {line.trim().slice(3)}
+              </h2>
+            );
+          }
+          if (line.trim().startsWith("# ")) {
+            return (
+              <h1 key={lineIdx} className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-3 mb-1">
+                {line.trim().slice(2)}
+              </h1>
+            );
+          }
 
-    return <p key={lineIdx} className="text-sm sm:text-base leading-relaxed text-gray-700">{formattedParts}</p>;
+          // Bold formatting: **text**
+          const parts = line.split(/(\*\*.*?\*\*)/g);
+          const formattedParts = parts.map((part, partIdx) => {
+            if (part.startsWith("**") && part.endsWith("**")) {
+              return <strong key={partIdx} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
+            }
+            // Inline code formatting: `code`
+            const subParts = part.split(/(`.*?`)/g);
+            return subParts.map((subPart, subIdx) => {
+              if (subPart.startsWith("`") && subPart.endsWith("`")) {
+                return (
+                  <code key={`${partIdx}-${subIdx}`} className="bg-gray-100 text-gray-800 text-[12px] px-1.5 py-0.5 rounded font-mono border border-gray-200">
+                    {subPart.slice(1, -1)}
+                  </code>
+                );
+              }
+              return subPart;
+            });
+          });
+
+          // Bullet points
+          if (line.trim().startsWith("- ") || line.trim().startsWith("• ")) {
+            return (
+              <div key={lineIdx} className="flex items-start space-x-2 my-1 pl-1">
+                <span className="text-gray-400 mt-1 select-none">•</span>
+                <span className="flex-1">{formattedParts}</span>
+              </div>
+            );
+          }
+
+          // Numbered lists
+          const numMatch = line.trim().match(/^(\d+)\.\s+/);
+          if (numMatch) {
+            return (
+              <div key={lineIdx} className="flex items-start space-x-2 my-1 pl-1">
+                <span className="text-blue-600 font-semibold text-xs mt-0.5 select-none">{numMatch[1]}.</span>
+                <span className="flex-1">{formattedParts}</span>
+              </div>
+            );
+          }
+
+          if (line.trim() === "") {
+            return <div key={lineIdx} className="h-1.5"></div>;
+          }
+
+          return <p key={lineIdx} className="text-sm sm:text-base leading-relaxed text-gray-700">{formattedParts}</p>;
+        })}
+      </div>
+    );
   });
 }
 
