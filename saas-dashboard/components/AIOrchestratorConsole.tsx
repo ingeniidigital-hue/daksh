@@ -74,6 +74,102 @@ interface ChatMessage {
   suggestedActions?: SuggestedAction[];
 }
 
+function CodeBlock({ lang, code }: { lang: string; code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    let success = false;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && document.hasFocus && document.hasFocus()) {
+        await navigator.clipboard.writeText(code.trim());
+        success = true;
+      }
+    } catch (e) {}
+
+    if (!success) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = code.trim();
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      } catch (e) {}
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="my-3 rounded-2xl overflow-hidden border border-gray-800 bg-[#0d1117] shadow-sm text-left">
+      <div className="bg-[#161b22] px-4 py-2.5 text-[11px] font-mono font-semibold text-gray-300 uppercase tracking-wider flex items-center justify-between border-b border-gray-800">
+        <span className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+          <span>{lang || "code"}</span>
+        </span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="text-[11px] font-sans font-medium text-gray-200 hover:text-white bg-[#21262d] hover:bg-[#30363d] px-3 py-1 rounded-lg transition-colors cursor-pointer border border-gray-700/80 active:scale-95"
+        >
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <pre className="p-4 text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed select-all">
+        <code>{code.trim()}</code>
+      </pre>
+    </div>
+  );
+}
+
+function InlineCode({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    let success = false;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && document.hasFocus && document.hasFocus()) {
+        await navigator.clipboard.writeText(text);
+        success = true;
+      }
+    } catch (e) {}
+
+    if (!success) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      } catch (e) {}
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <code 
+      onClick={handleCopy}
+      title="Click to copy"
+      className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-[12px] px-1.5 py-0.5 rounded font-mono border border-gray-200 cursor-pointer transition-colors"
+    >
+      {text}
+      {copied && <span className="ml-1 text-[10px] text-emerald-600 font-sans font-bold">copied</span>}
+    </code>
+  );
+}
+
 function formatChatMessage(text: string) {
   // First split out ``` code blocks
   const chunks = text.split(/(```[\s\S]*?```)/g);
@@ -84,20 +180,7 @@ function formatChatMessage(text: string) {
       const lang = firstLineBreak !== -1 ? chunk.slice(3, firstLineBreak).trim() : "";
       const code = firstLineBreak !== -1 ? chunk.slice(firstLineBreak + 1, -3) : chunk.slice(3, -3);
 
-      return (
-        <div key={chunkIdx} className="my-3 rounded-2xl overflow-hidden border border-gray-800 bg-[#0d1117] shadow-sm text-left">
-          <div className="bg-[#161b22] px-4 py-2 text-[11px] font-mono font-semibold text-gray-300 uppercase tracking-wider flex items-center justify-between border-b border-gray-800">
-            <span className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
-              <span>{lang || "code"}</span>
-            </span>
-            <span className="text-[10px] text-gray-500 font-sans normal-case">copy & paste into project</span>
-          </div>
-          <pre className="p-4 text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed select-all">
-            <code>{code.trim()}</code>
-          </pre>
-        </div>
-      );
+      return <CodeBlock key={chunkIdx} lang={lang} code={code} />;
     }
 
     const lines = chunk.split("\n");
@@ -140,9 +223,7 @@ function formatChatMessage(text: string) {
             return subParts.map((subPart, subIdx) => {
               if (subPart.startsWith("`") && subPart.endsWith("`")) {
                 return (
-                  <code key={`${partIdx}-${subIdx}`} className="bg-gray-100 text-gray-800 text-[12px] px-1.5 py-0.5 rounded font-mono border border-gray-200">
-                    {subPart.slice(1, -1)}
-                  </code>
+                  <InlineCode key={`${partIdx}-${subIdx}`} text={subPart.slice(1, -1)} />
                 );
               }
               return subPart;
