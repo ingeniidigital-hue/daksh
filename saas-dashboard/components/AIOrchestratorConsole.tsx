@@ -7,11 +7,9 @@ import {
   Sparkles, Terminal, Wrench, Send, CheckCircle2, 
   RefreshCw, ShoppingBag, Coins, 
   Database, Trophy, ArrowRight, X, 
-  Trash2, Cpu, Gamepad2, Plus, 
-  Gift, RotateCcw
+  Cpu, Plus, Gift
 } from "lucide-react";
 import MCPToolsModal from "./MCPToolsModal";
-import ModeSwitcher from "./ModeSwitcher";
 
 interface TitleRecord {
   id: string;
@@ -281,6 +279,60 @@ export default function AIOrchestratorConsole({
       return;
     }
 
+    const lowerQuery = query.toLowerCase().trim();
+
+    // 1. Clear chat shortcut
+    if (lowerQuery === "clear" || lowerQuery === "clear chat") {
+      clearChat();
+      setInputPrompt("");
+      return;
+    }
+
+    // 2. Start Fresh / Reset shortcut
+    if (lowerQuery === "start fresh" || lowerQuery === "reset") {
+      setInputPrompt("");
+      handleStartFresh();
+      return;
+    }
+
+    // 3. Switch / View Projects
+    if (lowerQuery === "switch project" || lowerQuery === "projects" || lowerQuery === "all projects") {
+      setInputPrompt("");
+      router.push("/dashboard");
+      return;
+    }
+
+    // 4. MCP Tools specification
+    if (lowerQuery === "tools" || lowerQuery === "mcp tools" || lowerQuery === "show tools" || lowerQuery === "help") {
+      setInputPrompt("");
+      setIsToolsModalOpen(true);
+      return;
+    }
+
+    // 5. CSV Data Export
+    if ((lowerQuery.includes("export") || lowerQuery.includes("download")) && lowerQuery.includes("csv")) {
+      window.location.href = `/api/titles/${titleId || "default"}/analytics/export?format=csv`;
+      const userMsg: ChatMessage = {
+        id: `usr_${Date.now()}`,
+        sender: "user",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: query
+      };
+      const aiMsg: ChatMessage = {
+        id: `ai_${Date.now()}`,
+        sender: "orchestrator",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: `📊 **Exporting CSV Data**: Initiated telemetry and economy dataset download in standard RFC 4180 CSV format.`,
+        simulationResult: {
+          status: "ready",
+          summary: "CSV export stream initiated successfully"
+        }
+      };
+      setMessages(prev => [...prev, userMsg, aiMsg]);
+      setInputPrompt("");
+      return;
+    }
+
     // Check if user is asking to select project via chat
     if (query.toLowerCase().includes("select project") || query.toLowerCase().includes("open project")) {
       const targetTitle = availableTitles.find(t => 
@@ -400,77 +452,6 @@ export default function AIOrchestratorConsole({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white text-gray-800 font-sans overflow-hidden relative">
-      
-      {/* Top Header - Ultra Clean */}
-      <header className="h-14 border-b border-gray-100 px-6 flex items-center justify-between shrink-0 bg-white sticky top-0 z-20">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm shadow-xs">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold text-gray-900 text-sm tracking-tight">Daksh</span>
-            <span className="bg-gray-100 text-gray-600 text-[11px] font-medium px-2 py-0.5 rounded-full border border-gray-200">
-              LiveOps
-            </span>
-          </div>
-
-          <div className="h-4 w-px bg-gray-200"></div>
-
-          {/* Active Project Pill */}
-          {!isProjectSelector ? (
-            <Link
-              href="/dashboard"
-              className="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded-full border border-gray-200 transition-colors"
-              title="Switch active game project"
-            >
-              <Gamepad2 className="w-3.5 h-3.5 text-blue-600" />
-              <span className="font-semibold text-gray-900">{displayTitleName}</span>
-              <span className="text-[11px] text-gray-400 font-mono">({titleId})</span>
-              <span className="text-[11px] text-blue-600 font-semibold ml-0.5">Switch ▾</span>
-            </Link>
-          ) : (
-            <div className="text-xs bg-gray-100 text-gray-700 border border-gray-200 px-3 py-1 rounded-full font-medium flex items-center gap-1.5">
-              <Gamepad2 className="w-3.5 h-3.5 text-gray-500" />
-              <span>Project Select</span>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {/* Mode Switcher: Manual vs AI */}
-          <ModeSwitcher />
-
-          {/* Tools Modal Trigger */}
-          <button
-            onClick={() => setIsToolsModalOpen(true)}
-            className="p-1.5 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-            title="View 12 LiveOps MCP Actions"
-          >
-            <Wrench className="w-4 h-4" />
-          </button>
-
-          {/* Start Fresh Reset Button */}
-          <button
-            onClick={handleStartFresh}
-            disabled={isResetting}
-            className="flex items-center space-x-1.5 text-xs text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer font-medium"
-            title="Wipe test data and restart fresh (Kubernetes engine stays alive)"
-          >
-            <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">{isResetting ? "Resetting..." : "Start Fresh"}</span>
-          </button>
-
-          {/* Clear Chat */}
-          <button
-            onClick={clearChat}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-            title="Clear chat conversation"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
-
       {/* Main Conversation Stream or Clean Centered Empty State */}
       <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin flex flex-col">
         {isProjectSelector ? (
