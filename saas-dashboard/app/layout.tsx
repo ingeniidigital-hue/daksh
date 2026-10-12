@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Daksh - Game Backend Platform",
+  title: "Game Backend Platform",
   description: "The developer control plane for your game backend.",
 };
 

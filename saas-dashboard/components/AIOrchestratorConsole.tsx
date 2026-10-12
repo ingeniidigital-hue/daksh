@@ -229,26 +229,8 @@ export default function AIOrchestratorConsole({
     window.location.href = "/dashboard";
   };
 
-  // Initial chat state
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    if (isProjectSelector) {
-      return [
-        {
-          id: "msg_select_project",
-          sender: "orchestrator",
-          timestamp: "Just now",
-          text: `👋 **Welcome to Daksh LiveOps!**\n\nYour **Kubernetes engine** (\`k3d-daksh-cluster\`) is online and operational. What is the name of your game project?`,
-          isProjectSelectCard: true,
-          simulationResult: {
-            status: "ready",
-            summary: "Kubernetes Engine Online & Ready"
-          }
-        }
-      ];
-    }
-    // Clean empty state for titles (just like ChatGPT)
-    return [];
-  });
+  // Initial chat state: starts completely empty
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   // Send prompt to AI chat route
   const handleSendMessage = async (textToSend?: string) => {
@@ -271,7 +253,7 @@ export default function AIOrchestratorConsole({
         id: `ai_${Date.now()}`,
         sender: "orchestrator",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: `🚀 **Creating project "${query}"...**\n\nProvisioning isolated **PostgreSQL** and **Nakama** game server pods on Kubernetes (\`k3d-daksh-cluster\`)...`
+        text: `🚀 **Creating project "${query}"...**\n\nProvisioning isolated database and game server microservices...`
       };
       setMessages(prev => [...prev, aiMsg]);
 
@@ -654,7 +636,7 @@ export default function AIOrchestratorConsole({
                   {/* Assistant header line */}
                   {msg.sender === "orchestrator" && (
                     <div className="flex items-center space-x-2 text-xs text-gray-400 font-medium">
-                      <span className="text-gray-900 font-semibold">Daksh</span>
+                      <span className="text-gray-900 font-semibold">AI Orchestrator</span>
                       <span>·</span>
                       <span className="font-mono text-[11px]">{msg.timestamp}</span>
                     </div>
