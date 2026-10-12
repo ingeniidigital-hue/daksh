@@ -79,6 +79,29 @@ function formatChatMessage(text: string) {
   return lines.map((rawLine, lineIdx) => {
     let line = rawLine;
 
+    // Markdown Headings
+    if (line.trim().startsWith("### ")) {
+      return (
+        <h3 key={lineIdx} className="text-lg font-bold text-gray-900 tracking-tight mt-2 mb-1">
+          {line.trim().slice(4)}
+        </h3>
+      );
+    }
+    if (line.trim().startsWith("## ")) {
+      return (
+        <h2 key={lineIdx} className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mt-2 mb-1">
+          {line.trim().slice(3)}
+        </h2>
+      );
+    }
+    if (line.trim().startsWith("# ")) {
+      return (
+        <h1 key={lineIdx} className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mt-2 mb-1">
+          {line.trim().slice(2)}
+        </h1>
+      );
+    }
+
     // Bold formatting: **text**
     const parts = line.split(/(\*\*.*?\*\*)/g);
     const formattedParts = parts.map((part, partIdx) => {
@@ -124,7 +147,7 @@ function formatChatMessage(text: string) {
       return <div key={lineIdx} className="h-2"></div>;
     }
 
-    return <p key={lineIdx} className="leading-relaxed">{formattedParts}</p>;
+    return <p key={lineIdx} className="text-sm sm:text-base leading-relaxed text-gray-700">{formattedParts}</p>;
   });
 }
 
@@ -135,6 +158,7 @@ export default function AIOrchestratorConsole({
   onOpenCreateTitle
 }: AIOrchestratorConsoleProps) {
   const router = useRouter();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputPrompt, setInputPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState("daksh_sim_prod_liveops_90218374");
@@ -195,8 +219,16 @@ export default function AIOrchestratorConsole({
 
   // Auto-scroll chat to bottom
   useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.interactiveCards && lastMsg.interactiveCards.length > 0) {
+      const el = document.getElementById(`msg-${lastMsg.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messagesEndRef, isProcessing]);
+  }, [messages, isProcessing]);
 
   // Quick title creation & direct k8s provision handler
   const handleQuickProvision = async (nameToProvision: string) => {
@@ -250,9 +282,6 @@ export default function AIOrchestratorConsole({
     setIsResetting(false);
     window.location.href = "/dashboard";
   };
-
-  // Initial chat state: starts completely empty
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   // Send prompt to AI chat route
   const handleSendMessage = async (textToSend?: string) => {
@@ -595,6 +624,7 @@ export default function AIOrchestratorConsole({
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
+                id={`msg-${msg.id}`}
                 className={`flex gap-3.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.sender === "orchestrator" && (
@@ -617,8 +647,13 @@ export default function AIOrchestratorConsole({
                     </div>
                   )}
 
-                  {/* Thought Process (Collapsible) */}
-                  {msg.thoughtProcess && (
+                  {/* Message Content (Heading & Prompts) */}
+                  <div className={msg.interactiveCards && msg.interactiveCards.length > 0 ? "space-y-1.5 pb-1" : "space-y-1"}>
+                    {formatChatMessage(msg.text)}
+                  </div>
+
+                  {/* Thought Process (Collapsible - hidden when interactive cards are displayed to keep UI clean) */}
+                  {msg.thoughtProcess && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-600">
                       <button 
                         onClick={() => setExpandedThoughtId(expandedThoughtId === msg.id ? null : msg.id)}
@@ -638,13 +673,8 @@ export default function AIOrchestratorConsole({
                     </div>
                   )}
 
-                  {/* Message Content */}
-                  <div className="space-y-1">
-                    {formatChatMessage(msg.text)}
-                  </div>
-
-                  {/* Executed Tools Summary */}
-                  {msg.toolCalls && msg.toolCalls.length > 0 && (
+                  {/* Executed Tools Summary (hidden when interactive cards are displayed) */}
+                  {msg.toolCalls && msg.toolCalls.length > 0 && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
                     <div className="space-y-1.5 pt-1">
                       {msg.toolCalls.map((tc, idx) => (
                         <div 
@@ -665,8 +695,8 @@ export default function AIOrchestratorConsole({
                     </div>
                   )}
 
-                  {/* Simulation Summary Banner */}
-                  {msg.simulationResult && (
+                  {/* Simulation Summary Banner (hidden when interactive cards are displayed) */}
+                  {msg.simulationResult && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
                     <div className="flex items-center justify-between text-xs bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-emerald-900 font-medium">
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -677,40 +707,43 @@ export default function AIOrchestratorConsole({
 
                   {/* Interactive Cards (e.g. Leaderboard Templates) */}
                   {msg.interactiveCards && msg.interactiveCards.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       {msg.interactiveCards.map((card) => (
                         <button
                           key={card.id}
                           onClick={() => handleSendMessage(card.prompt)}
                           disabled={isProcessing}
-                          className="text-left bg-white hover:bg-gray-50/80 active:bg-gray-100 border border-gray-200 hover:border-gray-900 rounded-2xl p-4 sm:p-5 transition-all shadow-xs hover:shadow-md group cursor-pointer flex flex-col justify-between"
+                          className="text-left bg-white hover:bg-blue-50/20 active:bg-blue-50/40 border border-gray-200 hover:border-blue-500 rounded-2xl p-5 sm:p-6 transition-all shadow-xs hover:shadow-md group cursor-pointer flex flex-col justify-between"
                         >
                           <div>
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-gray-900 text-base sm:text-lg flex items-center gap-2 group-hover:text-blue-600 transition-colors">
-                                <span className="text-xl">{card.icon}</span>
+                              <span className="font-bold text-gray-900 text-lg sm:text-xl flex items-center gap-2.5 group-hover:text-blue-600 transition-colors">
+                                <span className="text-2xl">{card.icon}</span>
                                 <span>{card.title}</span>
                               </span>
                               {card.badge && (
-                                <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-200 shrink-0">
+                                <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200 shrink-0">
                                   {card.badge}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                            <p className="text-sm sm:text-base text-gray-600 mt-2.5 leading-relaxed">
                               {card.description}
                             </p>
                             {card.previewRanks && card.previewRanks.length > 0 && (
-                              <div className="mt-3.5 pt-2.5 border-t border-gray-100 space-y-1.5">
+                              <div className="mt-4 bg-gray-50/90 rounded-xl p-3 border border-gray-100 space-y-1.5">
+                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-0.5 mb-1">
+                                  Standings Preview
+                                </div>
                                 {card.previewRanks.map((r) => (
-                                  <div key={r.rank} className="flex items-center justify-between text-xs py-0.5">
+                                  <div key={r.rank} className="flex items-center justify-between text-xs py-0.5 px-0.5">
                                     <div className="flex items-center gap-2">
                                       <span className="w-4 text-center font-bold text-xs">
                                         {r.rank === 1 ? "🥇" : r.rank === 2 ? "🥈" : "🥉"}
                                       </span>
-                                      <span className="font-semibold text-gray-800">{r.player}</span>
+                                      <span className="font-medium text-gray-800">{r.player}</span>
                                     </div>
-                                    <span className="font-mono text-xs text-gray-500 font-medium">
+                                    <span className="font-mono text-xs text-gray-600 font-semibold">
                                       {r.score}
                                     </span>
                                   </div>
@@ -718,9 +751,11 @@ export default function AIOrchestratorConsole({
                               </div>
                             )}
                           </div>
-                          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 group-hover:text-gray-900">
-                            <span className="text-xs font-medium">Click to create</span>
-                            <span className="font-bold text-sm text-blue-600 group-hover:translate-x-1 transition-transform">Deploy ➔</span>
+                          <div className="mt-5 pt-3.5 border-t border-gray-100 flex items-center justify-between">
+                            <span className="text-xs text-gray-500 font-medium">1-Click deploy</span>
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 group-hover:bg-blue-700 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors">
+                              Select & Deploy ➔
+                            </span>
                           </div>
                         </button>
                       ))}

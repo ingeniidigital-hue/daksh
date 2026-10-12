@@ -356,8 +356,8 @@ export async function POST(request: NextRequest) {
 
         const count = existingList.length;
         conversationalReply = count > 0
-          ? `You have **${count} active leaderboard${count > 1 ? "s" : ""}** configured. Choose a template below or click to create instantly:`
-          : `Which type of leaderboard would you like to set up? Choose a template below:`;
+          ? `## Which type of leaderboard would you like to set up?\nYou have **${count} active leaderboard${count > 1 ? "s" : ""}** configured. Choose a template below to deploy instantly, or ask me for custom rules:`
+          : `## Which type of leaderboard would you like to set up?\nChoose one of the 4 templates below to deploy instantly, or ask me for custom scoring rules:`;
 
         interactiveCards = [
           {
