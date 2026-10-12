@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   Sparkles, Terminal, Wrench, Send, CheckCircle2, 
-  RefreshCw, ShoppingBag, Coins, 
-  Database, Trophy, ArrowRight, X, 
-  Cpu, Plus, Gift
+  RefreshCw, Database, ArrowRight, X, 
+  Cpu, Plus
 } from "lucide-react";
 import MCPToolsModal from "./MCPToolsModal";
 
@@ -530,89 +529,40 @@ export default function AIOrchestratorConsole({
             )}
           </div>
         ) : messages.length === 0 ? (
-          /* Signature Clean ChatGPT Centered Welcome Screen */
-          <div className="max-w-xl mx-auto w-full my-auto py-8 flex flex-col items-center text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-              What would you like to do with {displayTitleName}?
+          /* Ultra-Clean Question Without Technical Jargon */
+          <div className="space-y-6 text-center max-w-xl mx-auto py-16 my-auto">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+              What would you like to set up?
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-2 max-w-md">
-              Your Kubernetes backend is online. Click a common action below or ask in everyday plain English:
-            </p>
 
-            {/* 4 Clean Action Cards (Just like ChatGPT) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-6 text-left">
-              <button
-                onClick={() => handleSendMessage("Setup default currencies: Gold (soft currency) and Gems (hard currency)")}
+            {/* Direct Input for Setup */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (inputPrompt.trim()) {
+                  handleSendMessage();
+                }
+              }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mx-auto pt-2"
+            >
+              <input
+                type="text"
+                value={inputPrompt}
+                onChange={(e) => setInputPrompt(e.target.value)}
                 disabled={isProcessing}
-                className="p-4 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl transition-all shadow-2xs group flex flex-col justify-between cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                    <Coins className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    1. Setup Currencies
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-500 mt-2.5 leading-relaxed">
-                  Initialize Gold (soft) & Gems (premium) for your game economy.
-                </p>
-              </button>
-
+                placeholder="e.g. Currencies, Store items, Leaderboards..."
+                className="flex-1 bg-white border border-gray-300 focus:border-gray-900 rounded-xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none shadow-xs transition-colors"
+                autoFocus
+              />
               <button
-                onClick={() => handleSendMessage("Create an Epic Dragon Armor for 500 Gems")}
-                disabled={isProcessing}
-                className="p-4 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl transition-all shadow-2xs group flex flex-col justify-between cursor-pointer"
+                type="submit"
+                disabled={isProcessing || !inputPrompt.trim()}
+                className="bg-gray-900 hover:bg-black disabled:bg-gray-200 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                    <ShoppingBag className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    2. Add Store Item
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-500 mt-2.5 leading-relaxed">
-                  Publish Dragon Armor for 500 Gems in the live store catalog.
-                </p>
+                <span>Continue</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
-
-              <button
-                onClick={() => handleSendMessage("Give 1000 Gold to player Player_01")}
-                disabled={isProcessing}
-                className="p-4 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl transition-all shadow-2xs group flex flex-col justify-between cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
-                    <Gift className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    3. Reward First Player
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-500 mt-2.5 leading-relaxed">
-                  Send 1,000 Gold to Player_01 to test wallet balance delivery.
-                </p>
-              </button>
-
-              <button
-                onClick={() => handleSendMessage("Simulate a weekend event with double XP, an event blade, and 500 gold airdrop")}
-                disabled={isProcessing}
-                className="p-4 bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 rounded-2xl transition-all shadow-2xs group flex flex-col justify-between cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                    <Trophy className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    4. Launch Live Event
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-500 mt-2.5 leading-relaxed">
-                  Simulate 2x XP tournament with exclusive event blade drops.
-                </p>
-              </button>
-            </div>
+            </form>
           </div>
         ) : (
           /* Active ChatGPT Conversation Stream */
@@ -745,8 +695,8 @@ export default function AIOrchestratorConsole({
         )}
       </div>
 
-      {/* Signature ChatGPT Bottom Floating Input Area - Hidden while asking for project name */}
-      {!(isProjectSelector && availableTitles.length === 0) && (
+      {/* Signature Bottom Floating Input Area - Only when active conversation is ongoing */}
+      {messages.length > 0 && !(isProjectSelector && availableTitles.length === 0) && (
         <div className="shrink-0 bg-white/95 backdrop-blur-md pt-3 pb-5 px-4 border-t border-gray-100">
           <div className="max-w-2xl mx-auto w-full space-y-2">
             {/* Input Pill */}
@@ -762,11 +712,7 @@ export default function AIOrchestratorConsole({
                 value={inputPrompt}
                 onChange={(e) => setInputPrompt(e.target.value)}
                 disabled={isProcessing}
-                placeholder={
-                  isProjectSelector 
-                    ? "Select a project above or enter a new project name..."
-                    : `Message in plain English (e.g. "Add a dragon sword for 500 gold")...`
-                }
+                placeholder="Type what you would like to set up..."
                 className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"
               />
               {inputPrompt && (
@@ -794,7 +740,7 @@ export default function AIOrchestratorConsole({
             </form>
 
             <div className="flex items-center justify-between text-[11px] text-gray-400 font-sans px-1">
-              <span>Connected to {displayTitleName} · Kubernetes backend active</span>
+              <span>{displayTitleName}</span>
               <span className="hidden sm:inline">Press Enter ↵ to send</span>
             </div>
           </div>
