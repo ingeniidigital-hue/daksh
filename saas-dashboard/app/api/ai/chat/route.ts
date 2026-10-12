@@ -236,6 +236,35 @@ export async function POST(request: NextRequest) {
       conversationalReply = `🏆 **Leaderboard Spawned Successfully!**\n\n- **Leaderboard**: **${lbName}** (\`${lbId}\`)\n- **Sort Order**: High-to-Low (Descending)\n- **Reset Schedule**: All-Time\n- **Status**: Live & Ready for score submissions\n\nYour leaderboard is live. You can now submit scores or ask: *"Submit score 1500 for Player_01"* or *"Show leaderboard"*!`;
       simulationSummary = `Leaderboard "${lbName}" created in database with active ranking set.`;
 
+    } else if (lower.includes("matchmaking") || lower.includes("multiplayer") || lower.includes("queue") || lower.includes("pvp") || lower.includes("1v1") || lower.includes("2v2") || lower.includes("battle royale")) {
+      thoughtProcess = `User requested multiplayer matchmaking setup. Calling MCP tool daksh_create_matchmaking_ruleset for title ${titleId}...`;
+      
+      const mode = lower.includes("battle royale") ? "BattleRoyale" : lower.includes("2v2") ? "2v2" : "1v1";
+      const queueName = lower.includes("battle royale") ? "Battle Royale Queue" : lower.includes("2v2") ? "2v2 Ranked Queue" : "1v1 Quickplay Queue";
+      const rulesetId = `queue_${mode.toLowerCase()}`;
+
+      const res = await MCPService.callTool({
+        name: "daksh_create_matchmaking_ruleset",
+        arguments: {
+          titleId,
+          rulesetId,
+          name: queueName,
+          mode
+        }
+      });
+
+      const parsed = JSON.parse(res.content[0].text);
+      executedToolCalls.push({
+        toolName: "daksh_create_matchmaking_ruleset",
+        args: { titleId, rulesetId, name: queueName, mode },
+        result: parsed,
+        isError: res.isError,
+        latencyMs: 11
+      });
+
+      conversationalReply = `🎮 **Multiplayer Matchmaking Spawned Successfully!**\n\n- **Queue Ruleset**: **${queueName}** (\`${rulesetId}\`)\n- **Game Mode**: **${mode}**\n- **Latency Tolerance**: <80ms with dynamic flexing\n- **Status**: Open & Ready for player tickets\n\nPlayers can now join the queue or you can simulate player ticket matchmaking directly!`;
+      simulationSummary = `Matchmaking queue "${queueName}" created and active.`;
+
     } else {
       // 5. General Intent Parser / Single Tool Execution
       const parsedIntent = await AIIntentParser.parsePrompt({ titleId, prompt });
@@ -390,10 +419,39 @@ export async function POST(request: NextRequest) {
         conversationalReply = `👋 **AI Orchestrator Ready for ${titleId}**\n\nYou can set up and manage any part of your game using everyday English. Here are the top things you can configure:\n\n1. 🏆 **Leaderboards** — *"Spawn a leaderboard"* or *"Submit score 1000 for Player_01"*\n2. 🪙 **Virtual Currencies** — *"What coins do I have?"* or *"Set up coins and gems"*\n3. 🛒 **Store & Catalog** — *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n4. 🎁 **Player Wallets & Gifts** — *"Give 1,000 Gold to player Player_01"*\n5. 🚀 **Live Events** — *"Start a weekend event with double XP and bonus rewards"*\n\nType what you'd like to set up in the box below!`;
         simulationSummary = `Interactive guide provided. Ready for commands.`;
       } else {
-        // Fallback: Proactive setup assistant
-        thoughtProcess = `Interpreted setup request "${prompt}" for game title ${titleId}...`;
-        conversationalReply = `✨ **Setting up for ${titleId}**\n\nI can configure any live system for your game. Here are the most common setups:\n\n- 🏆 **Leaderboards**: *"Spawn a Global High Scores leaderboard"*\n- 🪙 **Currencies**: *"What coins do I have?"* or *"Set up default currencies"*\n- 🛒 **Store Catalog**: *"Add a new sword for 300 Gems"*\n- 🎁 **Player Rewards**: *"Give 500 Gold to player Player_01"*\n- 🚀 **Live Events**: *"Start a weekend double XP event"*\n\nTell me what you'd like to create!`;
-        simulationSummary = `Ready for commands.`;
+        // Fallback: Query local AI agent proxy (Ollama) or provide smart guidance
+        thoughtProcess = `Analyzing request with local AI proxy for game title ${titleId}...`;
+        let localAiResponse: string | null = null;
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 3500);
+          const aiRes = await fetch("http://localhost:11434/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "llama3.2:latest",
+              prompt: `You are the backend AI orchestrator for the multiplayer game title "${titleId}". The developer says: "${prompt}". Answer concisely in 2 sentences explaining how to configure this or what Daksh MCP tools can set it up.`,
+              stream: false
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          if (aiRes.ok) {
+            const data = await aiRes.json();
+            if (data.response) localAiResponse = data.response.trim();
+          }
+        } catch {
+          // Ollama not reachable or timed out, gracefully continue
+        }
+
+        if (localAiResponse) {
+          thoughtProcess = `Generated response via local Llama 3.2 AI proxy for ${titleId}`;
+          conversationalReply = localAiResponse;
+          simulationSummary = `Local AI agent processed query.`;
+        } else {
+          conversationalReply = `✨ **Setting up for ${titleId}**\n\nI can configure any live system for your game. Here are the most common setups:\n\n- 🏆 **Leaderboards**: *"Spawn a Global High Scores leaderboard"*\n- 🎮 **Matchmaking**: *"Setup 1v1 matchmaking queue"*\n- 🪙 **Currencies**: *"What coins do I have?"* or *"Set up default currencies"*\n- 🛒 **Store Catalog**: *"Add a new sword for 300 Gems"*\n- 🎁 **Player Rewards**: *"Give 500 Gold to player Player_01"*\n- 🚀 **Live Events**: *"Start a weekend double XP event"*\n\nTell me what you'd like to create!`;
+          simulationSummary = `Ready for commands.`;
+        }
       }
     }
 

@@ -8,6 +8,7 @@ import { addCatalogItem, listCatalogItems } from "../economy/catalog";
 import { EconomyService } from "../economy/service";
 import { TitleDataService } from "../title-data/service";
 import { LeaderboardService } from "../leaderboards";
+import { MatchmakingService } from "../multiplayer/matchmaking";
 
 export class MCPService {
   private static readonly TOOLS: MCPTool[] = [
@@ -217,6 +218,20 @@ export class MCPService {
           titleId: { type: "string", description: "The ID of the game title" }
         },
         required: ["titleId"]
+      }
+    },
+    {
+      name: "daksh_create_matchmaking_ruleset",
+      description: "Spawns a new multiplayer matchmaking queue ruleset with dynamic team and latency flexing.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" },
+          rulesetId: { type: "string", description: "Unique identifier (e.g. queue_1v1_ranked)" },
+          name: { type: "string", description: "Human-readable queue name" },
+          mode: { type: "string", description: "Game mode: 1v1, 2v2, BattleRoyale" }
+        },
+        required: ["titleId", "rulesetId", "name", "mode"]
       }
     }
   ];
@@ -554,6 +569,36 @@ export class MCPService {
               {
                 type: "text",
                 text: JSON.stringify({ total: list.length, leaderboards: list }, null, 2)
+              }
+            ]
+          };
+        }
+
+        case "daksh_create_matchmaking_ruleset": {
+          const rulesetId = args.rulesetId || `queue_${Date.now().toString().slice(-4)}`;
+          const validMode = (["1v1", "2v2", "ffa", "custom"].includes(args.mode) ? args.mode : "1v1") as "1v1" | "2v2" | "ffa" | "custom";
+          const teamCount = validMode === "2v2" ? 2 : validMode === "ffa" ? 4 : 2;
+          const playersPerTeam = validMode === "2v2" ? 2 : 1;
+          const ruleset = await MatchmakingService.createOrUpdateRuleset({
+            titleId: args.titleId,
+            rulesetId,
+            name: args.name || "1v1 Matchmaking",
+            mode: validMode,
+            teamCount,
+            playersPerTeam,
+            baseMmrTolerance: 100,
+            flexSteps: [
+              { afterSeconds: 15, mmrTolerance: 200, stageName: "Flex15s" },
+              { afterSeconds: 30, mmrTolerance: 400, stageName: "Flex30s" }
+            ],
+            maxLatencyDelta: 80
+          });
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, ruleset }, null, 2)
               }
             ]
           };

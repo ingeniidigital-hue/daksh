@@ -68,7 +68,10 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
           setTitleName(found.name);
           return;
         } else {
-          router.replace("/dashboard");
+          const formatted = id.replace(/TITLE_/g, "").replace(/_/g, " ");
+          const newTitle = { id, name: formatted, secretKey: `sk_live_${id}_prod_90218374`, tsVersion: "v1.0.0" };
+          localStorage.setItem("daksh_titles", JSON.stringify([...titles, newTitle]));
+          setTitleName(formatted);
           return;
         }
       } catch (e) {
@@ -76,7 +79,10 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
         return;
       }
     } else {
-      router.replace("/dashboard");
+      const formatted = id.replace(/TITLE_/g, "").replace(/_/g, " ");
+      const newTitle = { id, name: formatted, secretKey: `sk_live_${id}_prod_90218374`, tsVersion: "v1.0.0" };
+      localStorage.setItem("daksh_titles", JSON.stringify([newTitle]));
+      setTitleName(formatted);
       return;
     }
   }, [id, router]);
