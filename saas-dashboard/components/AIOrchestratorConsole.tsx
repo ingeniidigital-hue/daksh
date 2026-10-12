@@ -41,6 +41,7 @@ interface InteractiveCard {
   title: string;
   badge?: string;
   description: string;
+  example?: string;
   icon?: string;
   prompt: string;
 }
@@ -584,7 +585,7 @@ export default function AIOrchestratorConsole({
           </div>
         ) : (
           /* Active ChatGPT Conversation Stream */
-          <div className="max-w-2xl mx-auto w-full space-y-6 py-4">
+          <div className="max-w-3xl mx-auto w-full space-y-6 py-4">
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
@@ -670,33 +671,41 @@ export default function AIOrchestratorConsole({
 
                   {/* Interactive Cards (e.g. Leaderboard Templates) */}
                   {msg.interactiveCards && msg.interactiveCards.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3">
                       {msg.interactiveCards.map((card) => (
                         <button
                           key={card.id}
                           onClick={() => handleSendMessage(card.prompt)}
                           disabled={isProcessing}
-                          className="text-left bg-white hover:bg-gray-50 active:bg-gray-100 border border-gray-200 hover:border-gray-900 rounded-xl p-3.5 transition-all shadow-2xs hover:shadow-xs group cursor-pointer flex flex-col justify-between"
+                          className="text-left bg-white hover:bg-gray-50/80 active:bg-gray-100 border border-gray-200 hover:border-gray-900 rounded-2xl p-4 sm:p-5 transition-all shadow-xs hover:shadow-md group cursor-pointer flex flex-col justify-between"
                         >
                           <div>
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-gray-900 text-sm flex items-center gap-1.5 group-hover:text-blue-600 transition-colors">
-                                <span className="text-base">{card.icon}</span>
+                              <span className="font-bold text-gray-900 text-base sm:text-lg flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                                <span className="text-xl">{card.icon}</span>
                                 <span>{card.title}</span>
                               </span>
                               {card.badge && (
-                                <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200 shrink-0">
+                                <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-200 shrink-0">
                                   {card.badge}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-500 mt-1.5 leading-snug">
+                            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
                               {card.description}
                             </p>
+                            {card.example && (
+                              <div className="mt-3 bg-gray-50 border border-gray-200/80 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-mono text-gray-700 overflow-x-auto whitespace-nowrap">
+                                <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-gray-500 bg-white px-1.5 py-0.5 rounded border border-gray-200 shrink-0">
+                                  Top 3
+                                </span>
+                                <span className="text-gray-900 font-medium">{card.example}</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 group-hover:text-gray-900">
-                            <span className="text-[11px]">Click to create</span>
-                            <span className="font-semibold text-blue-600 group-hover:translate-x-0.5 transition-transform">Deploy ➔</span>
+                          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 group-hover:text-gray-900">
+                            <span className="text-xs font-medium">Click to create</span>
+                            <span className="font-bold text-sm text-blue-600 group-hover:translate-x-1 transition-transform">Deploy ➔</span>
                           </div>
                         </button>
                       ))}
@@ -766,7 +775,7 @@ export default function AIOrchestratorConsole({
       {/* Signature Bottom Floating Input Area - Only when active conversation is ongoing */}
       {messages.length > 0 && !(isProjectSelector && availableTitles.length === 0) && (
         <div className="shrink-0 bg-white/95 backdrop-blur-md pt-3 pb-5 px-4 border-t border-gray-100">
-          <div className="max-w-2xl mx-auto w-full space-y-2">
+          <div className="max-w-3xl mx-auto w-full space-y-2">
             {/* Input Pill */}
             <form 
               onSubmit={(e) => {

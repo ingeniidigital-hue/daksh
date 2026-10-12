@@ -364,15 +364,17 @@ export async function POST(request: NextRequest) {
             id: "card_ranked",
             title: "Ranked Competitive",
             badge: "Monthly",
-            description: "Skill-based MMR (1000–3000). High scores rank top.",
+            description: "Skill-based MMR rating ladder (1000–3000).",
+            example: "🥇 Ace: 2850 · 🥈 Nova: 2720 · 🥉 Rex: 2610",
             icon: "🏆",
             prompt: "Deploy Template 1"
           },
           {
             id: "card_weekly",
             title: "Weekly Tournament",
-            badge: "Weekly",
-            description: "Cumulative points cup. Resets every Sunday.",
+            badge: "Sunday Reset",
+            description: "Total points accumulated each match across the week.",
+            example: "🥇 Shadow: 15.4k · 🥈 Blitz: 14.2k · 🥉 Kai: 12.8k",
             icon: "📅",
             prompt: "Deploy Template 2"
           },
@@ -380,15 +382,17 @@ export async function POST(request: NextRequest) {
             id: "card_speedrun",
             title: "Speedrun Time Trial",
             badge: "All-Time",
-            description: "Fastest lap time wins (Lowest time ranks top).",
+            description: "Fastest run wins. Lowest time ranks #1.",
+            example: "🥇 Sonic: 01:14.2 · 🥈 Dash: 01:15.0 · 🥉 Max: 01:16.4",
             icon: "⏱️",
             prompt: "Deploy Template 3"
           },
           {
             id: "card_custom",
             title: "Custom Event Season",
-            badge: "Event Window",
-            description: "Seasonal event medals with start and end dates.",
+            badge: "30-Day Cup",
+            description: "Holiday season medals with fixed start & end dates.",
+            example: "🥇 Frost: 4,200 · 🥈 Luna: 3,900 · 🥉 Jack: 3,450",
             icon: "⏳",
             prompt: "Deploy Template 4"
           }
