@@ -7,6 +7,7 @@ import {
 import { addCatalogItem, listCatalogItems } from "../economy/catalog";
 import { EconomyService } from "../economy/service";
 import { TitleDataService } from "../title-data/service";
+import { LeaderboardService } from "../leaderboards";
 
 export class MCPService {
   private static readonly TOOLS: MCPTool[] = [
@@ -190,6 +191,32 @@ export class MCPService {
           replicas: { type: "number", description: "Desired replica count if scaling" }
         },
         required: ["titleId", "region", "action"]
+      }
+    },
+    {
+      name: "daksh_create_leaderboard",
+      description: "Spawns a new competitive leaderboard with Redis ZSET sorting and anti-cheat protection.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" },
+          leaderboardId: { type: "string", description: "Unique identifier (e.g. global_high_scores)" },
+          name: { type: "string", description: "Human-readable leaderboard name" },
+          resetFrequency: { type: "string", enum: ["DAILY", "WEEKLY", "MONTHLY", "ALL_TIME"], description: "Reset schedule" },
+          sortOrder: { type: "string", enum: ["ASCENDING", "DESCENDING"], description: "Score ranking order" }
+        },
+        required: ["titleId", "leaderboardId", "name"]
+      }
+    },
+    {
+      name: "daksh_list_leaderboards",
+      description: "Lists all leaderboards configured for the title.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          titleId: { type: "string", description: "The ID of the game title" }
+        },
+        required: ["titleId"]
       }
     }
   ];
@@ -492,6 +519,41 @@ export class MCPService {
                   null,
                   2
                 )
+              }
+            ]
+          };
+        }
+
+        case "daksh_create_leaderboard": {
+          const lbId = args.leaderboardId || `lb_${Date.now().toString().slice(-4)}`;
+          const lbName = args.name || "Global High Scores";
+          const created = await LeaderboardService.createLeaderboard({
+            titleId: args.titleId,
+            leaderboardId: lbId,
+            name: lbName,
+            resetFrequency: args.resetFrequency || "ALL_TIME",
+            sortOrder: args.sortOrder || "DESCENDING",
+            maxScoreDelta: args.maxScoreDelta ? Number(args.maxScoreDelta) : 10000
+          });
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({ success: true, leaderboard: created }, null, 2)
+              }
+            ]
+          };
+        }
+
+        case "daksh_list_leaderboards": {
+          const list = await LeaderboardService.listLeaderboards(args.titleId);
+          return {
+            isError: false,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({ total: list.length, leaderboards: list }, null, 2)
               }
             ]
           };

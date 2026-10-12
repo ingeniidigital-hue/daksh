@@ -206,6 +206,36 @@ export async function POST(request: NextRequest) {
       conversationalReply = `🚀 **Fleet Auto-Scaling Simulation Passed**:\n\n- **Agones Cluster**: \`agones-us-east-1-prod\` scaled to **10 dedicated server pods**.\n- **Health Status**: Nakama (:7350), PostgreSQL (:5432), and Redis (:6379) report **Healthy**.\n- **Simulated Headroom**: Sustains up to **5,000 CCU** with expected p99 latency <35ms.`;
       simulationSummary = `Cluster scale simulation successful. 10 pods ready for traffic.`;
 
+    } else if (lower.includes("leaderboard") || lower.includes("rank") || lower.includes("high score") || lower.includes("scores")) {
+      thoughtProcess = `User requested leaderboard setup. Calling MCP tool daksh_create_leaderboard for title ${titleId}...`;
+      
+      const nameMatch = prompt.match(/(?:named|called|for|title)\s+["']?([^"']+)["']?/i);
+      const lbName = nameMatch ? nameMatch[1].trim() : "Global High Scores";
+      const lbId = `lb_${lbName.toLowerCase().replace(/[^a-z0-9]/g, "_")}`;
+
+      const res = await MCPService.callTool({
+        name: "daksh_create_leaderboard",
+        arguments: {
+          titleId,
+          leaderboardId: lbId,
+          name: lbName,
+          resetFrequency: "ALL_TIME",
+          sortOrder: "DESCENDING"
+        }
+      });
+
+      const parsed = JSON.parse(res.content[0].text);
+      executedToolCalls.push({
+        toolName: "daksh_create_leaderboard",
+        args: { titleId, leaderboardId: lbId, name: lbName },
+        result: parsed,
+        isError: res.isError,
+        latencyMs: 8
+      });
+
+      conversationalReply = `🏆 **Leaderboard Spawned Successfully!**\n\n- **Leaderboard**: **${lbName}** (\`${lbId}\`)\n- **Sort Order**: High-to-Low (Descending)\n- **Reset Schedule**: All-Time\n- **Status**: Live & Ready for score submissions\n\nYour leaderboard is live. You can now submit scores or ask: *"Submit score 1500 for Player_01"* or *"Show leaderboard"*!`;
+      simulationSummary = `Leaderboard "${lbName}" created in database with active ranking set.`;
+
     } else {
       // 5. General Intent Parser / Single Tool Execution
       const parsedIntent = await AIIntentParser.parsePrompt({ titleId, prompt });
@@ -357,12 +387,12 @@ export async function POST(request: NextRequest) {
         lower.includes("hi")
       ) {
         thoughtProcess = `User is requesting liveops guidance. Formulating friendly plain-English assistance for ${titleId}...`;
-        conversationalReply = `👋 **Hi! I am your AI LiveOps Co-pilot for ${titleId}.**\n\nYou don't need to know any technical code or server commands. Just ask in everyday English, and I will manage your live game for you!\n\nHere are the top things you can ask me to do right now:\n\n1. 🪙 **Check game coins & currencies**\n   *Try*: *"What coins do I have?"*\n\n2. 🛒 **Add or view store items**\n   *Try*: *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n\n3. 🎁 **Send rewards or currencies to players**\n   *Try*: *"Give 1,000 Gold to player Player_01"*\n\n4. 🏆 **Launch weekend events & bonuses**\n   *Try*: *"Start a weekend event with double XP and bonus rewards"*\n\n5. ⚙️ **Update game settings & balance**\n   *Try*: *"Set XP multiplier to 2.0"*\n\n👉 **Just type what you want in the box below, or click any suggestion card above!**`;
+        conversationalReply = `👋 **AI Orchestrator Ready for ${titleId}**\n\nYou can set up and manage any part of your game using everyday English. Here are the top things you can configure:\n\n1. 🏆 **Leaderboards** — *"Spawn a leaderboard"* or *"Submit score 1000 for Player_01"*\n2. 🪙 **Virtual Currencies** — *"What coins do I have?"* or *"Set up coins and gems"*\n3. 🛒 **Store & Catalog** — *"What items are in the shop?"* or *"Add an Epic Dragon Armor for 500 Gems"*\n4. 🎁 **Player Wallets & Gifts** — *"Give 1,000 Gold to player Player_01"*\n5. 🚀 **Live Events** — *"Start a weekend event with double XP and bonus rewards"*\n\nType what you'd like to set up in the box below!`;
         simulationSummary = `Interactive guide provided. Ready for commands.`;
       } else {
-        // Fallback: Friendly general guidance without dumping raw system health
-        thoughtProcess = `Interpreted query as general inquiry for game title ${titleId}...`;
-        conversationalReply = `👋 **LiveOps Assistant Ready for ${titleId}**\n\nI didn't quite catch that command, but I can help you with anything in your live game! For example:\n\n- 🪙 *"What coins do I have?"*\n- 🛒 *"What items are in the store?"*\n- ⚔️ *"Add a new Ice Blade for 300 Gems"*\n- 🎁 *"Give 500 Gold to player Player_01"*\n- 🏆 *"Start a weekend double XP event"*\n\nOr click one of the quick starter cards above to see an action in real-time!`;
+        // Fallback: Proactive setup assistant
+        thoughtProcess = `Interpreted setup request "${prompt}" for game title ${titleId}...`;
+        conversationalReply = `✨ **Setting up for ${titleId}**\n\nI can configure any live system for your game. Here are the most common setups:\n\n- 🏆 **Leaderboards**: *"Spawn a Global High Scores leaderboard"*\n- 🪙 **Currencies**: *"What coins do I have?"* or *"Set up default currencies"*\n- 🛒 **Store Catalog**: *"Add a new sword for 300 Gems"*\n- 🎁 **Player Rewards**: *"Give 500 Gold to player Player_01"*\n- 🚀 **Live Events**: *"Start a weekend double XP event"*\n\nTell me what you'd like to create!`;
         simulationSummary = `Ready for commands.`;
       }
     }
