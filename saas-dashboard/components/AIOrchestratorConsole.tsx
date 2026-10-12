@@ -163,7 +163,6 @@ export default function AIOrchestratorConsole({
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState("daksh_sim_prod_liveops_90218374");
   const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
-  const [expandedThoughtId, setExpandedThoughtId] = useState<string | null>(null);
   const [availableTitles, setAvailableTitles] = useState<TitleRecord[]>([]);
 
   // Onboarding & provisioning state
@@ -638,72 +637,10 @@ export default function AIOrchestratorConsole({
                     ? "bg-[#f4f4f4] text-gray-900 rounded-3xl px-5 py-2.5 max-w-[80%] text-sm leading-relaxed"
                     : "flex-1 max-w-[92%] text-sm text-gray-800 leading-relaxed"
                 }`}>
-                  {/* Assistant header line */}
-                  {msg.sender === "orchestrator" && (
-                    <div className="flex items-center space-x-2 text-xs text-gray-400 font-medium">
-                      <span className="text-gray-900 font-semibold">AI Orchestrator</span>
-                      <span>·</span>
-                      <span className="font-mono text-[11px]">{msg.timestamp}</span>
-                    </div>
-                  )}
-
                   {/* Message Content (Heading & Prompts) */}
                   <div className={msg.interactiveCards && msg.interactiveCards.length > 0 ? "space-y-1.5 pb-1" : "space-y-1"}>
                     {formatChatMessage(msg.text)}
                   </div>
-
-                  {/* Thought Process (Collapsible - hidden when interactive cards are displayed to keep UI clean) */}
-                  {msg.thoughtProcess && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-600">
-                      <button 
-                        onClick={() => setExpandedThoughtId(expandedThoughtId === msg.id ? null : msg.id)}
-                        className="flex items-center justify-between w-full text-xs text-gray-500 hover:text-gray-900 cursor-pointer"
-                      >
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <Cpu className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Execution Details</span>
-                        </span>
-                        <span>{expandedThoughtId === msg.id ? "▲ Hide" : "▼ Expand"}</span>
-                      </button>
-                      {expandedThoughtId === msg.id && (
-                        <div className="mt-2 whitespace-pre-line text-gray-600 text-xs leading-relaxed border-t border-gray-200 pt-2 font-mono">
-                          {msg.thoughtProcess}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Executed Tools Summary (hidden when interactive cards are displayed) */}
-                  {msg.toolCalls && msg.toolCalls.length > 0 && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
-                    <div className="space-y-1.5 pt-1">
-                      {msg.toolCalls.map((tc, idx) => (
-                        <div 
-                          key={idx}
-                          className="bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-xs font-mono flex items-center justify-between text-gray-700"
-                        >
-                          <span className="flex items-center gap-1.5 font-medium">
-                            <Terminal className="w-3 h-3 text-blue-600" />
-                            <span>{tc.toolName}</span>
-                          </span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-medium ${
-                            tc.isError ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-800"
-                          }`}>
-                            {tc.isError ? "Error" : "Executed"} · {tc.latencyMs}ms
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Simulation Summary Banner (hidden when interactive cards are displayed) */}
-                  {msg.simulationResult && (!msg.interactiveCards || msg.interactiveCards.length === 0) && (
-                    <div className="flex items-center justify-between text-xs bg-emerald-50 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-emerald-900 font-medium">
-                      <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{msg.simulationResult.summary}</span>
-                      </span>
-                    </div>
-                  )}
 
                   {/* Interactive Cards (e.g. Leaderboard Templates) */}
                   {msg.interactiveCards && msg.interactiveCards.length > 0 && (
