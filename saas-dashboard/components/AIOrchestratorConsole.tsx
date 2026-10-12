@@ -36,6 +36,20 @@ interface ToolExecutionInfo {
   latencyMs: number;
 }
 
+interface InteractiveCard {
+  id: string;
+  title: string;
+  badge?: string;
+  description: string;
+  icon?: string;
+  prompt: string;
+}
+
+interface SuggestedAction {
+  label: string;
+  prompt: string;
+}
+
 interface ChatMessage {
   id: string;
   sender: "user" | "orchestrator";
@@ -49,6 +63,8 @@ interface ChatMessage {
     latencyMs?: number;
   };
   isProjectSelectCard?: boolean;
+  interactiveCards?: InteractiveCard[];
+  suggestedActions?: SuggestedAction[];
 }
 
 function formatChatMessage(text: string) {
@@ -236,8 +252,8 @@ export default function AIOrchestratorConsole({
     const query = (textToSend || inputPrompt).trim();
     if (!query || isProcessing) return;
 
-    // IF THERE ARE NO PROJECTS YET: The user is answering what their game name is!
-    if (availableTitles.length === 0) {
+    // IF ON ROOT PROJECT SELECTOR AND THERE ARE NO PROJECTS YET: The user is answering what their game name is!
+    if (isProjectSelector && availableTitles.length === 0) {
       const userMsg: ChatMessage = {
         id: `usr_${Date.now()}`,
         sender: "user",
@@ -367,7 +383,9 @@ export default function AIOrchestratorConsole({
         text: data.reply,
         thoughtProcess: data.thoughtProcess,
         toolCalls: data.toolCalls,
-        simulationResult: data.simulationResult
+        simulationResult: data.simulationResult,
+        interactiveCards: data.interactiveCards,
+        suggestedActions: data.suggestedActions
       };
 
       setMessages(prev => [...prev, aiMsg]);
@@ -650,30 +668,80 @@ export default function AIOrchestratorConsole({
                     </div>
                   )}
 
+                  {/* Interactive Cards (e.g. Leaderboard Templates) */}
+                  {msg.interactiveCards && msg.interactiveCards.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                      {msg.interactiveCards.map((card) => (
+                        <button
+                          key={card.id}
+                          onClick={() => handleSendMessage(card.prompt)}
+                          disabled={isProcessing}
+                          className="text-left bg-white hover:bg-gray-50 active:bg-gray-100 border border-gray-200 hover:border-gray-900 rounded-xl p-3.5 transition-all shadow-2xs hover:shadow-xs group cursor-pointer flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-gray-900 text-sm flex items-center gap-1.5 group-hover:text-blue-600 transition-colors">
+                                <span className="text-base">{card.icon}</span>
+                                <span>{card.title}</span>
+                              </span>
+                              {card.badge && (
+                                <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200 shrink-0">
+                                  {card.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1.5 leading-snug">
+                              {card.description}
+                            </p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400 group-hover:text-gray-900">
+                            <span className="text-[11px]">Click to create</span>
+                            <span className="font-semibold text-blue-600 group-hover:translate-x-0.5 transition-transform">Deploy ➔</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Suggested Follow-up Actions */}
                   {msg.sender === "orchestrator" && (
                     <div className="pt-2 flex flex-wrap items-center gap-1.5">
-                      <button
-                        onClick={() => handleSendMessage("List all catalog items and prices")}
-                        disabled={isProcessing}
-                        className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
-                      >
-                        <span>🛒 View Store Items</span>
-                      </button>
-                      <button
-                        onClick={() => handleSendMessage("Give 1000 Gold to player Player_01")}
-                        disabled={isProcessing}
-                        className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
-                      >
-                        <span>🎁 Reward Player</span>
-                      </button>
-                      <button
-                        onClick={() => handleSendMessage("Help - what else can I do?")}
-                        disabled={isProcessing}
-                        className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
-                      >
-                        <span>💡 What else can you do?</span>
-                      </button>
+                      {msg.suggestedActions && msg.suggestedActions.length > 0 ? (
+                        msg.suggestedActions.map((act, actIdx) => (
+                          <button
+                            key={actIdx}
+                            onClick={() => handleSendMessage(act.prompt)}
+                            disabled={isProcessing}
+                            className="text-xs bg-white hover:bg-gray-50 text-gray-800 hover:text-black border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1.5 font-medium"
+                          >
+                            <span>{act.label}</span>
+                          </button>
+                        ))
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleSendMessage("List all catalog items and prices")}
+                            disabled={isProcessing}
+                            className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                          >
+                            <span>🛒 View Store Items</span>
+                          </button>
+                          <button
+                            onClick={() => handleSendMessage("Give 1000 Gold to player Player_01")}
+                            disabled={isProcessing}
+                            className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                          >
+                            <span>🎁 Reward Player</span>
+                          </button>
+                          <button
+                            onClick={() => handleSendMessage("Help - what else can I do?")}
+                            disabled={isProcessing}
+                            className="text-xs bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1 rounded-full transition-all shadow-2xs cursor-pointer flex items-center gap-1"
+                          >
+                            <span>💡 What else can you do?</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

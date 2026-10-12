@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
     let conversationalReply = "";
     let thoughtProcess = "";
     let simulationSummary = "";
+    let interactiveCards: any[] = [];
+    let suggestedActions: any[] = [];
 
     const lower = prompt.toLowerCase();
 
@@ -334,68 +336,74 @@ export async function POST(request: NextRequest) {
         // Formulate existing + new summary
         const updatedList = [...existingList.filter((l: any) => l.leaderboardId !== lbId), parsed.leaderboard || { name: lbName, leaderboardId: lbId, resetFrequency, sortOrder, metricName }];
 
-        conversationalReply = `🏆 **Leaderboard Spawned Successfully!**\n\n` +
-          `### 📋 Newly Deployed Configuration:\n` +
-          `- **Leaderboard Name**: **${lbName}** (\`${lbId}\`)\n` +
-          `- **Cadence / Reset**: **${resetFrequency}**${seasonStart ? ` (Active: ${seasonStart.slice(0, 10)} → ${seasonEnd?.slice(0, 10)})` : ""}\n` +
-          `- **Metric Data Tracked**: **${metricName}**\n` +
-          `- **Sort Order**: **${sortOrder === "DESCENDING" ? "High-to-Low (Descending ⬇️)" : "Low-to-High (Ascending ⬆️ - Fastest/Lowest wins)"}**\n` +
-          `- **Update Strategy**: **${updateStrategy === "BEST" ? "Best Personal Record" : "Cumulative Sum"}**\n` +
-          `- **Status**: 🟢 **Live in Redis ZSET Engine**\n\n` +
-          `---\n\n` +
-          `📊 **All Active Leaderboards for ${titleId} (${updatedList.length} Total):**\n` +
-          updatedList.map((lb: any, idx: number) => 
-            `${idx + 1}. **${lb.name}** (\`${lb.leaderboardId}\`) — Cadence: \`${lb.resetFrequency || "ALL_TIME"}\` | Metric: \`${lb.metricName || "Points"}\` | Sort: \`${lb.sortOrder || "DESCENDING"}\``
-          ).join("\n") +
-          `\n\n*Next Steps*: Submit a score with *"Submit score 1250 for Player_01 on ${lbId}"* or ask to deploy another customized leaderboard!`;
+        conversationalReply = `🏆 **${lbName}** is now live!\n\n` +
+          `- **Cadence**: ${resetFrequency}\n` +
+          `- **Metric**: ${metricName}\n` +
+          `- **Sort**: ${sortOrder === "DESCENDING" ? "High-to-Low" : "Low-to-High (Fastest wins)"}\n\n` +
+          `Active boards: **${updatedList.map((l: any) => l.name).join(", ")}**`;
+
+        suggestedActions = [
+          { label: "🎯 Submit Score", prompt: `Submit score 1250 for Player_01 on ${lbId}` },
+          { label: "➕ Another Board", prompt: "I want another leaderboard" },
+          { label: "🎮 Setup Matchmaking", prompt: "Setup 1v1 multiplayer matchmaking" }
+        ];
 
         simulationSummary = `Leaderboard "${lbName}" registered with ${resetFrequency} reset and ${metricName} metric.`;
 
       } else {
-        // Broad request: Converse as Principal Game Backend Architect / System Designer
-        thoughtProcess = `Engaging developer in game backend system design consultation regarding leaderboard architecture for title ${titleId}...`;
+        // Broad request: Short, ultra-clean prompt with 4 clickable cards!
+        thoughtProcess = `Presenting clean leaderboard templates for title ${titleId}...`;
 
-        const existingSection = existingList.length > 0
-          ? `📊 **Currently Active Leaderboards for \`${titleId}\` (${existingList.length} Registered):**\n` +
-            existingList.map((lb: any, idx: number) => 
-              `${idx + 1}. **${lb.name}** (\`${lb.leaderboardId}\`)\n   - Cadence: \`${lb.resetFrequency || "ALL_TIME"}\` | Metric: \`${lb.metricName || "Points"}\` | Sort: \`${lb.sortOrder || "DESCENDING"}\``
-            ).join("\n")
-          : `📊 **Currently Active Leaderboards for \`${titleId}\`:**\n- *No leaderboards registered yet.*`;
+        const count = existingList.length;
+        conversationalReply = count > 0
+          ? `You have **${count} active leaderboard${count > 1 ? "s" : ""}** configured. Choose a template below or click to create instantly:`
+          : `Which type of leaderboard would you like to set up? Choose a template below:`;
 
-        conversationalReply = `${existingSection}\n\n` +
-          `---\n\n` +
-          `🎯 **Game Backend System Design: Architecting Your Leaderboard**\n\n` +
-          `As your backend system designer, a leaderboard isn't just a list—it's a retention engine that drives player competition. Let's design the exact parameters for your game:\n\n` +
-          `### 🛠️ Key Architectural Decisions (Questions for You):\n\n` +
-          `1. **Reset Cadence & Lifecycle**:\n` +
-          `   - ⚡ **Daily** — Resets at 00:00 UTC (ideal for daily challenges, dungeon runs, or puzzle streaks)\n` +
-          `   - 📅 **Weekly** — Resets Sunday midnight (ideal for weekend warrior leagues & tournaments)\n` +
-          `   - 🗓️ **Monthly** — Resets 1st of month (ideal for competitive ranked tiers)\n` +
-          `   - 🎆 **Yearly** — Resets annually (Hall of Fame & seasonal championships)\n` +
-          `   - ⏳ **Custom Season** — Fixed event window with explicit start and end dates (e.g. Halloween Oct 15 → Nov 15)\n` +
-          `   - ♾️ **All-Time** — Lifetime persistent high scores that never reset\n\n` +
-          `2. **Metric / Score Data Type**:\n` +
-          `   - What should player scores be called?\n` +
-          `   - Options: **Points**, **MMR Rating** (e.g. 1000–3000), **Trophies**, **Lap Time (ms)**, **Coins**, or **Cleared Waves**?\n\n` +
-          `3. **Sort Order & Win Condition**:\n` +
-          `   - ⬇️ **High-to-Low (Descending)**: Higher score wins (Points, MMR, Kills)\n` +
-          `   - ⬆️ **Low-to-High (Ascending)**: Lower score wins (Speedruns, Race Lap Times, Fewest Deaths)\n\n` +
-          `4. **Score Update Strategy**:\n` +
-          `   - 🔝 **Best Record**: Keep the player's peak score\n` +
-          `   - ➕ **Cumulative Sum**: Add every match/level to an ongoing total (event grinding)\n\n` +
-          `---\n\n` +
-          `### 🚀 Or Pick a Ready-To-Deploy Template:\n\n` +
-          `- 🏆 **Template 1: Ranked Competitive** — *Monthly Reset · MMR Rating · High-to-Low · Best Score*\n` +
-          `  *(Reply: **"Deploy Template 1"**)*\n\n` +
-          `- ⚔️ **Template 2: Weekly Tournament Cup** — *Weekly Reset · Points · High-to-Low · Cumulative Sum*\n` +
-          `  *(Reply: **"Deploy Template 2"**)*\n\n` +
-          `- ⏱️ **Template 3: Speedrun Time Trial** — *All-Time · Lap Time (ms) · Low-to-High (Fastest Wins) · Best Time*\n` +
-          `  *(Reply: **"Deploy Template 3"**)*\n\n` +
-          `- 🎃 **Template 4: Custom Event Season** — *Custom Start/End Dates · Event Medals · High-to-Low*\n` +
-          `  *(Reply: **"Deploy Template 4"** or specify start/end dates)*\n\n` +
-          `💬 **Which template would you like, or how should we configure your custom leaderboard?**`;
+        interactiveCards = [
+          {
+            id: "card_ranked",
+            title: "Ranked Competitive",
+            badge: "Monthly",
+            description: "Skill-based MMR (1000–3000). High scores rank top.",
+            icon: "🏆",
+            prompt: "Deploy Template 1"
+          },
+          {
+            id: "card_weekly",
+            title: "Weekly Tournament",
+            badge: "Weekly",
+            description: "Cumulative points cup. Resets every Sunday.",
+            icon: "📅",
+            prompt: "Deploy Template 2"
+          },
+          {
+            id: "card_speedrun",
+            title: "Speedrun Time Trial",
+            badge: "All-Time",
+            description: "Fastest lap time wins (Lowest time ranks top).",
+            icon: "⏱️",
+            prompt: "Deploy Template 3"
+          },
+          {
+            id: "card_custom",
+            title: "Custom Event Season",
+            badge: "Event Window",
+            description: "Seasonal event medals with start and end dates.",
+            icon: "⏳",
+            prompt: "Deploy Template 4"
+          }
+        ];
 
-        simulationSummary = `Leaderboard system designer consultation presented.`;
+        suggestedActions = [
+          { label: "🏆 Monthly Ranked", prompt: "Deploy Template 1" },
+          { label: "📅 Weekly Tournament", prompt: "Deploy Template 2" },
+          { label: "⏱️ Speedrun Trial", prompt: "Deploy Template 3" },
+          { label: "⏳ Seasonal Event", prompt: "Deploy Template 4" }
+        ];
+
+        simulationSummary = count > 0 
+          ? `${count} active leaderboards found. Templates ready.` 
+          : `Leaderboard templates ready for selection.`;
       }
 
     } else if (lower.includes("matchmaking") || lower.includes("multiplayer") || lower.includes("queue") || lower.includes("pvp") || lower.includes("1v1") || lower.includes("2v2") || lower.includes("battle royale")) {
@@ -624,6 +632,8 @@ export async function POST(request: NextRequest) {
       reply: conversationalReply,
       thoughtProcess,
       toolCalls: executedToolCalls,
+      interactiveCards,
+      suggestedActions,
       simulationResult: {
         status: isSimulation ? "simulated" : "applied",
         summary: simulationSummary,
