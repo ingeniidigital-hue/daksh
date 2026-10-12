@@ -23,8 +23,19 @@ function TitleLayoutContent({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const pathname = usePathname();
   const id = params?.id as string;
-  
-  const [titleName, setTitleName] = useState(id || "Game Title");
+  const [titleName, setTitleName] = useState(() => {
+    if (typeof window !== "undefined" && id) {
+      try {
+        const saved = localStorage.getItem("daksh_titles");
+        if (saved) {
+          const titles = JSON.parse(saved);
+          const found = titles.find((t: any) => t.id === id);
+          if (found) return found.name;
+        }
+      } catch (e) {}
+    }
+    return id ? (id.replace(/TITLE_/g, "").replace(/_/g, " ")) : "Game Title";
+  });
   const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
   const [isEjectModalOpen, setIsEjectModalOpen] = useState(false);
   const [showManualInspector, setShowManualInspector] = useState(false);
