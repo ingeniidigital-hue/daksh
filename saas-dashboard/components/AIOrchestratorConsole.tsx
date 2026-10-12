@@ -477,29 +477,13 @@ export default function AIOrchestratorConsole({
           /* Project Selector View */
           <div className="max-w-2xl mx-auto w-full my-auto py-8 space-y-6">
             {availableTitles.length === 0 ? (
-              /* Conversational AI First Interaction */
-              <div className="space-y-6 text-center max-w-xl mx-auto py-6">
-                <div className="w-14 h-14 rounded-2xl bg-gray-900 text-white flex items-center justify-center font-bold mx-auto shadow-sm">
-                  <Sparkles className="w-7 h-7 text-emerald-400" />
-                </div>
+              /* Direct Clean Minimalist Question */
+              <div className="space-y-6 text-center max-w-xl mx-auto py-12">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                  What should be the name of your project?
+                </h1>
 
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-emerald-800 text-xs font-medium">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Kubernetes Engine Online (<code className="font-mono text-[11px]">k3d-daksh-cluster</code>)</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                    Welcome to Daksh LiveOps!
-                  </h1>
-                  <p className="text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
-                    I am your AI LiveOps co-pilot. We don't have any game projects set up yet.
-                  </p>
-                  <p className="text-sm font-semibold text-gray-900 pt-1">
-                    👉 What is the name of your game project?
-                  </p>
-                </div>
-
-                {/* Direct Title Creation Input */}
+                {/* Direct Project Creation Input */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -507,61 +491,35 @@ export default function AIOrchestratorConsole({
                       handleQuickProvision(quickTitleName);
                     }
                   }}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mx-auto"
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 max-w-md mx-auto pt-2"
                 >
                   <input
                     type="text"
                     value={quickTitleName}
                     onChange={(e) => setQuickTitleName(e.target.value)}
                     disabled={isProvisioning}
-                    placeholder="Enter game name (e.g. Sky8Ball)..."
-                    className="flex-1 bg-white border border-gray-300 focus:border-gray-900 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none shadow-xs"
+                    placeholder="Enter project name..."
+                    className="flex-1 bg-white border border-gray-300 focus:border-gray-900 rounded-xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none shadow-xs transition-colors"
                     autoFocus
                   />
                   <button
                     type="submit"
                     disabled={isProvisioning || !quickTitleName.trim()}
-                    className="bg-gray-900 hover:bg-black disabled:bg-gray-200 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                    className="bg-gray-900 hover:bg-black disabled:bg-gray-200 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                   >
                     {isProvisioning ? (
                       <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <RefreshCw className="w-4 h-4 animate-spin" />
                         <span>Deploying...</span>
                       </>
                     ) : (
                       <>
                         <span>Create Project</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
                 </form>
-
-                {/* 1-Click Starter Suggestions */}
-                <div className="pt-2">
-                  <span className="text-xs text-gray-400 font-medium">Or pick a starter template:</span>
-                  <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-                    {[
-                      { name: "Sky8Ball", icon: "🎱" },
-                      { name: "DragonQuest", icon: "🐉" },
-                      { name: "CyberArena", icon: "⚡" }
-                    ].map((preset, pIdx) => (
-                      <button
-                        key={pIdx}
-                        type="button"
-                        onClick={() => {
-                          setQuickTitleName(preset.name);
-                          handleQuickProvision(preset.name);
-                        }}
-                        disabled={isProvisioning}
-                        className="bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-900 text-gray-800 text-xs px-3.5 py-1.5 rounded-full transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer font-medium"
-                      >
-                        <span>{preset.icon}</span>
-                        <span>{preset.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -611,11 +569,7 @@ export default function AIOrchestratorConsole({
         ) : messages.length === 0 ? (
           /* Signature Clean ChatGPT Centered Welcome Screen */
           <div className="max-w-xl mx-auto w-full my-auto py-8 flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 text-white flex items-center justify-center font-bold mb-4 shadow-sm">
-              <Sparkles className="w-6 h-6 text-emerald-400" />
-            </div>
-            
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
               What would you like to do with {displayTitleName}?
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-2 max-w-md">
@@ -846,8 +800,8 @@ export default function AIOrchestratorConsole({
               disabled={isProcessing}
               placeholder={
                 isProjectSelector 
-                  ? (availableTitles.length === 0 ? "Type your game name (e.g. 'Sky8Ball') to create project..." : "Select a project above or type a new game name...") 
-                  : `Message Daksh in plain English (e.g. "Add a dragon sword for 500 gold")...`
+                  ? (availableTitles.length === 0 ? "Type your project name..." : "Select a project above or enter a new project name...") 
+                  : `Message in plain English (e.g. "Add a dragon sword for 500 gold")...`
               }
               className="w-full bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none py-1.5"
             />
@@ -876,7 +830,7 @@ export default function AIOrchestratorConsole({
           </form>
 
           <div className="flex items-center justify-between text-[11px] text-gray-400 font-sans px-1">
-            <span>⚡ Connected to {displayTitleName} · Kubernetes backend active</span>
+            <span>Connected to {displayTitleName} · Kubernetes backend active</span>
             <span className="hidden sm:inline">Press Enter ↵ to send</span>
           </div>
         </div>
